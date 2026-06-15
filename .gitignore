@@ -1,0 +1,33 @@
+# Zig build artifacts
+zig-out/
+zig-cache/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Development environments
+.env
+.venv
+env/
+venv/
+node_modules/
+dist/
+build/
+bin/
+
+# Temporary files
+*.tmp
+*.log
+*.swp
+.idea/
+.vscode/
+
+# Internal design documents
+context.md
+BioZig.md
