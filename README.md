@@ -64,9 +64,9 @@ BioZig operates as a standalone CLI executable.
 
 ## License
 
-This project is licensed under the MIT License.
+This project is licensed under the 3-Clause BSD License.
 
 ## Author
 
 MD. Arshad
-Department of Computer Science, Jamia Millia Islamia
+BioZig Software Foundation
