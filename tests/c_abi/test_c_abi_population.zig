@@ -1,5 +1,9 @@
 const std = @import("std");
 
+comptime {
+    _ = @import("c_api");
+}
+
 extern fn biozig_context_create() c_int;
 extern fn biozig_context_destroy() c_int;
 
