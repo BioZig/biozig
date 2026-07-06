@@ -14,14 +14,14 @@ pub const NexusParser = struct {
         var in_trees_block = false;
         var newick_str = std.ArrayList(u8).empty;
         defer newick_str.deinit(self.allocator);
-        
+
         var lines = std.mem.splitScalar(u8, input, '\n');
         var found_tree = false;
 
         while (lines.next()) |raw_line| {
             var line = std.mem.trim(u8, raw_line, " \t\r");
             if (line.len == 0) continue;
-            
+
             const upper_line = try self.allocator.dupe(u8, line);
             defer self.allocator.free(upper_line);
             for (upper_line) |*c| c.* = std.ascii.toUpper(c.*);
@@ -36,10 +36,10 @@ pub const NexusParser = struct {
                     in_trees_block = false;
                     break;
                 }
-                
+
                 if (std.mem.startsWith(u8, upper_line, "TREE ")) {
                     if (found_tree) return error.MultipleTreesNotSupported;
-                    
+
                     if (std.mem.indexOfScalar(u8, line, '=')) |eq_idx| {
                         const tree_def = std.mem.trim(u8, line[eq_idx + 1 ..], " \t\r");
                         try newick_str.appendSlice(self.allocator, tree_def);
@@ -98,7 +98,7 @@ test "nexus valid parse" {
         n_parser.freePhyloTree(&tree);
         n_parser.deinit();
     }
-    
+
     const root = tree.nodes[tree.root];
     try std.testing.expectEqualStrings("A", tree.nodes[root.children[0]].label);
 }
@@ -123,15 +123,13 @@ test "nexus malformed parse" {
 }
 
 test "nexus serialization and roundtrip" {
-    const nodes = [_]phylogeny.PhyloNode{
-        phylogeny.PhyloNode{
-            .id = 1,
-            .label = try std.testing.allocator.dupe(u8, "Root"),
-            .branch_length = 0.0,
-            .children = &[_]usize{},
-            .metadata = &[_]phylogeny.MetadataEntry{},
-        }
-    };
+    const nodes = [_]phylogeny.PhyloNode{phylogeny.PhyloNode{
+        .id = 1,
+        .label = try std.testing.allocator.dupe(u8, "Root"),
+        .branch_length = 0.0,
+        .children = &[_]usize{},
+        .metadata = &[_]phylogeny.MetadataEntry{},
+    }};
     const tree = phylogeny.PhyloTree{
         .nodes = &nodes,
         .root = 0,

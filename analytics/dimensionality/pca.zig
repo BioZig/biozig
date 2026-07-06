@@ -36,11 +36,11 @@ pub fn pca(
     while (current_comp < n_components) : (current_comp += 1) {
         var v = try allocator.alloc(f64, cols);
         defer allocator.free(v);
-        
+
         for (v, 0..) |*val, i| {
-            val.* = @as(f64, @floatFromInt(i % 3)) - 1.0; 
+            val.* = @as(f64, @floatFromInt(i % 3)) - 1.0;
         }
-        
+
         var v_norm: f64 = 0;
         for (v) |val| v_norm += val * val;
         v_norm = @sqrt(v_norm);
@@ -185,10 +185,10 @@ test "pca basic" {
         3.0, 6.0, 9.0,
         4.0, 8.0, 12.0,
     };
-    
+
     const comps = try pca(allocator, &data, 4, 3, 1, 2);
     defer allocator.free(comps);
-    
+
     try std.testing.expectEqual(@as(usize, 3), comps.len);
     const norm = @sqrt(1.0 + 4.0 + 9.0);
     try std.testing.expectApproxEqAbs(comps[0], 1.0 / norm, 1e-4);

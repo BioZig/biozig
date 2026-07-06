@@ -95,7 +95,7 @@ test "mtx: entry count mismatch (fewer entries than declared)" {
     const data =
         "%%MatrixMarket matrix coordinate real general\n" ++
         "3 3 5\n" ++
-        "1 1 1.0\n" ++  // only 1 entry but declared 5
+        "1 1 1.0\n" ++ // only 1 entry but declared 5
         "\n";
     const parser = mtx.MtxParser.init(testing.allocator);
     try testing.expectError(error.MtxEntryCountMismatch, parser.parseSparseMmap(data));

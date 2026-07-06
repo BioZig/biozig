@@ -19,7 +19,7 @@ test "CellCycle - State Metadata Overwrite" {
     const alloc = testing.allocator;
     var state = cellcycle.State.init(alloc, .G2);
     defer state.deinit();
-    
+
     try state.addMetadata("Score", "99.9");
     try testing.expectEqualStrings("99.9", state.metadata.get("Score").?);
 }

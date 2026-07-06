@@ -14,7 +14,7 @@ test "bitpacking odd widths" {
     array7.set(9, 63);
     try std.testing.expectEqual(array7.get(0), 127);
     try std.testing.expectEqual(array7.get(9), 63);
-    
+
     // bit reader boundary
     var reader = core.bitpacking.BitReader.init(&buffer);
     try std.testing.expectError(error.EndOfStream, reader.readBits(u32, 100));

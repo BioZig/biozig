@@ -8,12 +8,12 @@ pub const peptide = @import("peptide/peptide.zig");
 pub const transcript = @import("transcript/transcript.zig");
 pub const variant = @import("variant/variant.zig");
 
-pub fn dummyDoc() void {
+pub fn forceModuleAnalysis() void {
     _ = core.hashing.XxHash64.hash("a", 0);
 }
 
 test {
-    dummyDoc();
+    forceModuleAnalysis();
     _ = sequence;
     _ = dna;
     _ = rna;
@@ -232,9 +232,9 @@ test "Transcript spliced reconstruction and coordinate mapping" {
     const allocator = std.testing.allocator;
 
     const exons = [_]transcript.Exon{
-        .{ .start = 10, .end = 20 },  // len = 10
-        .{ .start = 30, .end = 35 },  // len = 5
-        .{ .start = 50, .end = 60 },  // len = 10
+        .{ .start = 10, .end = 20 }, // len = 10
+        .{ .start = 30, .end = 35 }, // len = 5
+        .{ .start = 50, .end = 60 }, // len = 10
     };
 
     var tx = try transcript.Transcript.init("TX1", .forward, &exons, allocator);

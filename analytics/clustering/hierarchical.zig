@@ -2,7 +2,7 @@ const std = @import("std");
 
 pub const HierarchicalResult = struct {
     labels: []usize, // cluster assignments
-    
+
     pub fn deinit(self: HierarchicalResult, allocator: std.mem.Allocator) void {
         allocator.free(self.labels);
     }
@@ -43,25 +43,25 @@ pub fn agglomerative(allocator: std.mem.Allocator, data: []const f64, dim: usize
     const num_points = data.len / dim;
     if (num_points < k) return error.NotEnoughData;
     if (threads == 0) return error.InvalidThreadCount;
-    
+
     const dist_matrix = try allocator.alloc(f64, num_points * num_points);
     defer allocator.free(dist_matrix);
-    
+
     // Fill diagonal with infinity
     var i: usize = 0;
     while (i < num_points) : (i += 1) {
         dist_matrix[i * num_points + i] = std.math.inf(f64);
     }
-    
+
     const thread_pool = try allocator.alloc(std.Thread, threads);
     defer allocator.free(thread_pool);
-    
+
     const chunk_size = (num_points + threads - 1) / threads;
     var t: usize = 0;
     while (t < threads) : (t += 1) {
         const start = t * chunk_size;
         const end = @min(start + chunk_size, num_points);
-        
+
         if (start >= end) {
             thread_pool[t] = try std.Thread.spawn(.{}, distWorker, .{DistContext{
                 .data = data,
@@ -73,7 +73,7 @@ pub fn agglomerative(allocator: std.mem.Allocator, data: []const f64, dim: usize
             }});
             continue;
         }
-        
+
         thread_pool[t] = try std.Thread.spawn(.{}, distWorker, .{DistContext{
             .data = data,
             .dim = dim,
@@ -83,35 +83,35 @@ pub fn agglomerative(allocator: std.mem.Allocator, data: []const f64, dim: usize
             .dist_matrix = dist_matrix,
         }});
     }
-    
+
     for (thread_pool) |thread| {
         thread.join();
     }
-    
+
     const active = try allocator.alloc(bool, num_points);
     defer allocator.free(active);
     @memset(active, true);
-    
+
     const clusters = try allocator.alloc(usize, num_points);
     defer allocator.free(clusters);
     i = 0;
     while (i < num_points) : (i += 1) {
         clusters[i] = i;
     }
-    
+
     var current_clusters = num_points;
     while (current_clusters > k) : (current_clusters -= 1) {
         var min_d = std.math.inf(f64);
         var min_u: usize = 0;
         var min_v: usize = 0;
-        
+
         var u: usize = 0;
         while (u < num_points) : (u += 1) {
             if (!active[u]) continue;
             var v: usize = u + 1;
             while (v < num_points) : (v += 1) {
                 if (!active[v]) continue;
-                
+
                 const d = dist_matrix[u * num_points + v];
                 if (d < min_d) {
                     min_d = d;
@@ -120,7 +120,7 @@ pub fn agglomerative(allocator: std.mem.Allocator, data: []const f64, dim: usize
                 }
             }
         }
-        
+
         // Merge min_v into min_u (Single Linkage)
         active[min_v] = false;
         var w: usize = 0;
@@ -129,11 +129,11 @@ pub fn agglomerative(allocator: std.mem.Allocator, data: []const f64, dim: usize
             const d_uw = dist_matrix[min_u * num_points + w];
             const d_vw = dist_matrix[min_v * num_points + w];
             const new_d = @min(d_uw, d_vw);
-            
+
             dist_matrix[min_u * num_points + w] = new_d;
             dist_matrix[w * num_points + min_u] = new_d;
         }
-        
+
         // Update clusters array
         var p: usize = 0;
         while (p < num_points) : (p += 1) {
@@ -142,14 +142,14 @@ pub fn agglomerative(allocator: std.mem.Allocator, data: []const f64, dim: usize
             }
         }
     }
-    
+
     const labels = try allocator.alloc(usize, num_points);
     errdefer allocator.free(labels);
-    
+
     // Compress cluster IDs to 0..k-1
     var id_map = std.AutoHashMap(usize, usize).init(allocator);
     defer id_map.deinit();
-    
+
     var next_id: usize = 0;
     i = 0;
     while (i < num_points) : (i += 1) {
@@ -160,21 +160,21 @@ pub fn agglomerative(allocator: std.mem.Allocator, data: []const f64, dim: usize
         }
         labels[i] = id_map.get(c).?;
     }
-    
+
     return HierarchicalResult{ .labels = labels };
 }
 
 test "hierarchical basic" {
     const data = [_]f64{
-        1.0, 1.0,
-        1.1, 1.1,
+        1.0,  1.0,
+        1.1,  1.1,
         10.0, 10.0,
         10.1, 10.1,
     };
-    
+
     const res = try agglomerative(std.testing.allocator, &data, 2, 2, 2);
     defer res.deinit(std.testing.allocator);
-    
+
     try std.testing.expectEqual(res.labels[0], res.labels[1]);
     try std.testing.expectEqual(res.labels[2], res.labels[3]);
     try std.testing.expect(res.labels[0] != res.labels[2]);

@@ -3,28 +3,28 @@ const rna_mod = @import("../rna/rna.zig");
 
 pub const AminoAcid = enum(u5) {
     A = 0, // Ala
-    C,     // Cys
-    D,     // Asp
-    E,     // Glu
-    F,     // Phe
-    G,     // Gly
-    H,     // His
-    I,     // Ile
-    K,     // Lys
-    L,     // Leu
-    M,     // Met
-    N,     // Asn
-    P,     // Pro
-    Q,     // Gln
-    R,     // Arg
-    S,     // Ser
-    T,     // Thr
-    V,     // Val
-    W,     // Trp
-    Y,     // Tyr
-    X,     // Unknown / Any
-    Gap,   // Alignment Gap
-    Stop,  // Translation Termination
+    C, // Cys
+    D, // Asp
+    E, // Glu
+    F, // Phe
+    G, // Gly
+    H, // His
+    I, // Ile
+    K, // Lys
+    L, // Leu
+    M, // Met
+    N, // Asn
+    P, // Pro
+    Q, // Gln
+    R, // Arg
+    S, // Ser
+    T, // Thr
+    V, // Val
+    W, // Trp
+    Y, // Tyr
+    X, // Unknown / Any
+    Gap, // Alignment Gap
+    Stop, // Translation Termination
 };
 
 pub fn charToAminoAcid(c: u8) !AminoAcid {
@@ -91,8 +91,8 @@ pub const Codon = struct {
     pub fn init(n1: rna_mod.Nucleotide, n2: rna_mod.Nucleotide, n3: rna_mod.Nucleotide) Codon {
         return .{
             .value = @as(u6, @intFromEnum(n1)) |
-                     (@as(u6, @intFromEnum(n2)) << 2) |
-                     (@as(u6, @intFromEnum(n3)) << 4),
+                (@as(u6, @intFromEnum(n2)) << 2) |
+                (@as(u6, @intFromEnum(n3)) << 4),
         };
     }
 
@@ -143,53 +143,85 @@ fn initTable() [64]AminoAcid {
     };
 
     // Standard Genetic Code
-    Helper.set(&table, "UUU", .F); Helper.set(&table, "UUC", .F);
-    Helper.set(&table, "UUA", .L); Helper.set(&table, "UUG", .L);
+    Helper.set(&table, "UUU", .F);
+    Helper.set(&table, "UUC", .F);
+    Helper.set(&table, "UUA", .L);
+    Helper.set(&table, "UUG", .L);
 
-    Helper.set(&table, "UCU", .S); Helper.set(&table, "UCC", .S);
-    Helper.set(&table, "UCA", .S); Helper.set(&table, "UCG", .S);
+    Helper.set(&table, "UCU", .S);
+    Helper.set(&table, "UCC", .S);
+    Helper.set(&table, "UCA", .S);
+    Helper.set(&table, "UCG", .S);
 
-    Helper.set(&table, "UAU", .Y); Helper.set(&table, "UAC", .Y);
-    Helper.set(&table, "UAA", .Stop); Helper.set(&table, "UAG", .Stop);
+    Helper.set(&table, "UAU", .Y);
+    Helper.set(&table, "UAC", .Y);
+    Helper.set(&table, "UAA", .Stop);
+    Helper.set(&table, "UAG", .Stop);
 
-    Helper.set(&table, "UGU", .C); Helper.set(&table, "UGC", .C);
-    Helper.set(&table, "UGA", .Stop); Helper.set(&table, "UGG", .W);
+    Helper.set(&table, "UGU", .C);
+    Helper.set(&table, "UGC", .C);
+    Helper.set(&table, "UGA", .Stop);
+    Helper.set(&table, "UGG", .W);
 
-    Helper.set(&table, "CUU", .L); Helper.set(&table, "CUC", .L);
-    Helper.set(&table, "CUA", .L); Helper.set(&table, "CUG", .L);
+    Helper.set(&table, "CUU", .L);
+    Helper.set(&table, "CUC", .L);
+    Helper.set(&table, "CUA", .L);
+    Helper.set(&table, "CUG", .L);
 
-    Helper.set(&table, "CCU", .P); Helper.set(&table, "CCC", .P);
-    Helper.set(&table, "CCA", .P); Helper.set(&table, "CCG", .P);
+    Helper.set(&table, "CCU", .P);
+    Helper.set(&table, "CCC", .P);
+    Helper.set(&table, "CCA", .P);
+    Helper.set(&table, "CCG", .P);
 
-    Helper.set(&table, "CAU", .H); Helper.set(&table, "CAC", .H);
-    Helper.set(&table, "CAA", .Q); Helper.set(&table, "CAG", .Q);
+    Helper.set(&table, "CAU", .H);
+    Helper.set(&table, "CAC", .H);
+    Helper.set(&table, "CAA", .Q);
+    Helper.set(&table, "CAG", .Q);
 
-    Helper.set(&table, "CGU", .R); Helper.set(&table, "CGC", .R);
-    Helper.set(&table, "CGA", .R); Helper.set(&table, "CGG", .R);
+    Helper.set(&table, "CGU", .R);
+    Helper.set(&table, "CGC", .R);
+    Helper.set(&table, "CGA", .R);
+    Helper.set(&table, "CGG", .R);
 
-    Helper.set(&table, "AUU", .I); Helper.set(&table, "AUC", .I);
-    Helper.set(&table, "AUA", .I); Helper.set(&table, "AUG", .M);
+    Helper.set(&table, "AUU", .I);
+    Helper.set(&table, "AUC", .I);
+    Helper.set(&table, "AUA", .I);
+    Helper.set(&table, "AUG", .M);
 
-    Helper.set(&table, "ACU", .T); Helper.set(&table, "ACC", .T);
-    Helper.set(&table, "ACA", .T); Helper.set(&table, "ACG", .T);
+    Helper.set(&table, "ACU", .T);
+    Helper.set(&table, "ACC", .T);
+    Helper.set(&table, "ACA", .T);
+    Helper.set(&table, "ACG", .T);
 
-    Helper.set(&table, "AAU", .N); Helper.set(&table, "AAC", .N);
-    Helper.set(&table, "AAA", .K); Helper.set(&table, "AAG", .K);
+    Helper.set(&table, "AAU", .N);
+    Helper.set(&table, "AAC", .N);
+    Helper.set(&table, "AAA", .K);
+    Helper.set(&table, "AAG", .K);
 
-    Helper.set(&table, "AGU", .S); Helper.set(&table, "AGC", .S);
-    Helper.set(&table, "AGA", .R); Helper.set(&table, "AGG", .R);
+    Helper.set(&table, "AGU", .S);
+    Helper.set(&table, "AGC", .S);
+    Helper.set(&table, "AGA", .R);
+    Helper.set(&table, "AGG", .R);
 
-    Helper.set(&table, "GUU", .V); Helper.set(&table, "GUC", .V);
-    Helper.set(&table, "GUA", .V); Helper.set(&table, "GUG", .V);
+    Helper.set(&table, "GUU", .V);
+    Helper.set(&table, "GUC", .V);
+    Helper.set(&table, "GUA", .V);
+    Helper.set(&table, "GUG", .V);
 
-    Helper.set(&table, "GCU", .A); Helper.set(&table, "GCC", .A);
-    Helper.set(&table, "GCA", .A); Helper.set(&table, "GCG", .A);
+    Helper.set(&table, "GCU", .A);
+    Helper.set(&table, "GCC", .A);
+    Helper.set(&table, "GCA", .A);
+    Helper.set(&table, "GCG", .A);
 
-    Helper.set(&table, "GAU", .D); Helper.set(&table, "GAC", .D);
-    Helper.set(&table, "GAA", .E); Helper.set(&table, "GAG", .E);
+    Helper.set(&table, "GAU", .D);
+    Helper.set(&table, "GAC", .D);
+    Helper.set(&table, "GAA", .E);
+    Helper.set(&table, "GAG", .E);
 
-    Helper.set(&table, "GGU", .G); Helper.set(&table, "GGC", .G);
-    Helper.set(&table, "GGA", .G); Helper.set(&table, "GGG", .G);
+    Helper.set(&table, "GGU", .G);
+    Helper.set(&table, "GGC", .G);
+    Helper.set(&table, "GGA", .G);
+    Helper.set(&table, "GGG", .G);
 
     return table;
 }

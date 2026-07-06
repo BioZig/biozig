@@ -99,14 +99,14 @@ pub fn serialize(writer: anytype, rec: FastqRecord) !void {
 }
 
 test "benchmark zero-copy FASTQ iterator" {
-    const test_data = 
+    const test_data =
         "@read1\nAGCT\n+\n!!!!\n" ** 10000;
-    
+
     var it = FastqIterator.init(test_data);
     var count: usize = 0;
     while (try it.next()) |_| {
         count += 1;
     }
-    
+
     try std.testing.expectEqual(@as(usize, 10000), count);
 }

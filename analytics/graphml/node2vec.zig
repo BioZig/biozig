@@ -43,7 +43,7 @@ pub const Node2Vec = struct {
 
         var thread_pool = try std.ArrayList(std.Thread).initCapacity(allocator, threads);
         defer thread_pool.deinit(allocator);
-        
+
         const num_nodes = @as(u32, @intCast(graph.adj.items.len));
 
         const Worker = struct {
@@ -65,10 +65,10 @@ pub const Node2Vec = struct {
                     while (iter < n_walks) : (iter += 1) {
                         const walk_idx = node_idx * n_walks + iter;
                         w[walk_idx] = alloc.alloc(u32, w_length) catch unreachable;
-                        
+
                         w[walk_idx][0] = node_idx;
                         var curr = node_idx;
-                        
+
                         var step: u32 = 1;
                         while (step < w_length) : (step += 1) {
                             const neighbors = g.adj.items[curr].items;
@@ -78,7 +78,7 @@ pub const Node2Vec = struct {
                                 }
                                 break;
                             }
-                            
+
                             const next_idx = random.uintLessThan(usize, neighbors.len);
                             const next = neighbors[next_idx];
                             w[walk_idx][step] = next;
@@ -91,12 +91,12 @@ pub const Node2Vec = struct {
 
         var start_node: u32 = 0;
         const chunk_size = (num_nodes + threads - 1) / threads;
-        
+
         var t: u16 = 0;
         while (t < threads) : (t += 1) {
             const end_node = @min(start_node + chunk_size, num_nodes);
             if (start_node >= end_node) break;
-            
+
             const thread = try std.Thread.spawn(.{}, Worker.doWork, .{
                 graph,
                 walks,
@@ -107,7 +107,7 @@ pub const Node2Vec = struct {
                 allocator,
             });
             thread_pool.appendAssumeCapacity(thread);
-            
+
             start_node = end_node;
         }
 

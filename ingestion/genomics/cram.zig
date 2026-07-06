@@ -163,12 +163,9 @@ pub const CramParser = struct {
             // Skip block data
             try skipBytesLocal(reader, @as(usize, @intCast(length)));
 
-            // Map to molecular.dna for demonstration (extracting dummy sequences based on bases count)
             if (bases > 0) {
-                // Return a dummy DNA sequence to fulfill the requirement
-                // A real parser would decompress blocks and reconstruct the sequence
-                const seq = try dna.DNA2.init("ACGT", self.allocator);
-                try sequences.append(self.allocator, seq);
+                // BioZig Principle: Exact verification. Do not approximate or generate dummy data.
+                return error.DecompressionNotImplemented;
             } else if (n_records == 0 and length == 0) {
                 // EOF container
                 break;
@@ -218,16 +215,16 @@ fn writeIntTest(writer: anytype, comptime T: type, val: T) !void {
 
 test "CramParser: valid CRAM" {
     const allocator = std.testing.allocator;
-    
+
     var buf = std.ArrayList(u8).empty;
     defer buf.deinit(allocator);
-    
+
     var writer = StringWriter{ .list = &buf, .allocator = allocator };
     try writer.writeAll("CRAM");
     try writer.writeByte(3);
     try writer.writeByte(0);
     try writer.writeAll("12345678901234567890");
-    
+
     // Container header
     try writeIntTest(&writer, i32, 0); // length (no blocks)
     try writeItf8(&writer, 0); // ref seq
@@ -239,7 +236,7 @@ test "CramParser: valid CRAM" {
     try writeItf8(&writer, 0); // n blocks
     try writeItf8(&writer, 0); // landmarks len
     try writeIntTest(&writer, u32, 0x12345678); // crc32
-    
+
     // EOF Container
     try writer.writeInt(i32, 0, .little); // length
     try writeItf8(&writer, -1); // ref_seq_id
@@ -251,24 +248,18 @@ test "CramParser: valid CRAM" {
     try writeItf8(&writer, 0); // n_blocks
     try writeItf8(&writer, 0); // landmarks_len
     try writer.writeInt(u32, 0, .little); // crc32
-    
+
     var parser = CramParser.init(allocator);
     var sr = StringReader.init(buf.items);
-    
-    var sequences = try parser.parseStream(&sr);
-    defer {
-        for (sequences.items) |*seq| seq.deinit();
-        sequences.deinit(allocator);
-    }
-    
-    try std.testing.expectEqual(@as(usize, 1), sequences.items.len);
-    try std.testing.expectEqual(@as(usize, 4), sequences.items[0].len);
+
+    const err = parser.parseStream(&sr);
+    try std.testing.expectError(error.DecompressionNotImplemented, err);
 }
 
 test "CramParser: malformed CRAM" {
     const allocator = std.testing.allocator;
     var parser = CramParser.init(allocator);
-    
+
     var sr = StringReader.init("NOTCRAM");
     const res = parser.parseStream(&sr);
     try std.testing.expectError(error.InvalidCramMagic, res);
@@ -277,7 +268,7 @@ test "CramParser: malformed CRAM" {
 test "CramParser: invalid CRAM" {
     const allocator = std.testing.allocator;
     var parser = CramParser.init(allocator);
-    
+
     var buf = std.ArrayList(u8).empty;
     defer buf.deinit(allocator);
     var writer = StringWriter{ .list = &buf, .allocator = allocator };
@@ -287,7 +278,7 @@ test "CramParser: invalid CRAM" {
     try writer.writeAll("12345678901234567890");
     // Write length but then EOF
     try writer.writeInt(i32, 1000, .little);
-    
+
     var sr = StringReader.init(buf.items);
     const res = parser.parseStream(&sr);
     try std.testing.expectError(error.EndOfStream, res);
@@ -296,13 +287,13 @@ test "CramParser: invalid CRAM" {
 test "CramParser: roundtrip / serialization mock" {
     const allocator = std.testing.allocator;
     var parser = CramParser.init(allocator);
-    
+
     var buf = std.ArrayList(u8).empty;
     defer buf.deinit(allocator);
     var writer = StringWriter{ .list = &buf, .allocator = allocator };
     try writer.writeAll("CRAM\x03\x00");
     try writer.writeAll("12345678901234567890");
-    
+
     // EOF container immediately
     try writer.writeInt(i32, 0, .little); // length
     try writeItf8(&writer, -1); // ref_seq_id
@@ -314,18 +305,20 @@ test "CramParser: roundtrip / serialization mock" {
     try writeItf8(&writer, 0); // n_blocks
     try writeItf8(&writer, 0); // landmarks_len
     try writer.writeInt(u32, 0, .little); // crc32
-    
+
     var sr = StringReader.init(buf.items);
     var sequences = try parser.parseStream(&sr);
     defer sequences.deinit(allocator);
-    
+
     try std.testing.expectEqual(@as(usize, 0), sequences.items.len);
 }
 
 const StringReader = struct {
     buffer: []const u8,
     pos: usize = 0,
-    pub fn init(b: []const u8) StringReader { return .{ .buffer = b }; }
+    pub fn init(b: []const u8) StringReader {
+        return .{ .buffer = b };
+    }
     pub fn readByte(self: *@This()) !u8 {
         if (self.pos >= self.buffer.len) return error.EndOfStream;
         const c = self.buffer[self.pos];
@@ -337,8 +330,12 @@ const StringReader = struct {
 const StringWriter = struct {
     list: *std.ArrayList(u8),
     allocator: std.mem.Allocator,
-    pub fn writeByte(self: *@This(), b: u8) !void { try self.list.append(self.allocator, b); }
-    pub fn writeAll(self: *@This(), s: []const u8) !void { try self.list.appendSlice(self.allocator, s); }
+    pub fn writeByte(self: *@This(), b: u8) !void {
+        try self.list.append(self.allocator, b);
+    }
+    pub fn writeAll(self: *@This(), s: []const u8) !void {
+        try self.list.appendSlice(self.allocator, s);
+    }
     pub fn writeInt(self: *@This(), comptime T: type, val: T, endian: std.builtin.Endian) !void {
         _ = endian;
         var bytes: [@sizeOf(T)]u8 = undefined;
@@ -349,10 +346,17 @@ const StringWriter = struct {
 
 fn readIntLocal(reader: anytype, comptime T: type) !T {
     var bytes: [@sizeOf(T)]u8 = undefined;
-    for (0..@sizeOf(T)) |i| { bytes[i] = try reader.readByte(); }
+    for (0..@sizeOf(T)) |i| {
+        bytes[i] = try reader.readByte();
+    }
     return std.mem.readInt(T, &bytes, .little);
 }
 
 fn skipBytesLocal(reader: anytype, count: usize) !void {
-    for (0..count) |_| { _ = reader.readByte() catch |err| { if (err == error.EndOfStream) return; return err; }; }
+    for (0..count) |_| {
+        _ = reader.readByte() catch |err| {
+            if (err == error.EndOfStream) return;
+            return err;
+        };
+    }
 }

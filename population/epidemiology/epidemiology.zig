@@ -103,7 +103,7 @@ pub const CaseControlStudy = struct {
         self.allocator.free(self.study_id);
         self.cases.deinit();
         self.controls.deinit();
-        
+
         for (self.associations.items) |a| {
             self.allocator.free(a.exposure_id);
             self.allocator.free(a.outcome_id);
@@ -130,12 +130,12 @@ test "Epidemiology study and associations" {
     const alloc = std.testing.allocator;
     const cases = try Cohort.init(alloc, "C_01", "T2D_Cases", 5000);
     const controls = try Cohort.init(alloc, "C_02", "Healthy_Controls", 10000);
-    
+
     var study = try CaseControlStudy.init(alloc, "S_01", cases, controls);
     defer study.deinit();
 
     try study.addAssociation("BMI", "T2D", "OddsRatio", 1.8, 1.6, 2.0, 1e-12);
-    
+
     try std.testing.expectEqual(@as(usize, 1), study.associations.items.len);
     try std.testing.expectEqualStrings("OddsRatio", study.associations.items[0].effect_measure);
 }

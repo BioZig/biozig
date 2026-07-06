@@ -37,10 +37,10 @@ pub const RegulatoryGraph = struct {
     allocator: std.mem.Allocator,
     nodes: std.ArrayList([]const u8), // node_idx -> entity_id
     interactions: std.ArrayList(RegulatoryInteraction),
-    
+
     // Quick lookups
     id_to_idx: std.StringHashMap(usize),
-    
+
     // Adjacency lists
     targets_of: std.AutoHashMap(usize, std.ArrayList(usize)), // regulator -> list of interaction indices
     regulators_of: std.AutoHashMap(usize, std.ArrayList(usize)), // target -> list of interaction indices
@@ -60,7 +60,7 @@ pub const RegulatoryGraph = struct {
         for (self.nodes.items) |id| self.allocator.free(id);
         self.nodes.deinit(self.allocator);
         self.interactions.deinit(self.allocator);
-        
+
         var iter = self.id_to_idx.iterator();
         while (iter.next()) |entry| {
             self.allocator.free(entry.key_ptr.*);
@@ -82,7 +82,7 @@ pub const RegulatoryGraph = struct {
 
     pub fn addNode(self: *RegulatoryGraph, entity_id: []const u8) !usize {
         if (self.id_to_idx.get(entity_id)) |idx| return idx;
-        
+
         const idx = self.nodes.items.len;
         const id_copy = try self.allocator.dupe(u8, entity_id);
         try self.nodes.append(self.allocator, id_copy);
@@ -93,7 +93,7 @@ pub const RegulatoryGraph = struct {
     pub fn addInteraction(self: *RegulatoryGraph, regulator: []const u8, target: []const u8, reg_type: RegulationType, score: f64) !void {
         const r_idx = try self.addNode(regulator);
         const t_idx = try self.addNode(target);
-        
+
         const inter_idx = self.interactions.items.len;
         try self.interactions.append(self.allocator, .{
             .regulator_idx = r_idx,

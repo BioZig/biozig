@@ -15,13 +15,11 @@ pub const GpmlParser = struct {
     }
 
     pub fn parse(self: *GpmlParser, xml_data: []const u8) !struct { net: network.Network, path: pathway.Pathway } {
-
         var net = network.Network.init(self.allocator);
         errdefer net.deinit();
 
         var path = try pathway.Pathway.init(self.allocator, "GPML", "GPML Pathway");
         errdefer path.deinit();
-
 
         // graph_id -> node index
         var node_map = std.StringHashMap(usize).init(self.allocator);
@@ -35,10 +33,10 @@ pub const GpmlParser = struct {
 
         var in_pathway = false;
         var in_interaction = false;
-        
+
         var current_source_ref: ?[]const u8 = null;
         var current_target_ref: ?[]const u8 = null;
-        
+
         defer {
             if (current_source_ref) |ref| self.allocator.free(ref);
             if (current_target_ref) |ref| self.allocator.free(ref);
@@ -93,7 +91,7 @@ pub const GpmlParser = struct {
             } else if (std.mem.eql(u8, tag_name, "DataNode")) {
                 var text_label: ?[]const u8 = null;
                 var graph_id: ?[]const u8 = null;
-                
+
                 while (tokens.next()) |attr| {
                     if (std.mem.indexOfScalar(u8, attr, '=')) |eq_idx| {
                         const key = attr[0..eq_idx];
@@ -156,7 +154,7 @@ pub const GpmlParser = struct {
                 current_target_ref = null;
             }
         }
-        
+
         // Final commit if any remains
         if (current_source_ref != null and current_target_ref != null) {
             const s_ref = current_source_ref.?;
@@ -212,7 +210,7 @@ pub fn serialize(writer: anytype, net: network.Network, path: pathway.Pathway) !
     try writer.writeAll("</Pathway>\n");
 }
 
-const gpml_valid = 
+const gpml_valid =
     \\<?xml version="1.0" encoding="UTF-8"?>
     \\<Pathway Name="Glycolysis">
     \\  <DataNode TextLabel="Glucose" GraphId="n1" Type="Metabolite"/>
@@ -233,7 +231,7 @@ const gpml_valid =
     \\</Pathway>
 ;
 
-const gpml_malformed = 
+const gpml_malformed =
     \\<?xml version="1.0" encoding="UTF-8"?>
     \\<NotAPathway Name="Bad">
     \\  <DataNode TextLabel="Glucose" GraphId="n1"/>
@@ -282,7 +280,7 @@ test "GPML serialization roundtrip" {
 
     var buf: [2048]u8 = undefined;
     var writer = std.Io.Writer.fixed(&buf);
-    
+
     try serialize(&writer, result.net, result.path);
     const serialized_data = writer.buffered();
 
@@ -297,5 +295,3 @@ test "GPML serialization roundtrip" {
     try std.testing.expectEqual(@as(usize, 3), result2.net.nodes.items.len);
     try std.testing.expectEqual(@as(usize, 2), result2.net.edges.items.len);
 }
-
-

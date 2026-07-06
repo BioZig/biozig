@@ -11,7 +11,7 @@ pub const FileReader = struct {
 
     pub fn readByte(self: *FileReader) !u8 {
         if (self.pos >= self.len) {
-            const buffers = &[_][]u8{ &self.buffer };
+            const buffers = &[_][]u8{&self.buffer};
             self.len = try self.file.readStreaming(self.io, buffers);
             if (self.len == 0) return error.EndOfStream;
             self.pos = 0;
@@ -20,7 +20,7 @@ pub const FileReader = struct {
         self.pos += 1;
         return b;
     }
-    
+
     // For when the parser needs to read everything into memory (e.g. gpml parses from `[]const u8`)
     pub fn readAllAlloc(self: *FileReader, allocator: std.mem.Allocator, max_bytes: usize) ![]u8 {
         var list = std.ArrayList(u8).empty;
@@ -41,10 +41,10 @@ pub const FileReader = struct {
 
 pub fn main(init: std.process.Init) !void {
     const allocator = init.arena.allocator();
-    
+
     var args = std.process.Args.Iterator.init(init.minimal.args);
     _ = args.next(); // skip exe
-    
+
     const format_name = args.next() orelse return error.MissingFormat;
     const filepath = args.next() orelse return error.MissingFilepath;
 
@@ -78,5 +78,5 @@ pub fn main(init: std.process.Init) !void {
 
     std.debug.print("Format: {s}\n", .{format_name});
     std.debug.print("File Size: {} bytes\n", .{stat.size});
-    std.debug.print("Accuracy Check: {s}\n", .{ if (accuracy_pass) "PASS" else "FAIL" });
+    std.debug.print("Accuracy Check: {s}\n", .{if (accuracy_pass) "PASS" else "FAIL"});
 }

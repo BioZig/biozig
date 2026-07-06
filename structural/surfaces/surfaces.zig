@@ -190,9 +190,9 @@ test "SASA calculation for single atom" {
     );
     const atoms = [_]Atom{atom};
     var sasa_out = [_]f64{0.0};
-    
+
     try calculateSasa(&atoms, .{}, &sasa_out, allocator);
-    
+
     // Carbon VdW = 1.7, probe = 1.4 => radius = 3.1
     // Area = 4 * pi * 3.1 * 3.1 = 120.76282
     const expected = 4.0 * std.math.pi * 3.1 * 3.1;
@@ -211,7 +211,7 @@ test "SASA calculation for two distant atoms" {
     const atom2 = try Atom.init(2, "C2", .C, Vec3.init(100.0, 0, 0), 1.0, 20.0, null);
     const atoms = [_]Atom{ atom1, atom2 };
     var sasa_out = [_]f64{ 0.0, 0.0 };
-    
+
     try calculateSasa(&atoms, .{}, &sasa_out, allocator);
     const expected = 4.0 * std.math.pi * 3.1 * 3.1;
     try std.testing.expectApproxEqAbs(sasa_out[0], expected, 1e-5);
@@ -225,7 +225,7 @@ test "SASA calculation for two overlapping atoms" {
     const atom2 = try Atom.init(2, "C2", .C, Vec3.init(3.0, 0, 0), 1.0, 20.0, null);
     const atoms = [_]Atom{ atom1, atom2 };
     var sasa_out = [_]f64{ 0.0, 0.0 };
-    
+
     try calculateSasa(&atoms, .{}, &sasa_out, allocator);
     const expected_isolated = 4.0 * std.math.pi * 3.1 * 3.1;
     // Overlapping should reduce SASA
@@ -233,4 +233,3 @@ test "SASA calculation for two overlapping atoms" {
     try std.testing.expect(sasa_out[1] < expected_isolated);
     try std.testing.expect(sasa_out[0] > 0.0);
 }
-

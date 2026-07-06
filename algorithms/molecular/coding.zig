@@ -77,7 +77,7 @@ pub fn detectORFs(allocator: std.mem.Allocator, dna: DNA2View, min_length: usize
         var start_pos: ?usize = null;
         var i: usize = frame;
         while (i + 3 <= dna.len) : (i += 3) {
-            const code = encodeCodon(dna.get(i), dna.get(i+1), dna.get(i+2));
+            const code = encodeCodon(dna.get(i), dna.get(i + 1), dna.get(i + 2));
             if (code == atg_code and start_pos == null) {
                 start_pos = i;
             } else if (table[code] == STOP_CODON) {
@@ -107,7 +107,7 @@ test "Sequence Coding - Translation" {
 
     const protein = try translateDNA(alloc, seq.view());
     defer alloc.free(protein);
-    
+
     try std.testing.expectEqualStrings("MAMAPRTEIAS*", protein);
 }
 

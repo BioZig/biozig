@@ -22,13 +22,13 @@ test "SearchLayer - basic execution" {
 
     const exact = searcher.exactMatch(query.view());
     try testing.expect(exact.end > exact.start);
-    
+
     const approx = searcher.seedAndExtend(query.view(), 1);
     testing.allocator.free(approx);
-    
+
     const banded = searcher.banding(query.view(), 5);
     testing.allocator.free(banded);
-    
+
     const chained = searcher.chaining(mins);
     testing.allocator.free(chained);
 }
@@ -50,7 +50,7 @@ test "SearchLayer - empty query" {
 
     const exact = searcher.exactMatch(query.view());
     try testing.expectEqual(@as(usize, 0), exact.start);
-    
+
     const approx = searcher.seedAndExtend(query.view(), 1);
     try testing.expectEqual(@as(usize, 0), approx.len);
     testing.allocator.free(approx);
@@ -70,7 +70,7 @@ test "SearchLayer - empty sequence and minimizers" {
 
     var mins = [_]mol.indexing.Minimizer{};
     var searcher = search.SearchLayer.init(testing.allocator, &fm, &mins, seq.view());
-    
+
     const chained = searcher.chaining(&mins);
     try testing.expectEqual(@as(usize, 0), chained.len);
     testing.allocator.free(chained);

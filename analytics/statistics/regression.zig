@@ -28,7 +28,7 @@ pub fn simpleLinearRegression(x: []const f64, y: []const f64, allocator: std.mem
     var residuals = try allocator.alloc(f64, x.len);
     var ss_res: f64 = 0.0;
     var ss_tot: f64 = 0.0;
-    
+
     for (0..x.len) |i| {
         const pred = slope * x[i] + intercept;
         residuals[i] = y[i] - pred;
@@ -54,7 +54,7 @@ pub fn simpleLinearRegression(x: []const f64, y: []const f64, allocator: std.mem
 /// Note: This is a basic implementation for small-to-medium datasets.
 pub fn multipleLinearRegression(
     X: [][]const f64, // Matrix of predictors (n x k)
-    Y: []const f64,   // Vector of responses (n)
+    Y: []const f64, // Vector of responses (n)
     allocator: std.mem.Allocator,
 ) !struct { coefficients: []f64, r_squared: f64, adjusted_r_squared: f64 } {
     const n = Y.len;
@@ -65,7 +65,7 @@ pub fn multipleLinearRegression(
     // I'll need a way to invert X'X.
     // Since I don't have a full matrix library in core yet,
     // I'll implement a small Gauss-Jordan elimination for now.
-    
+
     // Create augmented matrix [X'X | X'Y]
     // X'X is k+1 x k+1 (including intercept)
     const m = k + 1;
@@ -104,7 +104,7 @@ pub fn multipleLinearRegression(
         var pivot_row = i;
         while (pivot_row < m and @abs(augmented[pivot_row][i]) < 1e-12) : (pivot_row += 1) {}
         if (pivot_row == m) return error.SingularMatrix;
-        
+
         const tmp = augmented[i];
         augmented[i] = augmented[pivot_row];
         augmented[pivot_row] = tmp;
@@ -161,7 +161,7 @@ test "multiple linear regression" {
     const x2 = [_]f64{ 1.0, 3.0, 2.0, 5.0, 4.0 }; // Not collinear with x1
     const y = [_]f64{ 10.0, 11.0, 12.0, 13.0, 14.0 };
     var X = [_][]const f64{ &x1, &x2 };
-    
+
     const res = try multipleLinearRegression(&X, &y, std.testing.allocator);
     defer std.testing.allocator.free(res.coefficients);
 
@@ -169,6 +169,6 @@ test "multiple linear regression" {
     const y2 = [_]f64{ 7.0, 8.0, 9.0, 10.0, 11.0 }; // y = x1 + 6
     const res2 = try multipleLinearRegression(&X, &y2, std.testing.allocator);
     defer std.testing.allocator.free(res2.coefficients);
-    
+
     try std.testing.expectApproxEqAbs(@as(f64, 1.0), res2.r_squared, 1e-10);
 }

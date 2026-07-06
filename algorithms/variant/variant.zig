@@ -12,18 +12,18 @@ pub const VariantParams = struct {
 /// Compares two variants to determine if they are identical in representation.
 pub fn isMatch(a: VariantParams, b: VariantParams) bool {
     return a.pos == b.pos and
-           std.mem.eql(u8, a.chrom, b.chrom) and
-           std.mem.eql(u8, a.ref, b.ref) and
-           std.mem.eql(u8, a.alt, b.alt);
+        std.mem.eql(u8, a.chrom, b.chrom) and
+        std.mem.eql(u8, a.ref, b.ref) and
+        std.mem.eql(u8, a.alt, b.alt);
 }
 
 /// Checks if two variants overlap in genomic space.
 pub fn isOverlap(a: VariantParams, b: VariantParams) bool {
     if (!std.mem.eql(u8, a.chrom, b.chrom)) return false;
-    
+
     const a_end = a.pos + a.ref.len;
     const b_end = b.pos + b.ref.len;
-    
+
     return a.pos < b_end and b.pos < a_end;
 }
 
@@ -82,7 +82,8 @@ pub fn computeStatistics(variants: []const VariantParams) VariantStatistics {
             const r = v.ref[0];
             const a = v.alt[0];
             if ((r == 'A' and a == 'G') or (r == 'G' and a == 'A') or
-                (r == 'C' and a == 'T') or (r == 'T' and a == 'C')) {
+                (r == 'C' and a == 'T') or (r == 'T' and a == 'C'))
+            {
                 stats.transitions += 1;
             } else {
                 stats.transversions += 1;

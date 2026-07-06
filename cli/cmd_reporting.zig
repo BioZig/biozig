@@ -23,11 +23,10 @@ pub fn execute(args: ParsedArgs) !void {
             \\  -i, --input  Input data file
             \\  -o, --output Output file path
             \\
-            , .{}
-        );
+        , .{});
         return;
     }
-    
+
     const cmd = args.run orelse {
         std.debug.print("Error: No command provided for reporting.\n", .{});
         std.process.exit(1);
@@ -47,7 +46,7 @@ pub fn execute(args: ParsedArgs) !void {
         std.mem.eql(u8, cmd, "manuscript") or
         std.mem.eql(u8, cmd, "markdown") or
         std.mem.eql(u8, cmd, "pdf") or
-        std.mem.eql(u8, cmd, "supplement")) 
+        std.mem.eql(u8, cmd, "supplement"))
     {
         // Mock wiring to prevent unused imports
         _ = reporting.html;
@@ -56,7 +55,7 @@ pub fn execute(args: ParsedArgs) !void {
         _ = reporting.markdown;
         _ = reporting.pdf;
         _ = reporting.supplement;
-        try out_writer.writeText("Successfully initialized reporting ({s}) to {s}.\n", .{cmd, out_path});
+        try out_writer.writeText("Successfully initialized reporting ({s}) to {s}.\n", .{ cmd, out_path });
     } else {
         std.debug.print("Error: Unknown reporting command '{s}'\n", .{cmd});
         return error.UnknownSubcommand;

@@ -55,5 +55,3 @@ test "fasta: windows line endings" {
     defer testing.allocator.free(clean);
     try testing.expectEqualStrings("ACGTACGT", clean);
 }
-
-

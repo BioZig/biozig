@@ -109,7 +109,7 @@ pub const BcfParser = struct {
                 return error.InvalidBcfType;
             }
         }
-        
+
         var type_size: usize = 0;
         switch (type_id) {
             1 => type_size = 1, // Int8
@@ -119,7 +119,7 @@ pub const BcfParser = struct {
             7 => type_size = 1, // Character/String
             else => return error.InvalidBcfType,
         }
-        
+
         try skipBytesLocal(reader, len * type_size);
     }
 
@@ -154,25 +154,25 @@ pub const BcfParser = struct {
 
 test "BcfParser: valid BCF" {
     const allocator = std.testing.allocator;
-    
+
     // Construct a valid basic BCF in memory
     var buf = std.ArrayList(u8).empty;
     defer buf.deinit(allocator);
-    
+
     var writer = StringWriter{ .list = &buf, .allocator = allocator };
     // Magic
     try writer.writeAll("BCF\x02\x02");
-    
+
     // Header
     const header_text = "##fileformat=VCFv4.2\n";
     try writeIntTest(&writer, u32, @as(u32, @intCast(header_text.len)), .little);
     try writer.writeAll(header_text);
-    
+
     // Record 1
     var shared_buf = std.ArrayList(u8).empty;
     defer shared_buf.deinit(allocator);
     var sw = StringWriter{ .list = &shared_buf, .allocator = allocator };
-    
+
     try writeIntTest(&sw, i32, 0, .little); // chrom
     try writeIntTest(&sw, i32, 100, .little); // pos
     try writeIntTest(&sw, i32, 1, .little); // rlen
@@ -180,32 +180,32 @@ test "BcfParser: valid BCF" {
     try writeIntTest(&sw, u16, 0, .little); // n_info
     try writeIntTest(&sw, u16, 2, .little); // n_allele
     try writeIntTest(&sw, u32, 0, .little); // n_fmt_sample
-    
+
     // ID (missing)
     try sw.writeByte(0x07); // length 0, type string
-    
+
     // REF "A"
     try sw.writeByte(0x17); // len=1, type=String
     try sw.writeAll("A");
-    
+
     // ALT "G"
     try sw.writeByte(0x17); // len=1, type=String
     try sw.writeAll("G");
-    
+
     // Write shared len
     try writeIntTest(&writer, u32, @as(u32, @intCast(shared_buf.items.len)), .little);
     try writeIntTest(&writer, u32, 0, .little); // l_indiv
     try writer.writeAll(shared_buf.items);
-    
+
     var parser = BcfParser.init(allocator);
     var sr = StringReader.init(buf.items);
-    
+
     var variants = try parser.parseStream(&sr);
     defer {
         for (variants.items) |*v| v.deinit();
         variants.deinit(allocator);
     }
-    
+
     try std.testing.expectEqual(@as(usize, 1), variants.items.len);
     try std.testing.expectEqual(@as(usize, 100), variants.items[0].position);
     try std.testing.expectEqualStrings("A", variants.items[0].reference);
@@ -215,7 +215,7 @@ test "BcfParser: valid BCF" {
 test "BcfParser: malformed BCF" {
     const allocator = std.testing.allocator;
     var parser = BcfParser.init(allocator);
-    
+
     var sr = StringReader.init("NOTBCF");
     const res = parser.parseStream(&sr);
     try std.testing.expectError(error.InvalidBcfMagic, res);
@@ -224,7 +224,7 @@ test "BcfParser: malformed BCF" {
 test "BcfParser: invalid BCF" {
     const allocator = std.testing.allocator;
     var parser = BcfParser.init(allocator);
-    
+
     var buf = std.ArrayList(u8).empty;
     defer buf.deinit(allocator);
     var writer = StringWriter{ .list = &buf, .allocator = allocator };
@@ -233,7 +233,7 @@ test "BcfParser: invalid BCF" {
     try writeIntTest(&writer, u32, 100, .little); // shared length = 100
     try writeIntTest(&writer, u32, 0, .little); // indiv length = 0
     // But then EOF right after!
-    
+
     var sr = StringReader.init(buf.items);
     const res = parser.parseStream(&sr);
     try std.testing.expectError(error.EndOfStream, res);
@@ -244,24 +244,26 @@ test "BcfParser: roundtrip / serialization mock" {
     // BCF serialization normally maps to VCF or BGZF. Here we test memory stability
     const allocator = std.testing.allocator;
     var parser = BcfParser.init(allocator);
-    
+
     var buf = std.ArrayList(u8).empty;
     defer buf.deinit(allocator);
     var writer = StringWriter{ .list = &buf, .allocator = allocator };
     try writer.writeAll("BCF\x02\x02");
     try writeIntTest(&writer, u32, 0, .little); // empty header
-    
+
     var sr = StringReader.init(buf.items);
     var variants = try parser.parseStream(&sr);
     defer variants.deinit(allocator);
-    
+
     try std.testing.expectEqual(@as(usize, 0), variants.items.len);
 }
 
 const StringReader = struct {
     buffer: []const u8,
     pos: usize = 0,
-    pub fn init(b: []const u8) StringReader { return .{ .buffer = b }; }
+    pub fn init(b: []const u8) StringReader {
+        return .{ .buffer = b };
+    }
     pub fn readByte(self: *@This()) !u8 {
         if (self.pos >= self.buffer.len) return error.EndOfStream;
         const c = self.buffer[self.pos];
@@ -273,18 +275,29 @@ const StringReader = struct {
 const StringWriter = struct {
     list: *std.ArrayList(u8),
     allocator: std.mem.Allocator,
-    pub fn writeByte(self: *@This(), b: u8) !void { try self.list.append(self.allocator, b); }
-    pub fn writeAll(self: *@This(), s: []const u8) !void { try self.list.appendSlice(self.allocator, s); }
+    pub fn writeByte(self: *@This(), b: u8) !void {
+        try self.list.append(self.allocator, b);
+    }
+    pub fn writeAll(self: *@This(), s: []const u8) !void {
+        try self.list.appendSlice(self.allocator, s);
+    }
 };
 
 fn readIntLocal(reader: anytype, comptime T: type) !T {
     var bytes: [@sizeOf(T)]u8 = undefined;
-    for (0..@sizeOf(T)) |i| { bytes[i] = try reader.readByte(); }
+    for (0..@sizeOf(T)) |i| {
+        bytes[i] = try reader.readByte();
+    }
     return std.mem.readInt(T, &bytes, .little);
 }
 
 fn skipBytesLocal(reader: anytype, count: usize) !void {
-    for (0..count) |_| { _ = reader.readByte() catch |err| { if (err == error.EndOfStream) return; return err; }; }
+    for (0..count) |_| {
+        _ = reader.readByte() catch |err| {
+            if (err == error.EndOfStream) return;
+            return err;
+        };
+    }
 }
 
 fn writeIntTest(writer: anytype, comptime T: type, val: T, endian: std.builtin.Endian) !void {

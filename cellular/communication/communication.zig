@@ -56,7 +56,7 @@ pub const Interaction = struct {
 pub const InteractionGraph = struct {
     allocator: std.mem.Allocator,
     interactions: std.ArrayList(Interaction),
-    
+
     /// Map from (sender, receiver) to list of interaction indices.
     adj: std.AutoHashMap([2]usize, std.ArrayList(usize)),
 
@@ -71,7 +71,7 @@ pub const InteractionGraph = struct {
     pub fn deinit(self: *InteractionGraph) void {
         for (self.interactions.items) |*i| i.deinit();
         self.interactions.deinit(self.allocator);
-        
+
         var iter = self.adj.iterator();
         while (iter.next()) |entry| {
             entry.value_ptr.deinit(self.allocator);
@@ -82,7 +82,7 @@ pub const InteractionGraph = struct {
     pub fn addInteraction(self: *InteractionGraph, interaction: Interaction) !void {
         const idx = self.interactions.items.len;
         try self.interactions.append(self.allocator, interaction);
-        
+
         const key = [2]usize{ interaction.sender_idx, interaction.receiver_idx };
         const entry = try self.adj.getOrPut(key);
         if (!entry.found_existing) entry.value_ptr.* = .empty;
@@ -119,14 +119,14 @@ test "InteractionGraph building and lookup" {
     const alloc = std.testing.allocator;
     var graph = InteractionGraph.init(alloc);
     defer graph.deinit();
-    
+
     const inter1 = try Interaction.init(alloc, 0, 1, "TNF", "TNFRSF1A", 0.9);
     try graph.addInteraction(inter1);
-    
+
     const matches = graph.getInteractions(0, 1);
     try std.testing.expect(matches != null);
     try std.testing.expectEqual(@as(usize, 1), matches.?.len);
-    
+
     const retrieved = graph.interactions.items[matches.?[0]];
     try std.testing.expectEqualStrings("TNF", retrieved.ligand);
 }

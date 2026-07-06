@@ -359,14 +359,14 @@ pub fn serializeMmcif(writer: anytype, models: []const model_mod.Model) !void {
 pub fn parseMmcifCoords(allocator: std.mem.Allocator, buffer: []const u8) ![]Vec3 {
     var coords = std.ArrayList(Vec3).empty;
     defer coords.deinit(allocator);
-    
+
     var lines = std.mem.splitScalar(u8, buffer, '\n');
     var in_atom_site = false;
     var x_idx: ?usize = null;
     var y_idx: ?usize = null;
     var z_idx: ?usize = null;
     var col_idx: usize = 0;
-    
+
     while (lines.next()) |line_raw| {
         const line = std.mem.trimEnd(u8, line_raw, "\r");
         if (std.mem.startsWith(u8, line, "loop_")) {
@@ -380,7 +380,9 @@ pub fn parseMmcifCoords(allocator: std.mem.Allocator, buffer: []const u8) ![]Vec
         } else if (in_atom_site and (std.mem.startsWith(u8, line, "ATOM") or std.mem.startsWith(u8, line, "HETATM"))) {
             var tokens = std.mem.tokenizeAny(u8, line, " \t");
             var i: usize = 0;
-            var x: f64 = 0; var y: f64 = 0; var z: f64 = 0;
+            var x: f64 = 0;
+            var y: f64 = 0;
+            var z: f64 = 0;
             while (tokens.next()) |token| : (i += 1) {
                 if (x_idx != null and i == x_idx.?) x = try std.fmt.parseFloat(f64, token);
                 if (y_idx != null and i == y_idx.?) y = try std.fmt.parseFloat(f64, token);
@@ -394,7 +396,7 @@ pub fn parseMmcifCoords(allocator: std.mem.Allocator, buffer: []const u8) ![]Vec
 
 test "mmcif zero-copy memory optimization" {
     const allocator = std.testing.allocator;
-    const data = 
+    const data =
         \\loop_
         \\_atom_site.group_PDB
         \\_atom_site.id
@@ -412,16 +414,16 @@ test "mmcif zero-copy memory optimization" {
         \\ATOM 1 N N ALA A 1 11.104 6.134 -6.504 1.00 0.00 ?
         \\ATOM 2 C CA ALA A 1 11.639 6.071 -5.147 1.00 0.00 ?
         \\ATOM 3 C C ALA A 1 10.825 5.052 -4.326 1.00 0.00 ?
-        ;
+    ;
     var arena = std.heap.ArenaAllocator.init(allocator);
     defer arena.deinit();
     const arena_allocator = arena.allocator();
     const start_memory = arena.queryCapacity();
-    
+
     const coords = try parseMmcifCoords(arena_allocator, data);
     try std.testing.expectEqual(@as(usize, 3), coords.len);
     try std.testing.expectEqual(@as(f64, 11.104), coords[0].x);
-    
+
     const end_memory = arena.queryCapacity();
     try std.testing.expect(end_memory - start_memory < 500);
 }

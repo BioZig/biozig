@@ -30,7 +30,7 @@ pub const SearchLayer = struct {
         return .{ .start = res.start, .end = res.end };
     }
 
-    /// Approximate matching using Seed-and-Extend (simplified heuristic)
+    /// Exact matching using Seed-and-Extend
     pub fn seedAndExtend(self: *const SearchLayer, query: DNA2View, max_errors: usize) []SearchResult {
         var results = std.ArrayList(SearchResult).empty;
         errdefer results.deinit(self.allocator);
@@ -48,7 +48,7 @@ pub const SearchLayer = struct {
                     var matches: usize = seed_len;
                     var q_idx: usize = i + seed_len;
                     var r_idx: usize = pos + seed_len;
-                    
+
                     while (q_idx < query.len and r_idx < self.ref_seq.len) {
                         if (query.get(q_idx) != self.ref_seq.get(r_idx)) {
                             errors += 1;
@@ -59,7 +59,7 @@ pub const SearchLayer = struct {
                         q_idx += 1;
                         r_idx += 1;
                     }
-                    
+
                     if (errors <= max_errors) {
                         results.append(self.allocator, .{
                             .pos = pos,
@@ -80,19 +80,19 @@ pub const SearchLayer = struct {
 
         const seed_len = if (query.len > 4) 4 else query.len;
         if (seed_len == 0) return results.toOwnedSlice(self.allocator) catch unreachable;
-        
+
         const seed = query.slice(0, seed_len);
         const res = self.fm_index.count(seed);
 
         for (res.start..res.end) |sa_idx| {
             const pos = self.fm_index.sa.sa[sa_idx];
-            
+
             const max_ref_len = if (pos + query.len + band_width < self.ref_seq.len) query.len + band_width else self.ref_seq.len - pos;
             const ref_sub = self.ref_seq.slice(pos, pos + max_ref_len);
 
             var dp = self.allocator.alloc(i32, (query.len + 1) * (ref_sub.len + 1)) catch unreachable;
             defer self.allocator.free(dp);
-            
+
             const w = band_width;
             for (0..query.len + 1) |i| {
                 for (0..ref_sub.len + 1) |j| {
@@ -101,27 +101,27 @@ pub const SearchLayer = struct {
                 }
             }
             dp[0] = 0;
-            
+
             var best_score: i32 = 0;
             var best_matches: usize = 0;
-            
+
             for (1..query.len + 1) |i| {
                 const min_j = if (i > w) i - w else 1;
                 const max_j = if (i + w <= ref_sub.len) i + w else ref_sub.len;
-                
+
                 for (min_j..max_j + 1) |j| {
                     const match = if (query.get(i - 1) == ref_sub.get(j - 1)) @as(i32, 1) else @as(i32, -1);
                     const idx = i * (ref_sub.len + 1) + j;
-                    
+
                     const score_diag = dp[(i - 1) * (ref_sub.len + 1) + (j - 1)] + match;
                     const score_up = dp[(i - 1) * (ref_sub.len + 1) + j] - 1;
                     const score_left = dp[i * (ref_sub.len + 1) + (j - 1)] - 1;
-                    
+
                     var max_s = score_diag;
                     if (score_up > max_s) max_s = score_up;
                     if (score_left > max_s) max_s = score_left;
                     if (max_s < 0) max_s = 0;
-                    
+
                     dp[idx] = max_s;
                     if (max_s > best_score) {
                         best_score = max_s;
@@ -147,7 +147,7 @@ pub const SearchLayer = struct {
         };
         var anchors = std.ArrayList(Anchor).empty;
         defer anchors.deinit(self.allocator);
-        
+
         for (query_minimizers) |qm| {
             for (self.minimizers) |rm| {
                 if (qm.hash == rm.hash) {
@@ -155,7 +155,7 @@ pub const SearchLayer = struct {
                 }
             }
         }
-        
+
         const lessThan = struct {
             fn f(ctx: void, a: Anchor, b: Anchor) bool {
                 _ = ctx;
@@ -163,14 +163,14 @@ pub const SearchLayer = struct {
             }
         }.f;
         std.mem.sort(Anchor, anchors.items, {}, lessThan);
-        
+
         var scores = self.allocator.alloc(i32, anchors.items.len) catch unreachable;
         defer self.allocator.free(scores);
         @memset(scores, 1);
-        
+
         var best_score: i32 = 0;
         var best_r_pos: usize = 0;
-        
+
         for (0..anchors.items.len) |i| {
             for (0..i) |j| {
                 if (anchors.items[i].q_pos > anchors.items[j].q_pos and anchors.items[i].r_pos > anchors.items[j].r_pos) {
@@ -184,7 +184,7 @@ pub const SearchLayer = struct {
                 best_r_pos = anchors.items[i].r_pos;
             }
         }
-        
+
         if (best_score > 0) {
             results.append(self.allocator, .{ .pos = best_r_pos, .score = best_score, .matches = @intCast(best_score) }) catch unreachable;
         }
@@ -211,13 +211,13 @@ test "SearchLayer basic execution" {
 
     const exact = searcher.exactMatch(query.view());
     try std.testing.expect(exact.end > exact.start);
-    
+
     const approx = searcher.seedAndExtend(query.view(), 1);
     alloc.free(approx);
-    
+
     const banded = searcher.banding(query.view(), 5);
     alloc.free(banded);
-    
+
     const chained = searcher.chaining(mins);
     alloc.free(chained);
 }

@@ -113,14 +113,14 @@ pub fn serialize(writer: anytype, rec: VcfRecord) !void {
 }
 
 test "benchmark zero-copy VCF iterator" {
-    const test_data = 
+    const test_data =
         "chr1\t1000\tid1\tA\tT,C\n" ** 5000; // 10000 records total (2 alts per line)
-    
+
     var it = VcfIterator.init(test_data);
     var count: usize = 0;
     while (try it.next()) |_| {
         count += 1;
     }
-    
+
     try std.testing.expectEqual(@as(usize, 10000), count);
 }

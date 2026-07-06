@@ -5,10 +5,10 @@ const dna = molecular.dna;
 
 pub fn main(init: std.process.Init) !void {
     const allocator = std.heap.page_allocator;
-    
+
     var args = std.process.Args.Iterator.init(init.minimal.args);
     _ = args.next(); // skip exe
-    
+
     const algo_name = args.next() orelse return error.MissingAlgoName;
     const size_str = args.next() orelse "10000000"; // default 10M
     const size = try std.fmt.parseInt(usize, size_str, 10);
@@ -20,7 +20,7 @@ pub fn main(init: std.process.Init) !void {
     std.debug.print("Initializing Genomics Data: {} bases...\n", .{size});
     const sequence_str = try allocator.alloc(u8, size);
     defer allocator.free(sequence_str);
-    
+
     const bases = "ACGT";
     for (sequence_str) |*b| {
         b.* = bases[random.uintLessThan(usize, 4)];
@@ -66,16 +66,16 @@ pub fn main(init: std.process.Init) !void {
         var fm = try algorithms.molecular.indexing.FMIndex.init(allocator, sequence.view());
         const mins = try algorithms.molecular.indexing.computeMinimizers(allocator, sequence.view(), 10, 21);
         var searcher = algorithms.molecular.search.SearchLayer.init(allocator, &fm, mins, sequence.view());
-        
+
         var q = try dna.DNA2.init("ACGT", allocator);
-        
+
         const count = searcher.exactMatch(q.view());
         const seeds = searcher.seedAndExtend(q.view(), 2);
         const chains = searcher.chaining(mins);
         const bands = searcher.banding(q.view(), 5);
-        
+
         accuracy_pass = count.end >= count.start and chains.len == 0 and bands.len == 0 and seeds.len == 0;
-        
+
         allocator.free(seeds);
         allocator.free(chains);
         allocator.free(bands);
@@ -110,18 +110,27 @@ pub fn main(init: std.process.Init) !void {
         std.debug.print("Data Size: {} bases\n", .{size});
     } else if (std.mem.eql(u8, algo_name, "HMM_VITERBI")) {
         var hmm = try algorithms.molecular.hmm.HMM.init(allocator, 2, 4);
-        hmm.initial_probs[0] = 0.5; hmm.initial_probs[1] = 0.5;
-        hmm.transition_probs[0][0] = 0.9; hmm.transition_probs[0][1] = 0.1;
-        hmm.transition_probs[1][0] = 0.1; hmm.transition_probs[1][1] = 0.9;
-        hmm.emission_probs[0][0] = 0.25; hmm.emission_probs[0][1] = 0.25; hmm.emission_probs[0][2] = 0.25; hmm.emission_probs[0][3] = 0.25;
-        hmm.emission_probs[1][0] = 0.4; hmm.emission_probs[1][1] = 0.1; hmm.emission_probs[1][2] = 0.1; hmm.emission_probs[1][3] = 0.4;
-        
+        hmm.initial_probs[0] = 0.5;
+        hmm.initial_probs[1] = 0.5;
+        hmm.transition_probs[0][0] = 0.9;
+        hmm.transition_probs[0][1] = 0.1;
+        hmm.transition_probs[1][0] = 0.1;
+        hmm.transition_probs[1][1] = 0.9;
+        hmm.emission_probs[0][0] = 0.25;
+        hmm.emission_probs[0][1] = 0.25;
+        hmm.emission_probs[0][2] = 0.25;
+        hmm.emission_probs[0][3] = 0.25;
+        hmm.emission_probs[1][0] = 0.4;
+        hmm.emission_probs[1][1] = 0.1;
+        hmm.emission_probs[1][2] = 0.1;
+        hmm.emission_probs[1][3] = 0.4;
+
         const emissions = try allocator.alloc(usize, @min(size, 10000));
         defer allocator.free(emissions);
         for (emissions, 0..) |*e, i| {
             e.* = @intFromEnum(sequence.view().get(i));
         }
-        
+
         const path = try hmm.viterbi(allocator, emissions);
         accuracy_pass = path.len == emissions.len;
         allocator.free(path);
@@ -131,7 +140,7 @@ pub fn main(init: std.process.Init) !void {
     } else if (std.mem.eql(u8, algo_name, "MSA_PROGRESSIVE")) {
         const seqs = try allocator.alloc([]const u8, 10);
         defer allocator.free(seqs);
-        for (seqs, 0..) |*s, i| s.* = sequence_str[i*100 .. i*100 + 100];
+        for (seqs, 0..) |*s, i| s.* = sequence_str[i * 100 .. i * 100 + 100];
         var msa = algorithms.molecular.msa.MSA.init(allocator, seqs);
         const aligned = try msa.alignProgressive(.{});
         accuracy_pass = aligned.len == 10;
@@ -142,7 +151,7 @@ pub fn main(init: std.process.Init) !void {
     } else if (std.mem.eql(u8, algo_name, "GIBBS_SAMPLING")) {
         const seqs = try allocator.alloc([]const u8, 10);
         defer allocator.free(seqs);
-        for (seqs, 0..) |*s, i| s.* = sequence_str[i*100 .. i*100 + 100];
+        for (seqs, 0..) |*s, i| s.* = sequence_str[i * 100 .. i * 100 + 100];
         var gibbs = algorithms.molecular.gibbs.GibbsSampler.init(allocator, seqs, 8);
         const motifs = try gibbs.sample(10);
         accuracy_pass = motifs.len == 10;
@@ -158,5 +167,5 @@ pub fn main(init: std.process.Init) !void {
         std.debug.print("Data Size: {} bases\n", .{size});
     }
 
-    std.debug.print("Accuracy Check: {s}\n", .{ if (accuracy_pass) "PASS" else "FAIL" });
+    std.debug.print("Accuracy Check: {s}\n", .{if (accuracy_pass) "PASS" else "FAIL"});
 }

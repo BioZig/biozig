@@ -38,7 +38,7 @@ pub const SelectionSignal = struct {
 pub const SelectionCollection = struct {
     allocator: std.mem.Allocator,
     signals: std.ArrayList(SelectionSignal),
-    
+
     // Quick lookup: locus -> list of signal indices
     locus_idx: std.StringHashMap(std.ArrayList(usize)),
 
@@ -53,7 +53,7 @@ pub const SelectionCollection = struct {
     pub fn deinit(self: *SelectionCollection) void {
         for (self.signals.items) |*s| s.deinit();
         self.signals.deinit(self.allocator);
-        
+
         var iter = self.locus_idx.iterator();
         while (iter.next()) |entry| {
             self.allocator.free(entry.key_ptr.*);

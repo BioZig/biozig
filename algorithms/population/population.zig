@@ -27,7 +27,7 @@ pub fn computeLD(pA: f64, pB: f64, pAB: f64) LDStats {
     }
 
     const d_prime = if (d_max != 0.0) d / d_max else 0.0;
-    
+
     const r_sq_denom = pA * pa * pB * pb;
     const r_squared = if (r_sq_denom > 0.0) (d * d) / r_sq_denom else 0.0;
 
@@ -38,19 +38,19 @@ pub fn computeLD(pA: f64, pB: f64, pAB: f64) LDStats {
     };
 }
 
-/// Represents alleles across a population. 
+/// Represents alleles across a population.
 /// rows = individuals, cols = loci
 pub const PopulationMatrix = struct {
     matrix: []const []const u8, // 0 for ref, 1 for alt
 
     pub fn alleleFrequency(self: PopulationMatrix, locus: usize) f64 {
         if (self.matrix.len == 0) return 0.0;
-        
+
         var alt_count: usize = 0;
         for (self.matrix) |ind| {
             if (ind[locus] == 1) alt_count += 1;
         }
-        
+
         return @as(f64, @floatFromInt(alt_count)) / @as(f64, @floatFromInt(self.matrix.len));
     }
 
@@ -86,7 +86,7 @@ pub const PopulationMatrix = struct {
                 }
             }
         }
-        
+
         const pairs = @as(f64, @floatFromInt(n * (n - 1) / 2));
         const Pi = sum_diffs / pairs;
 
@@ -97,7 +97,7 @@ pub const PopulationMatrix = struct {
         }
 
         const theta = @as(f64, @floatFromInt(S)) / a1;
-        
+
         // Return difference (simplified Tajima's D numerator without variance normalization)
         return Pi - theta;
     }
@@ -137,12 +137,12 @@ test "Population Algorithms - Selection and Epi" {
     const p1 = [_]u8{ 0, 0, 1 };
     const p2 = [_]u8{ 0, 1, 1 };
     const p3 = [_]u8{ 1, 1, 1 };
-    
+
     const mat = [_][]const u8{ &p1, &p2, &p3 };
     const pop = PopulationMatrix{ .matrix = &mat };
 
     try std.testing.expectEqual(@as(f64, 1.0), pop.alleleFrequency(2)); // Locus 2 is all 1s
-    try std.testing.expectEqual(@as(f64, 2.0/3.0), pop.alleleFrequency(1));
+    try std.testing.expectEqual(@as(f64, 2.0 / 3.0), pop.alleleFrequency(1));
 
     const epi = computeEpidemiologicalSummary(1000, 50, 200, 10);
     try std.testing.expectEqual(@as(f64, 0.05), epi.incidence_rate);
@@ -192,19 +192,19 @@ pub const BitpackedHaplotypes = struct {
         const bit_idx = @as(u6, @intCast(ind % 64));
         return @as(u1, @intCast((self.data[word_idx] >> bit_idx) & 1));
     }
-    
+
     pub fn alleleFrequency(self: BitpackedHaplotypes, locus: usize) f64 {
         if (self.num_individuals == 0) return 0.0;
-        
+
         const words_per_locus = (self.num_individuals + 63) / 64;
         const start_idx = locus * words_per_locus;
         const end_idx = start_idx + words_per_locus;
-        
+
         var alt_count: usize = 0;
         for (start_idx..end_idx) |i| {
             alt_count += @popCount(self.data[i]);
         }
-        
+
         return @as(f64, @floatFromInt(alt_count)) / @as(f64, @floatFromInt(self.num_individuals));
     }
 };
@@ -238,7 +238,7 @@ pub const BitpackedGenotypes = struct {
         const words_per_locus = (self.num_individuals + 31) / 32;
         const word_idx = locus * words_per_locus + (ind / 32);
         const shift = @as(u6, @intCast((ind % 32) * 2));
-        
+
         self.data[word_idx] &= ~(@as(u64, 3) << shift);
         self.data[word_idx] |= (@as(u64, val) << shift);
     }
@@ -249,14 +249,14 @@ pub const BitpackedGenotypes = struct {
         const shift = @as(u6, @intCast((ind % 32) * 2));
         return @as(u2, @intCast((self.data[word_idx] >> shift) & 3));
     }
-    
+
     pub fn alleleFrequencyAlt(self: BitpackedGenotypes, locus: usize) f64 {
         if (self.num_individuals == 0) return 0.0;
-        
+
         const words_per_locus = (self.num_individuals + 31) / 32;
         const start_idx = locus * words_per_locus;
         const end_idx = start_idx + words_per_locus;
-        
+
         var alt_allele_count: usize = 0;
         for (start_idx..end_idx) |i| {
             const word = self.data[i];
@@ -264,7 +264,7 @@ pub const BitpackedGenotypes = struct {
             const even = (word >> 1) & 0x5555555555555555;
             alt_allele_count += @popCount(odd) + @popCount(even) * 2;
         }
-        
+
         return @as(f64, @floatFromInt(alt_allele_count)) / @as(f64, @floatFromInt(self.num_individuals * 2));
     }
 };
@@ -272,16 +272,16 @@ pub const BitpackedGenotypes = struct {
 test "BitpackedHaplotypes" {
     var hap = try BitpackedHaplotypes.init(std.testing.allocator, 100, 2);
     defer hap.deinit();
-    
+
     hap.set(0, 0, 1);
     hap.set(0, 63, 1);
     hap.set(0, 64, 1);
-    
+
     try std.testing.expectEqual(@as(u1, 1), hap.get(0, 0));
     try std.testing.expectEqual(@as(u1, 1), hap.get(0, 63));
     try std.testing.expectEqual(@as(u1, 1), hap.get(0, 64));
     try std.testing.expectEqual(@as(u1, 0), hap.get(0, 1));
-    
+
     try std.testing.expectEqual(@as(f64, 0.03), hap.alleleFrequency(0));
     try std.testing.expectEqual(@as(f64, 0.0), hap.alleleFrequency(1));
 }
@@ -289,16 +289,16 @@ test "BitpackedHaplotypes" {
 test "BitpackedGenotypes" {
     var geno = try BitpackedGenotypes.init(std.testing.allocator, 100, 2);
     defer geno.deinit();
-    
+
     geno.set(0, 0, 1); // 1 alt allele
     geno.set(0, 31, 2); // 2 alt alleles
     geno.set(0, 32, 2); // 2 alt alleles
-    
+
     try std.testing.expectEqual(@as(u2, 1), geno.get(0, 0));
     try std.testing.expectEqual(@as(u2, 2), geno.get(0, 31));
     try std.testing.expectEqual(@as(u2, 2), geno.get(0, 32));
     try std.testing.expectEqual(@as(u2, 0), geno.get(0, 1));
-    
+
     // Total alt alleles = 1 + 2 + 2 = 5
     // Total alleles = 100 * 2 = 200
     // Frequency = 5 / 200 = 0.025
@@ -318,20 +318,20 @@ pub fn detectIbsSegments(
     ind_a: usize,
     ind_b: usize,
     min_length: usize,
-    allocator: std.mem.Allocator
+    allocator: std.mem.Allocator,
 ) ![]IbsSegment {
     var segments = std.ArrayList(IbsSegment).empty;
     errdefer segments.deinit(allocator);
 
     var current_start: ?usize = null;
-    
+
     for (0..geno.num_loci) |locus| {
         const a = geno.get(locus, ind_a);
         const b = geno.get(locus, ind_b);
-        
+
         const ibs_0 = (a == 0 and b == 2) or (a == 2 and b == 0);
         const match = !ibs_0;
-        
+
         if (match) {
             if (current_start == null) current_start = locus;
         } else {
@@ -344,14 +344,14 @@ pub fn detectIbsSegments(
             }
         }
     }
-    
+
     if (current_start) |start| {
         const len = geno.num_loci - start;
         if (len >= min_length) {
             try segments.append(allocator, .{ .start_locus = start, .end_locus = geno.num_loci, .length = len });
         }
     }
-    
+
     return try segments.toOwnedSlice(allocator);
 }
 
@@ -365,24 +365,24 @@ pub fn liStephensViterbi(
 ) ![]usize {
     const num_loci = obs.len;
     const num_refs = refs.num_individuals;
-    
+
     var dp = try allocator.alloc(f64, num_refs);
     defer allocator.free(dp);
-    
+
     var new_dp = try allocator.alloc(f64, num_refs);
     defer allocator.free(new_dp);
-    
+
     var ptrs = try allocator.alloc([]usize, num_loci);
     defer {
         for (ptrs) |p| allocator.free(p);
         allocator.free(ptrs);
     }
-    
+
     const log_mut = @log(mut_rate);
     const log_no_mut = @log(1.0 - mut_rate);
     const log_recomb = @log(recomb_rate / @as(f64, @floatFromInt(num_refs)));
     const log_no_recomb = @log(1.0 - recomb_rate);
-    
+
     for (0..num_refs) |r| {
         dp[r] = -@log(@as(f64, @floatFromInt(num_refs)));
         if (obs[0] == refs.get(0, r)) {
@@ -393,10 +393,10 @@ pub fn liStephensViterbi(
     }
     ptrs[0] = try allocator.alloc(usize, num_refs);
     @memset(ptrs[0], 0);
-    
+
     for (1..num_loci) |l| {
         ptrs[l] = try allocator.alloc(usize, num_refs);
-        
+
         var max_dp: f64 = -std.math.inf(f64);
         var max_r: usize = 0;
         for (dp, 0..) |v, r| {
@@ -405,11 +405,11 @@ pub fn liStephensViterbi(
                 max_r = r;
             }
         }
-        
+
         for (0..num_refs) |r| {
             const no_recomb_val = dp[r] + log_no_recomb;
             const recomb_val = max_dp + log_recomb;
-            
+
             if (no_recomb_val >= recomb_val) {
                 new_dp[r] = no_recomb_val;
                 ptrs[l][r] = r;
@@ -417,17 +417,17 @@ pub fn liStephensViterbi(
                 new_dp[r] = recomb_val;
                 ptrs[l][r] = max_r;
             }
-            
+
             if (obs[l] == refs.get(l, r)) {
                 new_dp[r] += log_no_mut;
             } else {
                 new_dp[r] += log_mut;
             }
         }
-        
+
         @memcpy(dp, new_dp);
     }
-    
+
     var best_path = try allocator.alloc(usize, num_loci);
     var max_dp: f64 = -std.math.inf(f64);
     var best_r: usize = 0;
@@ -437,7 +437,7 @@ pub fn liStephensViterbi(
             best_r = r;
         }
     }
-    
+
     best_path[num_loci - 1] = best_r;
     var curr_r = best_r;
     var l: usize = num_loci - 1;
@@ -446,7 +446,7 @@ pub fn liStephensViterbi(
         l -= 1;
         best_path[l] = curr_r;
     }
-    
+
     return best_path;
 }
 
@@ -460,27 +460,27 @@ pub fn estimateAdmixtureEM(
 ) ![]f64 {
     const K = pop_freqs.len;
     const L = genotype.len;
-    
+
     var q = try allocator.alloc(f64, K);
     for (0..K) |k| q[k] = 1.0 / @as(f64, @floatFromInt(K));
-    
+
     var new_q = try allocator.alloc(f64, K);
     defer allocator.free(new_q);
-    
+
     for (0..max_iter) |_| {
         @memset(new_q, 0.0);
-        
+
         for (0..L) |l| {
             const g = @as(f64, @floatFromInt(genotype[l]));
             if (g > 2.0) continue; // skip missing
-            
+
             var denom_alt: f64 = 0.0;
             var denom_ref: f64 = 0.0;
             for (0..K) |k| {
                 denom_alt += q[k] * pop_freqs[k][l];
                 denom_ref += q[k] * (1.0 - pop_freqs[k][l]);
             }
-            
+
             for (0..K) |k| {
                 if (denom_alt > 0) {
                     new_q[k] += g * (q[k] * pop_freqs[k][l]) / denom_alt;
@@ -490,23 +490,23 @@ pub fn estimateAdmixtureEM(
                 }
             }
         }
-        
+
         var sum_q: f64 = 0.0;
         for (0..K) |k| {
             new_q[k] /= @as(f64, @floatFromInt(2 * L));
             sum_q += new_q[k];
         }
-        
+
         var diff: f64 = 0.0;
         for (0..K) |k| {
             new_q[k] /= sum_q;
             diff += @abs(q[k] - new_q[k]);
             q[k] = new_q[k];
         }
-        
+
         if (diff < tolerance) break;
     }
-    
+
     return q;
 }
 
@@ -519,10 +519,10 @@ pub const GwasResult = struct {
 
 pub fn gwasLmmWaldTest(x: []const f64, y: []const f64, v_inv: []const f64) GwasResult {
     const n = x.len;
-    
+
     var xt_vinv_x: f64 = 0.0;
     var xt_vinv_y: f64 = 0.0;
-    
+
     for (0..n) |i| {
         var vinv_x_i: f64 = 0.0;
         var vinv_y_i: f64 = 0.0;
@@ -534,11 +534,11 @@ pub fn gwasLmmWaldTest(x: []const f64, y: []const f64, v_inv: []const f64) GwasR
         xt_vinv_x += x[i] * vinv_x_i;
         xt_vinv_y += x[i] * vinv_y_i;
     }
-    
+
     const var_beta = if (xt_vinv_x > 0.0) 1.0 / xt_vinv_x else 0.0;
     const beta = if (xt_vinv_x > 0.0) xt_vinv_y / xt_vinv_x else 0.0;
     const chi2 = if (var_beta > 0.0) (beta * beta) / var_beta else 0.0;
-    
+
     return .{ .beta = beta, .se = @sqrt(var_beta), .chi2 = chi2 };
 }
 
@@ -553,9 +553,9 @@ pub fn hweExactTest(obs_aa: usize, obs_ab: usize, obs_bb: usize) f64 {
     const ln_2n_fact = lnFact(2 * n);
     const ln_na_fact = lnFact(n_a);
     const ln_nb_fact = lnFact(n_b);
-    
+
     const const_term = ln_n_fact - ln_2n_fact + ln_na_fact + ln_nb_fact;
-    
+
     const calcLogProb = struct {
         fn call(aa: usize, ab: usize, bb: usize, c_term: f64, l2: f64) f64 {
             return c_term - lnFact(aa) - lnFact(ab) - lnFact(bb) + @as(f64, @floatFromInt(ab)) * l2;
@@ -563,23 +563,23 @@ pub fn hweExactTest(obs_aa: usize, obs_ab: usize, obs_bb: usize) f64 {
     }.call;
 
     const obs_log_prob = calcLogProb(obs_aa, obs_ab, obs_bb, const_term, ln_2);
-    
+
     var p_value: f64 = 0.0;
-    
+
     const min_ab = n_a % 2;
     const max_ab = @min(n_a, n_b);
-    
+
     var ab = min_ab;
     while (ab <= max_ab) : (ab += 2) {
         const aa = (n_a - ab) / 2;
         const bb = (n_b - ab) / 2;
-        
+
         const log_prob = calcLogProb(aa, ab, bb, const_term, ln_2);
         if (log_prob <= obs_log_prob + 1e-9) {
             p_value += @exp(log_prob);
         }
     }
-    
+
     return @min(1.0, p_value);
 }
 
@@ -609,31 +609,31 @@ pub fn computeFStatistics(subpop_allele_freqs: []const f64, subpop_obs_hets: []c
     var ht: f64 = 0.0;
     var hs: f64 = 0.0;
     var ho: f64 = 0.0;
-    
+
     var mean_p: f64 = 0.0;
 
     for (subpop_allele_freqs, subpop_obs_hets, subpop_sizes) |p, obs_het, s| {
         const weight = @as(f64, @floatFromInt(s)) / total_f;
         mean_p += p * weight;
-        
+
         const exp_het = 2.0 * p * (1.0 - p);
         hs += exp_het * weight;
         ho += obs_het * weight;
     }
-    
+
     ht = 2.0 * mean_p * (1.0 - mean_p);
-    
+
     const fis = if (hs > 0) (hs - ho) / hs else 0.0;
     const fst = if (ht > 0) (ht - hs) / ht else 0.0;
     const fit = if (ht > 0) (ht - ho) / ht else 0.0;
-    
+
     return .{ .fis = fis, .fst = fst, .fit = fit };
 }
 
 test "detectIbsSegments" {
     var geno = try BitpackedGenotypes.init(std.testing.allocator, 2, 10);
     defer geno.deinit();
-    
+
     // Set some alleles
     for (0..10) |locus| {
         geno.set(locus, 0, 1);
@@ -642,15 +642,15 @@ test "detectIbsSegments" {
     // Locus 5 breaks IBS=1 match because ind 0 has 0, ind 1 has 2.
     geno.set(5, 0, 0);
     geno.set(5, 1, 2);
-    
+
     const segments = try detectIbsSegments(geno, 0, 1, 2, std.testing.allocator);
     defer std.testing.allocator.free(segments);
-    
+
     try std.testing.expectEqual(@as(usize, 2), segments.len);
     try std.testing.expectEqual(@as(usize, 0), segments[0].start_locus);
     try std.testing.expectEqual(@as(usize, 5), segments[0].end_locus);
     try std.testing.expectEqual(@as(usize, 5), segments[0].length);
-    
+
     try std.testing.expectEqual(@as(usize, 6), segments[1].start_locus);
     try std.testing.expectEqual(@as(usize, 10), segments[1].end_locus);
     try std.testing.expectEqual(@as(usize, 4), segments[1].length);
@@ -672,18 +672,18 @@ test "computeFStatistics" {
 test "liStephensViterbi" {
     var refs = try BitpackedHaplotypes.init(std.testing.allocator, 2, 5);
     defer refs.deinit();
-    
+
     // ref 0: 0,0,0,0,0
     // ref 1: 1,1,1,1,1
     for (0..5) |l| {
         refs.set(l, 0, 0);
         refs.set(l, 1, 1);
     }
-    
-    const obs = [_]u1{0, 0, 1, 1, 1}; // switches from ref 0 to ref 1
+
+    const obs = [_]u1{ 0, 0, 1, 1, 1 }; // switches from ref 0 to ref 1
     const path = try liStephensViterbi(std.testing.allocator, &obs, refs, 0.1, 0.01);
     defer std.testing.allocator.free(path);
-    
+
     try std.testing.expectEqual(@as(usize, 5), path.len);
     try std.testing.expectEqual(@as(usize, 0), path[0]);
     try std.testing.expectEqual(@as(usize, 1), path[4]);
@@ -691,15 +691,15 @@ test "liStephensViterbi" {
 
 test "estimateAdmixtureEM" {
     const genotype = [_]u2{ 0, 1, 2, 2 }; // individual's genotype
-    
+
     const pop1_freqs = [_]f64{ 0.1, 0.5, 0.9, 0.9 };
     const pop2_freqs = [_]f64{ 0.9, 0.5, 0.1, 0.1 };
-    
+
     const pop_freqs = [_][]const f64{ &pop1_freqs, &pop2_freqs };
-    
+
     const q = try estimateAdmixtureEM(std.testing.allocator, &genotype, &pop_freqs, 10, 1e-4);
     defer std.testing.allocator.free(q);
-    
+
     // individual matches pop1 perfectly
     try std.testing.expect(q[0] > 0.9);
 }
@@ -712,7 +712,7 @@ test "gwasLmmWaldTest" {
         0.0, 1.0, 0.0,
         0.0, 0.0, 1.0,
     };
-    
+
     const res = gwasLmmWaldTest(&x, &y, &v_inv);
     try std.testing.expect(res.beta > 0.0);
     try std.testing.expect(res.chi2 > 0.0);

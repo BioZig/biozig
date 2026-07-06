@@ -45,13 +45,13 @@ export fn biozig_parse_fasta(file_path: [*c]const u8) callconv(.c) CBiozigParseR
     var res = CBiozigParseResult{ .num_records = 0, .error_code = 0 };
     const alloc = getAllocator();
     const path = std.mem.span(file_path);
-    
+
     var mmap = core.io.mmap.MMapReader.init(alloc, path) catch |err| {
         res.error_code = @intFromError(err);
         return res;
     };
     defer mmap.deinit();
-    
+
     var iter = genomics.fasta.fastaIterator(mmap.data);
     while (true) {
         const record_opt = iter.next() catch |err| {
@@ -69,13 +69,13 @@ export fn biozig_parse_fastq(file_path: [*c]const u8) callconv(.c) CBiozigParseR
     var res = CBiozigParseResult{ .num_records = 0, .error_code = 0 };
     const alloc = getAllocator();
     const path = std.mem.span(file_path);
-    
+
     var mmap = core.io.mmap.MMapReader.init(alloc, path) catch |err| {
         res.error_code = @intFromError(err);
         return res;
     };
     defer mmap.deinit();
-    
+
     var iter = genomics.fastq.fastqIterator(mmap.data);
     while (true) {
         const record_opt = iter.next() catch |err| {
@@ -93,13 +93,13 @@ export fn biozig_parse_sam(file_path: [*c]const u8) callconv(.c) CBiozigParseRes
     var res = CBiozigParseResult{ .num_records = 0, .error_code = 0 };
     const alloc = getAllocator();
     const path = std.mem.span(file_path);
-    
+
     var mmap = core.io.mmap.MMapReader.init(alloc, path) catch |err| {
         res.error_code = @intFromError(err);
         return res;
     };
     defer mmap.deinit();
-    
+
     var reader = BufferReader{ .buffer = mmap.data };
     var iter = genomics.sam.samIterator(alloc, &reader);
     defer iter.deinit();
@@ -123,13 +123,13 @@ export fn biozig_parse_bam(file_path: [*c]const u8) callconv(.c) CBiozigParseRes
     var res = CBiozigParseResult{ .num_records = 0, .error_code = 0 };
     const alloc = getAllocator();
     const path = std.mem.span(file_path);
-    
+
     var mmap = core.io.mmap.MMapReader.init(alloc, path) catch |err| {
         res.error_code = @intFromError(err);
         return res;
     };
     defer mmap.deinit();
-    
+
     var reader = BufferReader{ .buffer = mmap.data };
     var iter = genomics.bam.bamIterator(alloc, &reader);
     defer iter.deinit();
@@ -153,13 +153,13 @@ export fn biozig_parse_cram(file_path: [*c]const u8) callconv(.c) CBiozigParseRe
     var res = CBiozigParseResult{ .num_records = 0, .error_code = 0 };
     const alloc = getAllocator();
     const path = std.mem.span(file_path);
-    
+
     var mmap = core.io.mmap.MMapReader.init(alloc, path) catch |err| {
         res.error_code = @intFromError(err);
         return res;
     };
     defer mmap.deinit();
-    
+
     var reader = BufferReader{ .buffer = mmap.data };
     var parser = genomics.cram.CramParser.init(alloc);
     var records = parser.parseStream(&reader) catch |err| {
@@ -176,13 +176,13 @@ export fn biozig_parse_vcf(file_path: [*c]const u8) callconv(.c) CBiozigParseRes
     var res = CBiozigParseResult{ .num_records = 0, .error_code = 0 };
     const alloc = getAllocator();
     const path = std.mem.span(file_path);
-    
+
     var mmap = core.io.mmap.MMapReader.init(alloc, path) catch |err| {
         res.error_code = @intFromError(err);
         return res;
     };
     defer mmap.deinit();
-    
+
     var iter = genomics.vcf.vcfIterator(mmap.data);
     while (true) {
         const record_opt = iter.next() catch |err| {
@@ -200,13 +200,13 @@ export fn biozig_parse_bcf(file_path: [*c]const u8) callconv(.c) CBiozigParseRes
     var res = CBiozigParseResult{ .num_records = 0, .error_code = 0 };
     const alloc = getAllocator();
     const path = std.mem.span(file_path);
-    
+
     var mmap = core.io.mmap.MMapReader.init(alloc, path) catch |err| {
         res.error_code = @intFromError(err);
         return res;
     };
     defer mmap.deinit();
-    
+
     var reader = BufferReader{ .buffer = mmap.data };
     var parser = genomics.bcf.BcfParser.init(alloc);
     var records = parser.parseStream(&reader) catch |err| {
@@ -223,13 +223,13 @@ export fn biozig_parse_bed(file_path: [*c]const u8) callconv(.c) CBiozigParseRes
     var res = CBiozigParseResult{ .num_records = 0, .error_code = 0 };
     const alloc = getAllocator();
     const path = std.mem.span(file_path);
-    
+
     var mmap = core.io.mmap.MMapReader.init(alloc, path) catch |err| {
         res.error_code = @intFromError(err);
         return res;
     };
     defer mmap.deinit();
-    
+
     var iter = genomics.bed.bedIterator(mmap.data);
     while (true) {
         const record_opt = iter.next() catch |err| {
@@ -247,13 +247,13 @@ export fn biozig_parse_gff3(file_path: [*c]const u8) callconv(.c) CBiozigParseRe
     var res = CBiozigParseResult{ .num_records = 0, .error_code = 0 };
     const alloc = getAllocator();
     const path = std.mem.span(file_path);
-    
+
     var mmap = core.io.mmap.MMapReader.init(alloc, path) catch |err| {
         res.error_code = @intFromError(err);
         return res;
     };
     defer mmap.deinit();
-    
+
     var reader = BufferReader{ .buffer = mmap.data };
     var iter = genomics.gff3.gff3Iterator(alloc, &reader);
     defer iter.deinit();
@@ -277,13 +277,13 @@ export fn biozig_parse_gtf(file_path: [*c]const u8) callconv(.c) CBiozigParseRes
     var res = CBiozigParseResult{ .num_records = 0, .error_code = 0 };
     const alloc = getAllocator();
     const path = std.mem.span(file_path);
-    
+
     var mmap = core.io.mmap.MMapReader.init(alloc, path) catch |err| {
         res.error_code = @intFromError(err);
         return res;
     };
     defer mmap.deinit();
-    
+
     var reader = BufferReader{ .buffer = mmap.data };
     var iter = genomics.gtf.gtfIterator(alloc, &reader);
     defer iter.deinit();
@@ -307,19 +307,19 @@ export fn biozig_parse_twobit(file_path: [*c]const u8) callconv(.c) CBiozigParse
     var res = CBiozigParseResult{ .num_records = 0, .error_code = 0 };
     const alloc = getAllocator();
     const path = std.mem.span(file_path);
-    
+
     var mmap = core.io.mmap.MMapReader.init(alloc, path) catch |err| {
         res.error_code = @intFromError(err);
         return res;
     };
     defer mmap.deinit();
-    
+
     var parser = genomics.twobit.TwoBitFile.init(alloc, mmap.data) catch |err| {
         res.error_code = @intFromError(err);
         return res;
     };
     defer parser.deinit();
-    
+
     res.num_records = @intCast(parser.sequence_count);
     return res;
 }

@@ -44,7 +44,7 @@ pub const Node = struct {
         const id = try serialization.deserialize(reader, []const u8, allocator);
         var node = try Node.init(allocator, id);
         allocator.free(id); // init dupes it
-        
+
         const meta_count = try serialization.deserialize(reader, u64, allocator);
         var i: u64 = 0;
         while (i < meta_count) : (i += 1) {
@@ -85,7 +85,7 @@ pub const Network = struct {
     allocator: std.mem.Allocator,
     nodes: std.ArrayList(Node),
     edges: std.ArrayList(Edge),
-    
+
     pub fn init(allocator: std.mem.Allocator) Network {
         return .{
             .allocator = allocator,
@@ -108,7 +108,7 @@ pub const Network = struct {
 
     pub fn addEdge(self: *Network, source: usize, target: usize, weight: f64, directed: bool) !void {
         std.debug.assert(source < self.nodes.items.len and target < self.nodes.items.len);
-        
+
         const edge = Edge{ .source_idx = source, .target_idx = target, .weight = weight, .directed = directed };
         try self.edges.append(self.allocator, edge);
     }
@@ -153,7 +153,7 @@ pub const Network = struct {
 pub const CompiledNetwork = struct {
     allocator: std.mem.Allocator,
     num_nodes: usize,
-    
+
     // CSR for out-edges
     out_offsets: []usize,
     out_edges: []usize,
@@ -166,7 +166,7 @@ pub const CompiledNetwork = struct {
 
     pub fn init(allocator: std.mem.Allocator, net: Network) !CompiledNetwork {
         const n = net.nodes.items.len;
-        
+
         var out_deg = try allocator.alloc(usize, n);
         defer allocator.free(out_deg);
         @memset(out_deg, 0);

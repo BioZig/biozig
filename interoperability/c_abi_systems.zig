@@ -167,10 +167,10 @@ export fn biozig_ingestion_systems_gpml_parse(filepath_c: [*c]const u8) callconv
     defer parser.deinit();
 
     const res = parser.parse(mmap_reader.data) catch return err_res;
-    
+
     const net_ptr = alloc.create(systems.network.Network) catch return err_res;
     net_ptr.* = res.net;
-    
+
     const path_ptr = alloc.create(systems.pathway.Pathway) catch return err_res;
     path_ptr.* = res.path;
 
@@ -189,10 +189,10 @@ export fn biozig_ingestion_systems_biopax_parse(filepath_c: [*c]const u8) callco
     var parser = ingestion.systems.biopax.BiopaxParser.init(alloc);
 
     const res = parser.parse(mmap_reader.data) catch return err_res;
-    
+
     const net_ptr = alloc.create(systems.network.Network) catch return err_res;
     net_ptr.* = res.net;
-    
+
     const path_ptr = alloc.create(systems.pathway.Pathway) catch return err_res;
     path_ptr.* = res.path;
 
@@ -211,10 +211,10 @@ export fn biozig_ingestion_systems_sbml_parse(filepath_c: [*c]const u8) callconv
     var parser = ingestion.systems.sbml.SbmlParser.init(alloc);
 
     const res = parser.parse(mmap_reader.data) catch return err_res;
-    
+
     const net_ptr = alloc.create(systems.network.Network) catch return err_res;
     net_ptr.* = res.net;
-    
+
     const path_ptr = alloc.create(systems.pathway.Pathway) catch return err_res;
     path_ptr.* = res.path;
 

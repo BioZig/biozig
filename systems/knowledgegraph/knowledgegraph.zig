@@ -86,10 +86,10 @@ pub const KnowledgeGraph = struct {
     allocator: std.mem.Allocator,
     entities: std.ArrayList(Entity),
     relationships: std.ArrayList(Relationship),
-    
+
     // Quick lookup: entity_id -> node index
     id_to_idx: std.StringHashMap(usize),
-    
+
     // Adjacency list: node_idx -> list of relationship indices
     adj: std.AutoHashMap(usize, std.ArrayList(usize)),
 
@@ -107,7 +107,7 @@ pub const KnowledgeGraph = struct {
         for (self.entities.items) |*e| e.deinit();
         self.entities.deinit(self.allocator);
         self.relationships.deinit(self.allocator);
-        
+
         var iter = self.id_to_idx.iterator();
         while (iter.next()) |entry| {
             self.allocator.free(entry.key_ptr.*);
@@ -123,7 +123,7 @@ pub const KnowledgeGraph = struct {
 
     pub fn addEntity(self: *KnowledgeGraph, id: []const u8, name: []const u8, entity_type: EntityType) !usize {
         if (self.id_to_idx.get(id)) |idx| return idx;
-        
+
         const idx = self.entities.items.len;
         const entity = try Entity.init(self.allocator, id, name, entity_type);
         try self.entities.append(self.allocator, entity);
@@ -134,7 +134,7 @@ pub const KnowledgeGraph = struct {
     pub fn addRelationship(self: *KnowledgeGraph, source_id: []const u8, target_id: []const u8, rel_type: RelationshipType, weight: f64) !void {
         const s_idx = self.id_to_idx.get(source_id) orelse return error.EntityNotFound;
         const t_idx = self.id_to_idx.get(target_id) orelse return error.EntityNotFound;
-        
+
         const rel_idx = self.relationships.items.len;
         try self.relationships.append(self.allocator, .{
             .source_idx = s_idx,
@@ -147,7 +147,7 @@ pub const KnowledgeGraph = struct {
         const s_entry = try self.adj.getOrPut(s_idx);
         if (!s_entry.found_existing) s_entry.value_ptr.* = .empty;
         try s_entry.value_ptr.append(self.allocator, rel_idx);
-        
+
         // Add to target adjacency (undirected traversal possible)
         const t_entry = try self.adj.getOrPut(t_idx);
         if (!t_entry.found_existing) t_entry.value_ptr.* = .empty;

@@ -36,7 +36,7 @@ pub fn median(slice: []const f64, allocator: std.mem.Allocator) !f64 {
     return try numerics.quantile(slice, 0.5, allocator);
 }
 
-/// Computes the mode of a float slice. 
+/// Computes the mode of a float slice.
 /// For floats, this returns the most frequent value.
 pub fn mode(slice: []const f64, allocator: std.mem.Allocator) !?f64 {
     if (slice.len == 0) return null;
@@ -127,7 +127,7 @@ test "median, mode, stdDev, cv, mad, quartiles" {
     try std.testing.expectEqual(@as(f64, 4.0), (try mode(&data, alloc)).?);
     try std.testing.expectApproxEqAbs(@as(f64, 2.138089935275812), stdDev(&data), 1e-10);
     try std.testing.expectApproxEqAbs(@as(f64, 0.4276179870551624), coefficientOfVariation(&data), 1e-10);
-    
+
     // MAD: median(|2-4.5|, |4-4.5|, |4-4.5|, |4-4.5|, |5-4.5|, |5-4.5|, |7-4.5|, |9-4.5|)
     // = median(2.5, 0.5, 0.5, 0.5, 0.5, 0.5, 2.5, 4.5)
     // Sorted: 0.5, 0.5, 0.5, 0.5, 0.5, 2.5, 2.5, 4.5

@@ -19,7 +19,7 @@ export fn biozig_analytics_pca(
     const arena_ptr = c_api.c_arena orelse return .{ .data = null, .rows = 0, .cols = 0 };
     const alloc = arena_ptr.allocator();
     const data_slice = data[0 .. rows * cols];
-    
+
     if (analytics.dimensionality.pca.pca(alloc, data_slice, rows, cols, n_components, threads)) |res| {
         return .{
             .data = res.ptr,
@@ -40,7 +40,7 @@ export fn biozig_analytics_tsne(
     const arena_ptr = c_api.c_arena orelse return .{ .data = null, .rows = 0, .cols = 0 };
     const alloc = arena_ptr.allocator();
     const data_slice = data[0 .. rows * cols];
-    
+
     if (analytics.dimensionality.tsne.tsne(alloc, data_slice, rows, cols, threads)) |res| {
         return .{
             .data = res.ptr,
@@ -61,7 +61,7 @@ export fn biozig_analytics_umap(
     const arena_ptr = c_api.c_arena orelse return .{ .data = null, .rows = 0, .cols = 0 };
     const alloc = arena_ptr.allocator();
     const data_slice = data[0 .. rows * cols];
-    
+
     if (analytics.dimensionality.umap.umap(alloc, data_slice, rows, cols, threads)) |res| {
         return .{
             .data = res.ptr,
@@ -93,7 +93,7 @@ export fn biozig_analytics_kmeans(
     const arena_ptr = c_api.c_arena orelse return .{ .centroids = null, .labels = null, .k = 0, .dim = 0, .num_points = 0 };
     const alloc = arena_ptr.allocator();
     const data_slice = data[0 .. num_points * dim];
-    
+
     if (analytics.clustering.kmeans.kmeans(alloc, data_slice, dim, k, max_iter, threads)) |res| {
         return .{
             .centroids = res.centroids.ptr,
@@ -122,7 +122,7 @@ export fn biozig_analytics_hierarchical(
     const arena_ptr = c_api.c_arena orelse return .{ .labels = null, .num_points = 0 };
     const alloc = arena_ptr.allocator();
     const data_slice = data[0 .. num_points * dim];
-    
+
     if (analytics.clustering.hierarchical.agglomerative(alloc, data_slice, dim, k, threads)) |res| {
         return .{
             .labels = res.labels.ptr,
@@ -149,7 +149,7 @@ export fn biozig_analytics_dbscan(
     const arena_ptr = c_api.c_arena orelse return .{ .labels = null, .num_points = 0 };
     const alloc = arena_ptr.allocator();
     const data_slice = data[0 .. num_points * dim];
-    
+
     if (analytics.clustering.dbscan.dbscan(alloc, data_slice, dim, eps, min_pts, threads)) |res| {
         return .{
             .labels = res.labels.ptr,
@@ -178,7 +178,7 @@ export fn biozig_analytics_svd(
     const arena_ptr = c_api.c_arena orelse return .{ .u = null, .s = null, .vt = null, .rows = 0, .cols = 0 };
     const alloc = arena_ptr.allocator();
     const data_slice = data[0 .. rows * cols];
-    
+
     if (analytics.matrix.svd.computeSvd(alloc, data_slice, rows, cols, threads)) |res| {
         return .{
             .u = res.u.ptr,
@@ -209,7 +209,7 @@ export fn biozig_analytics_nmf(
 ) callconv(.c) CBiozigNmfResult {
     const arena_ptr = c_api.c_arena orelse return .{ .w = null, .h = null, .rows = 0, .k = 0, .cols = 0 };
     const alloc = arena_ptr.allocator();
-    
+
     const V = analytics.matrix.factorization.Matrix.init(alloc, rows, cols) catch return .{ .w = null, .h = null, .rows = 0, .k = 0, .cols = 0 };
     @memcpy(V.data, data[0 .. rows * cols]);
 
@@ -233,7 +233,7 @@ export fn biozig_analytics_mds(
 ) callconv(.c) CBiozigDimRedResult {
     const arena_ptr = c_api.c_arena orelse return .{ .data = null, .rows = 0, .cols = 0 };
     const alloc = arena_ptr.allocator();
-    
+
     const D = analytics.matrix.factorization.Matrix.init(alloc, n, n) catch return .{ .data = null, .rows = 0, .cols = 0 };
     @memcpy(D.data, data[0 .. n * n]);
 
@@ -256,7 +256,7 @@ pub const CBiozigOpaqueGraph = extern struct {
 export fn biozig_analytics_node2vec_init(num_nodes: u32) callconv(.c) CBiozigOpaqueGraph {
     const arena_ptr = c_api.c_arena orelse return .{ .ptr = undefined };
     const alloc = arena_ptr.allocator();
-    
+
     if (alloc.create(analytics.graphml.node2vec.Graph)) |g_ptr| {
         if (analytics.graphml.node2vec.Graph.init(alloc, num_nodes)) |g| {
             g_ptr.* = g;

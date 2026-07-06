@@ -40,10 +40,10 @@ pub const Term = struct {
 pub const Ontology = struct {
     allocator: std.mem.Allocator,
     terms: std.ArrayList(Term),
-    
+
     // Quick lookups
     id_to_idx: std.StringHashMap(usize),
-    
+
     // Adjacency lists (idx -> list of idx)
     parents: std.AutoHashMap(usize, std.ArrayList(usize)),
     children: std.AutoHashMap(usize, std.ArrayList(usize)),
@@ -61,7 +61,7 @@ pub const Ontology = struct {
     pub fn deinit(self: *Ontology) void {
         for (self.terms.items) |*t| t.deinit();
         self.terms.deinit(self.allocator);
-        
+
         var iter = self.id_to_idx.iterator();
         while (iter.next()) |entry| {
             self.allocator.free(entry.key_ptr.*);
@@ -83,7 +83,7 @@ pub const Ontology = struct {
 
     pub fn addTerm(self: *Ontology, id: []const u8, name: []const u8) !usize {
         if (self.id_to_idx.get(id)) |idx| return idx;
-        
+
         const idx = self.terms.items.len;
         const term = try Term.init(self.allocator, id, name);
         try self.terms.append(self.allocator, term);

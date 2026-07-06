@@ -30,7 +30,7 @@ test "DeBruijnGraph: sequence equal to k" {
     defer graph.deinit();
 
     try graph.addSequence("ACG");
-    
+
     const ac_edges = graph.edges.get("AC").?;
     try testing.expectEqual(@as(usize, 1), ac_edges.items.len);
     try testing.expectEqualStrings("CG", ac_edges.items[0]);
@@ -43,11 +43,11 @@ test "DeBruijnGraph: multiple additions" {
 
     try graph.addSequence("AAT");
     try graph.addSequence("ATG");
-    
+
     const aa_edges = graph.edges.get("AA").?;
     try testing.expectEqual(@as(usize, 1), aa_edges.items.len);
     try testing.expectEqualStrings("AT", aa_edges.items[0]);
-    
+
     const at_edges = graph.edges.get("AT").?;
     try testing.expectEqual(@as(usize, 1), at_edges.items.len);
     try testing.expectEqualStrings("TG", at_edges.items[0]);
@@ -59,7 +59,7 @@ test "DeBruijnGraph: loop" {
     defer graph.deinit();
 
     try graph.addSequence("AAAA");
-    
+
     const a_edges = graph.edges.get("A").?;
     try testing.expectEqual(@as(usize, 3), a_edges.items.len);
     for (a_edges.items) |item| {

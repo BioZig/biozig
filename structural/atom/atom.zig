@@ -13,12 +13,30 @@ pub const Element = union(enum) {
 
     pub fn toString(self: Element, dest: *[2]u8) []const u8 {
         switch (self) {
-            .H => { dest[0] = 'H'; return dest[0..1]; },
-            .C => { dest[0] = 'C'; return dest[0..1]; },
-            .N => { dest[0] = 'N'; return dest[0..1]; },
-            .O => { dest[0] = 'O'; return dest[0..1]; },
-            .P => { dest[0] = 'P'; return dest[0..1]; },
-            .S => { dest[0] = 'S'; return dest[0..1]; },
+            .H => {
+                dest[0] = 'H';
+                return dest[0..1];
+            },
+            .C => {
+                dest[0] = 'C';
+                return dest[0..1];
+            },
+            .N => {
+                dest[0] = 'N';
+                return dest[0..1];
+            },
+            .O => {
+                dest[0] = 'O';
+                return dest[0..1];
+            },
+            .P => {
+                dest[0] = 'P';
+                return dest[0..1];
+            },
+            .S => {
+                dest[0] = 'S';
+                return dest[0..1];
+            },
             .generic => |bytes| {
                 dest[0] = bytes[0];
                 dest[1] = bytes[1];
@@ -75,9 +93,9 @@ pub const Atom = struct {
     pub fn transform(self: *Atom, rotation: [3][3]f64, translation: Vec3) void {
         const p = self.pos;
         self.pos = Vec3.init(
-            rotation[0][0]*p.x + rotation[0][1]*p.y + rotation[0][2]*p.z + translation.x,
-            rotation[1][0]*p.x + rotation[1][1]*p.y + rotation[1][2]*p.z + translation.y,
-            rotation[2][0]*p.x + rotation[2][1]*p.y + rotation[2][2]*p.z + translation.z,
+            rotation[0][0] * p.x + rotation[0][1] * p.y + rotation[0][2] * p.z + translation.x,
+            rotation[1][0] * p.x + rotation[1][1] * p.y + rotation[1][2] * p.z + translation.y,
+            rotation[2][0] * p.x + rotation[2][1] * p.y + rotation[2][2] * p.z + translation.z,
         );
     }
 

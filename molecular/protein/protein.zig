@@ -30,7 +30,7 @@ pub const residue_weights = struct {
     pub const V: f64 = 99.1326;
     pub const W: f64 = 186.2132;
     pub const Y: f64 = 163.1760;
-    pub const X: f64 = 110.0;   // Average residue weight of canonical AAs
+    pub const X: f64 = 110.0; // Average residue weight of canonical AAs
     pub const Gap: f64 = 0.0;
     pub const Stop: f64 = 0.0;
 };
@@ -216,7 +216,7 @@ pub const ProteinView = struct {
             // Write element to temporary u16 shifted by bit_idx, then merge
             const temp = @as(u16, @intFromEnum(n)) << @as(u4, @truncate(bit_idx));
             byte_val |= @as(u8, @truncate(temp & 0xFF));
-            
+
             // If the next element will cross or if this is the last element, flush
             const next_bit_idx = (i + 1) * 5 % 8;
             if (next_bit_idx < bit_idx or i == self.len - 1) {
@@ -254,13 +254,13 @@ pub const ProteinView = struct {
                 try reader.readSliceAll(&b);
                 next_byte_val = b[0];
             }
-            
+
             var val = @as(u16, byte_val);
             if (bit_idx + 5 > 8) {
                 val |= @as(u16, next_byte_val) << 8;
                 byte_val = next_byte_val;
             }
-            
+
             const n_val = @as(u5, @truncate((val >> @as(u4, @truncate(bit_idx))) & 0x1F));
             p.set(i, n_val);
         }

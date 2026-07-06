@@ -15,7 +15,7 @@ test "SingleCell - Metadata insertion and overwrite" {
     const alloc = testing.allocator;
     var cell = try singlecell.Cell.init(alloc, "CELL_2", 0);
     defer cell.deinit();
-    
+
     // Note: If addMetadata isn't implemented, we skip mutating it, but we can access it
     try testing.expectEqual(@as(usize, 0), cell.metadata.count());
 }
@@ -24,12 +24,12 @@ test "CellCollection - Adding multiple cells" {
     const alloc = testing.allocator;
     var coll = singlecell.CellCollection.init(alloc);
     defer coll.deinit();
-    
+
     const cell1 = try singlecell.Cell.init(alloc, "C1", 10);
     const cell2 = try singlecell.Cell.init(alloc, "C2", 10);
     try coll.addCell(cell1);
     try coll.addCell(cell2);
-    
+
     try testing.expectEqual(@as(usize, 2), coll.cells.items.len);
 }
 

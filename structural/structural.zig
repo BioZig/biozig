@@ -105,8 +105,8 @@ test "Geometry: Kabsch superposition" {
     const sin_t = @sin(theta);
     const R = [3][3]f64{
         .{ cos_t, -sin_t, 0.0 },
-        .{ sin_t,  cos_t, 0.0 },
-        .{ 0.0,    0.0,   1.0 },
+        .{ sin_t, cos_t, 0.0 },
+        .{ 0.0, 0.0, 1.0 },
     };
     const t = Vec3.init(10.0, -5.0, 2.5);
 
@@ -120,9 +120,9 @@ test "Geometry: Kabsch superposition" {
     var y_y: [4]f64 align(32) = undefined;
     var y_z: [4]f64 align(32) = undefined;
     for (0..4) |i| {
-        y_x[i] = R[0][0]*x_x[i] + R[0][1]*x_y[i] + R[0][2]*x_z[i] + t.x;
-        y_y[i] = R[1][0]*x_x[i] + R[1][1]*x_y[i] + R[1][2]*x_z[i] + t.y;
-        y_z[i] = R[2][0]*x_x[i] + R[2][1]*x_y[i] + R[2][2]*x_z[i] + t.z;
+        y_x[i] = R[0][0] * x_x[i] + R[0][1] * x_y[i] + R[0][2] * x_z[i] + t.x;
+        y_y[i] = R[1][0] * x_x[i] + R[1][1] * x_y[i] + R[1][2] * x_z[i] + t.y;
+        y_z[i] = R[2][0] * x_x[i] + R[2][1] * x_y[i] + R[2][2] * x_z[i] + t.z;
     }
     const y_coords = geometry.CoordinateSet{ .x = &y_x, .y = &y_y, .z = &y_z };
 

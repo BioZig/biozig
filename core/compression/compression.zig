@@ -1,6 +1,5 @@
 const std = @import("std");
 
-
 pub const Format = enum {
     raw,
     zlib,
@@ -28,7 +27,6 @@ pub fn compress(dest: []u8, src: []const u8, format: Format) ![]const u8 {
     try compressor.finish();
     return writer.buffered();
 }
-
 
 pub fn decompress(dest: []u8, src: []const u8, format: Format) ![]const u8 {
     var reader = std.Io.Reader.fixed(src);

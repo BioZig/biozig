@@ -10,7 +10,7 @@ pub const HierarchyNode = struct {
 /// Tree representation for Organismal Hierarchy.
 pub const Hierarchy = struct {
     nodes: []const HierarchyNode,
-    
+
     /// Finds all children of a given node in O(N).
     pub fn getChildren(self: Hierarchy, allocator: std.mem.Allocator, node_id: usize) ![]usize {
         var children = std.ArrayList(usize).empty;
@@ -27,7 +27,7 @@ pub const Hierarchy = struct {
     /// Recursively computes the sum of a node's value and all its descendants.
     pub fn computeCumulativeValue(self: Hierarchy, allocator: std.mem.Allocator, root_id: usize) !f64 {
         var sum: f64 = 0.0;
-        
+
         for (self.nodes) |n| {
             if (n.id == root_id) sum += n.value;
         }
@@ -51,7 +51,7 @@ pub const Hierarchy = struct {
 
         while (current_id) |c| {
             try path.append(allocator, c);
-            
+
             var next_parent: ?usize = null;
             for (self.nodes) |n| {
                 if (n.id == c) {
@@ -83,14 +83,14 @@ pub const DiseaseSummary = struct {
 pub fn summarizeDiseaseAssociations(allocator: std.mem.Allocator, assocs: []const PhenotypeAssociation) ![]DiseaseSummary {
     var counts = std.AutoHashMap(usize, usize).init(allocator);
     defer counts.deinit();
-    
+
     var sums = std.AutoHashMap(usize, f64).init(allocator);
     defer sums.deinit();
 
     for (assocs) |a| {
         const c = try counts.getOrPutValue(a.disease_id, 0);
         c.value_ptr.* += 1;
-        
+
         const s = try sums.getOrPutValue(a.disease_id, 0.0);
         s.value_ptr.* += a.confidence_score;
     }
@@ -103,7 +103,7 @@ pub fn summarizeDiseaseAssociations(allocator: std.mem.Allocator, assocs: []cons
         const d_id = entry.key_ptr.*;
         const count = entry.value_ptr.*;
         const sum_conf = sums.get(d_id).?;
-        
+
         try summaries.append(allocator, .{
             .disease_id = d_id,
             .associated_phenotypes_count = count,
@@ -118,9 +118,9 @@ test "Organismal Algorithms - Hierarchy" {
     const alloc = std.testing.allocator;
     const nodes = [_]HierarchyNode{
         .{ .id = 1, .parent_id = null, .value = 10.0 }, // Root
-        .{ .id = 2, .parent_id = 1, .value = 5.0 },     // Child 1
-        .{ .id = 3, .parent_id = 1, .value = 2.0 },     // Child 2
-        .{ .id = 4, .parent_id = 2, .value = 1.0 },     // Grandchild
+        .{ .id = 2, .parent_id = 1, .value = 5.0 }, // Child 1
+        .{ .id = 3, .parent_id = 1, .value = 2.0 }, // Child 2
+        .{ .id = 4, .parent_id = 2, .value = 1.0 }, // Grandchild
     };
     const h = Hierarchy{ .nodes = &nodes };
 
@@ -147,7 +147,7 @@ test "Organismal Algorithms - Summaries" {
     defer alloc.free(summaries);
 
     try std.testing.expectEqual(@as(usize, 2), summaries.len);
-    
+
     const d1_idx: usize = if (summaries[0].disease_id == 1) 0 else 1;
     try std.testing.expectEqual(@as(usize, 2), summaries[d1_idx].associated_phenotypes_count);
     try std.testing.expectEqual(@as(f64, 0.9), summaries[d1_idx].mean_confidence);

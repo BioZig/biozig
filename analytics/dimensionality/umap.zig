@@ -26,7 +26,7 @@ pub fn umap(
 
     const embedding = try allocator.alloc(f64, rows * 2);
     errdefer allocator.free(embedding);
-    
+
     var prng = std.Random.Pcg.init(12345);
     const random = prng.random();
     for (embedding) |*val| {
@@ -70,9 +70,9 @@ pub fn umap(
                         const dx = ctx.emb[i * 2] - ctx.emb[j * 2];
                         const dy = ctx.emb[i * 2 + 1] - ctx.emb[j * 2 + 1];
                         const dist_sq = dx * dx + dy * dy;
-                        
+
                         const force = if (dist_sq > 1.0) 1.0 / (1.0 + dist_sq) else -1.0;
-                        
+
                         local_grads[(i - ctx.start_row) * 2] += force * dx * 0.01;
                         local_grads[(i - ctx.start_row) * 2 + 1] += force * dy * 0.01;
                     }
@@ -167,9 +167,9 @@ test "umap basic" {
         3.0, 6.0, 9.0,
         4.0, 8.0, 12.0,
     };
-    
+
     const emb = try umap(allocator, &data, 4, 3, 2);
     defer allocator.free(emb);
-    
+
     try std.testing.expectEqual(@as(usize, 8), emb.len);
 }

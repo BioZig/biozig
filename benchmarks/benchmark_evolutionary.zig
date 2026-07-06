@@ -6,14 +6,14 @@ pub fn main() !void {
     var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
     defer arena.deinit();
     const allocator = arena.allocator();
-    
+
     std.debug.print("Running evolutionary benchmarks...\n", .{});
-    
+
     var dist_matrix = try allocator.alloc([]const f64, 3);
     defer allocator.free(dist_matrix);
-    var d0 = [_]f64{0.0, 0.2, 0.3};
-    var d1 = [_]f64{0.2, 0.0, 0.4};
-    var d2 = [_]f64{0.3, 0.4, 0.0};
+    var d0 = [_]f64{ 0.0, 0.2, 0.3 };
+    var d1 = [_]f64{ 0.2, 0.0, 0.4 };
+    var d2 = [_]f64{ 0.3, 0.4, 0.0 };
     dist_matrix[0] = &d0;
     dist_matrix[1] = &d1;
     dist_matrix[2] = &d2;
@@ -24,8 +24,6 @@ pub fn main() !void {
     labels[1] = "B";
     labels[2] = "C";
 
-
-    
     // Benchmark UPGMA
     for (0..1000) |_| {
         const t = try evolutionary.upgma(allocator, dist_matrix, labels);
@@ -33,7 +31,7 @@ pub fn main() !void {
         _ = t;
     }
     std.debug.print("UPGMA (1000x): done\n", .{});
-    
+
     // Benchmark NJ
     for (0..1000) |_| {
         const t = try evolutionary.neighborJoining(allocator, dist_matrix, labels);
@@ -47,6 +45,6 @@ pub fn main() !void {
         jc_sum += evolutionary.SubstitutionModels.JC69.distance(0.1);
     }
     std.debug.print("JC69 (10000x): done\n", .{});
-    
+
     std.debug.print("Done.\n", .{});
 }

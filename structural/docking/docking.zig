@@ -35,9 +35,9 @@ pub const RigidTransform = struct {
         const r = self.rotation;
         const t = self.translation;
         return Vec3.init(
-            r[0][0]*p.x + r[0][1]*p.y + r[0][2]*p.z + t.x,
-            r[1][0]*p.x + r[1][1]*p.y + r[1][2]*p.z + t.y,
-            r[2][0]*p.x + r[2][1]*p.y + r[2][2]*p.z + t.z,
+            r[0][0] * p.x + r[0][1] * p.y + r[0][2] * p.z + t.x,
+            r[1][0] * p.x + r[1][1] * p.y + r[1][2] * p.z + t.y,
+            r[2][0] * p.x + r[2][1] * p.y + r[2][2] * p.z + t.z,
         );
     }
 
@@ -52,9 +52,9 @@ pub const RigidTransform = struct {
         };
         const t = self.translation;
         const inv_t = Vec3.init(
-            -(inv_r[0][0]*t.x + inv_r[0][1]*t.y + inv_r[0][2]*t.z),
-            -(inv_r[1][0]*t.x + inv_r[1][1]*t.y + inv_r[1][2]*t.z),
-            -(inv_r[2][0]*t.x + inv_r[2][1]*t.y + inv_r[2][2]*t.z),
+            -(inv_r[0][0] * t.x + inv_r[0][1] * t.y + inv_r[0][2] * t.z),
+            -(inv_r[1][0] * t.x + inv_r[1][1] * t.y + inv_r[1][2] * t.z),
+            -(inv_r[2][0] * t.x + inv_r[2][1] * t.y + inv_r[2][2] * t.z),
         );
         return .{ .rotation = inv_r, .translation = inv_t };
     }
@@ -67,16 +67,16 @@ pub const RigidTransform = struct {
         var r_new: [3][3]f64 = undefined;
         for (0..3) |i| {
             for (0..3) |j| {
-                r_new[i][j] = r1[i][0]*r2[0][j] + r1[i][1]*r2[1][j] + r1[i][2]*r2[2][j];
+                r_new[i][j] = r1[i][0] * r2[0][j] + r1[i][1] * r2[1][j] + r1[i][2] * r2[2][j];
             }
         }
 
         const t2 = other.translation;
         const t1 = self.translation;
         const t_new = Vec3.init(
-            r1[0][0]*t2.x + r1[0][1]*t2.y + r1[0][2]*t2.z + t1.x,
-            r1[1][0]*t2.x + r1[1][1]*t2.y + r1[1][2]*t2.z + t1.y,
-            r1[2][0]*t2.x + r1[2][1]*t2.y + r1[2][2]*t2.z + t1.z,
+            r1[0][0] * t2.x + r1[0][1] * t2.y + r1[0][2] * t2.z + t1.x,
+            r1[1][0] * t2.x + r1[1][1] * t2.y + r1[1][2] * t2.z + t1.y,
+            r1[2][0] * t2.x + r1[2][1] * t2.y + r1[2][2] * t2.z + t1.z,
         );
         return .{ .rotation = r_new, .translation = t_new };
     }
@@ -181,8 +181,8 @@ test "Rigid transform and docking pose operations" {
     // 1. Check RigidTransform inversion and composition
     const rot = [3][3]f64{
         .{ 0.0, -1.0, 0.0 },
-        .{ 1.0,  0.0, 0.0 },
-        .{ 0.0,  0.0, 1.0 },
+        .{ 1.0, 0.0, 0.0 },
+        .{ 0.0, 0.0, 1.0 },
     }; // 90 degree Z rotation
     const trans = Vec3.init(1.0, 2.0, 3.0);
     const transform = RigidTransform.init(rot, trans);

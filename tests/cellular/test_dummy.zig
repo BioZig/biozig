@@ -1,5 +1,5 @@
 const std = @import("std");
 
-test "dummy test" {
+test "synthetic test" {
     try std.testing.expect(true);
 }

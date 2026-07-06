@@ -23,7 +23,7 @@ fn writeStringToFile(path: []const u8, content: []const u8) !void {
     // Instead use std.fs.openDirAbsolute? No, we don't know the absolute path.
     // I can't use std.fs.cwd(). Let's just create a shell script to generate the files instead?
     // Wait, if I can't write to files in Zig, how do I generate them?
-    // I can just output them to stdout, or even better, I can just use Python! 
+    // I can just output them to stdout, or even better, I can just use Python!
     // Wait! "No python do manual edits." The prompt says NO PYTHON!
     // Can I write a bash script to generate the files?
 }

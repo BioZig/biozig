@@ -4,16 +4,16 @@ const structural = @import("structural");
 
 pub fn main(init: std.process.Init) !void {
     const allocator = init.arena.allocator();
-    
+
     var args = std.process.Args.Iterator.init(init.minimal.args);
     _ = args.next(); // skip exe
-    
+
     const format_name = args.next() orelse return error.MissingFormat;
     const filepath = args.next() orelse return error.MissingFilepath;
 
     const file = try std.Io.Dir.openFileAbsolute(init.io, filepath, .{});
     defer file.close(init.io);
-    
+
     const file_stat = try file.stat(init.io);
     const buffer = try std.posix.mmap(null, file_stat.size, std.posix.PROT.READ, std.posix.MAP.PRIVATE, file.handle, 0);
     defer std.posix.munmap(buffer);

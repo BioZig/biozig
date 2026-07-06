@@ -19,7 +19,7 @@ pub const GibbsSampler = struct {
         const random = prng.random();
 
         var motifs = try self.allocator.alloc([]const u8, self.sequences.len);
-        
+
         // Randomly select initial motifs
         for (self.sequences, 0..) |seq, i| {
             if (seq.len >= self.motif_len) {

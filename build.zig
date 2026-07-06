@@ -289,10 +289,6 @@ pub fn build(b: *std.Build) void {
     test_step.dependOn(&run_algorithms_tests.step);
     test_step.dependOn(&run_interoperability_tests.step);
 
-
-
-
-
     // 8. Register documentation generation
     const docs_step = b.step("docs", "Generate HTML documentation for all modules");
 
@@ -381,7 +377,7 @@ pub fn build(b: *std.Build) void {
         .linkage = .static,
     });
     b.installArtifact(population_lib);
-    
+
     cli_module.addImport("population", population_module);
     cli_module.addImport("reporting", reporting_module);
 

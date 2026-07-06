@@ -9,8 +9,8 @@ const systems_alg = algorithms.systems;
 fn readGraph(allocator: std.mem.Allocator, path: []const u8) !systems_alg.Graph {
     var reader = try MMapReader.init(allocator, path);
     defer reader.deinit();
-    
-    var builder = systems_alg.GraphBuilder.init(1000); 
+
+    var builder = systems_alg.GraphBuilder.init(1000);
     defer builder.deinit(allocator);
 
     var max_node: usize = 0;
@@ -63,8 +63,7 @@ pub fn execute(args: args_mod.ParsedArgs) !void {
             \\  -h, --help   Show this help message and exit
             \\  -i, --input  Input edge list file (.csv, .tsv, .txt)
             \\
-            , .{}
-        );
+        , .{});
         return;
     }
 
@@ -79,7 +78,7 @@ pub fn execute(args: args_mod.ParsedArgs) !void {
     };
 
     var out_writer = output.OutputWriter.init(.text);
-    
+
     // Ingest the graph
     const g = try readGraph(std.heap.page_allocator, in_path);
     defer g.deinit(std.heap.page_allocator);
@@ -87,7 +86,7 @@ pub fn execute(args: args_mod.ParsedArgs) !void {
     if (std.mem.eql(u8, cmd, "degree")) {
         const degs = try systems_alg.degree(std.heap.page_allocator, g);
         defer std.heap.page_allocator.free(degs);
-        for (degs, 0..) |d, i| try out_writer.writeText("Node {d}: Degree {d}\n", .{i, d});
+        for (degs, 0..) |d, i| try out_writer.writeText("Node {d}: Degree {d}\n", .{ i, d });
     } else if (std.mem.eql(u8, cmd, "bfs")) {
         const order = try systems_alg.bfs(std.heap.page_allocator, g, 0);
         defer std.heap.page_allocator.free(order);

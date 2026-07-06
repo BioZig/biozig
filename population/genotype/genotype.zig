@@ -39,7 +39,7 @@ pub const BitpackedGenotypes = struct {
         const shift = @as(u6, @intCast((sample_idx % 32) * 2));
         const mask = ~(@as(u64, 3) << shift);
         const val = @as(u64, @intFromEnum(state)) << shift;
-        
+
         self.data[block_idx] = (self.data[block_idx] & mask) | val;
     }
 

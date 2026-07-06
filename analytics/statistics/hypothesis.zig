@@ -103,14 +103,14 @@ pub fn fisherExactTest(a: usize, b: usize, c: usize, d: usize) f64 {
         .K = row1_sum,
         .n = col1_sum,
     };
-    
+
     const p_observed = hg.pdf(a);
     var p_total: f64 = 0.0;
-    
+
     // Iterate over all possible values of 'a' given row/col sums
     const min_a = if (row1_sum + col1_sum > n) row1_sum + col1_sum - n else 0;
     const max_a = @min(row1_sum, col1_sum);
-    
+
     for (min_a..max_a + 1) |i| {
         const p_i = hg.pdf(i);
         if (p_i <= p_observed + 1e-12) {
@@ -124,7 +124,7 @@ pub fn fisherExactTest(a: usize, b: usize, c: usize, d: usize) f64 {
 pub fn wilcoxonSignedRank(a: []const f64, b: []const f64, allocator: std.mem.Allocator) !TestResult {
     std.debug.assert(a.len == b.len);
     const n = a.len;
-    
+
     const Diff = struct {
         abs_val: f64,
         sign: f64,
@@ -176,7 +176,7 @@ pub fn wilcoxonSignedRank(a: []const f64, b: []const f64, allocator: std.mem.All
 pub fn mannWhitneyU(a: []const f64, b: []const f64, allocator: std.mem.Allocator) !TestResult {
     const na = a.len;
     const nb = b.len;
-    
+
     // Combine and rank
     const Combined = struct {
         val: f64,

@@ -170,7 +170,7 @@ pub fn parseSparseMmap(
         if (line.len == 0) continue;
         var tokens = std.mem.splitScalar(u8, line, delimiter);
         _ = tokens.next(); // Skip sample name
-        
+
         var val_count: usize = 0;
         while (tokens.next()) |tok| {
             if (val_count >= cols) return error.MatrixRowColMismatch;
@@ -277,7 +277,7 @@ pub fn serializeMatrix(writer: anytype, mat: expression.DenseMatrix, delimiter: 
     try writer.writeAll("\n");
 
     for (0..mat.rows) |r| {
-        try writer.print("{s}", .{ mat.sample_names[r] orelse "UnknownSample" });
+        try writer.print("{s}", .{mat.sample_names[r] orelse "UnknownSample"});
         const row_data = mat.rowSlice(r);
         for (row_data) |val| {
             try writer.print("{c}{d:.6}", .{ delimiter, val });

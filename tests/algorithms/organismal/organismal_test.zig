@@ -56,10 +56,12 @@ test "Organismal - pathToRoot nonexistent leaf" {
 
 test "Organismal - pathToRoot disconnected component" {
     const alloc = std.testing.allocator;
-    const h = Hierarchy{ .nodes = &[_]HierarchyNode{
-        .{ .id = 1, .parent_id = 2, .value = 0.0 },
-        // 2 is not in the tree
-    } };
+    const h = Hierarchy{
+        .nodes = &[_]HierarchyNode{
+            .{ .id = 1, .parent_id = 2, .value = 0.0 },
+            // 2 is not in the tree
+        },
+    };
     const path = try h.pathToRoot(alloc, 1);
     defer alloc.free(path);
     // path is just 1, 2
@@ -85,7 +87,7 @@ test "Organismal - summarizeDiseaseAssociations average exact" {
     };
     const summaries = try organismal.summarizeDiseaseAssociations(alloc, &assocs);
     defer alloc.free(summaries);
-    
+
     try std.testing.expectEqual(@as(usize, 1), summaries.len);
     try std.testing.expectEqual(@as(usize, 7), summaries[0].disease_id);
     try std.testing.expectEqual(@as(usize, 3), summaries[0].associated_phenotypes_count);

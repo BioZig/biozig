@@ -7,7 +7,7 @@ pub fn execute(args: ParsedArgs) !void {
         std.debug.print("biozig visualize ...\n", .{});
         return;
     }
-    
+
     const cmd = args.run orelse return error.UnknownSubcommand;
     var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
     defer arena.deinit();
@@ -36,10 +36,10 @@ pub fn execute(args: ParsedArgs) !void {
         _ = gc;
         try out_writer.writeText("Successfully initialized sequence visualization.\n", .{});
     } else if (std.mem.eql(u8, cmd, "structure")) {
-        const labels = [_][]const u8{"ResA", "ResB"};
-        const row1 = [_]f64{1.0, 0.5};
-        const row2 = [_]f64{0.5, 1.0};
-        const mat = [_][]const f64{&row1, &row2};
+        const labels = [_][]const u8{ "ResA", "ResB" };
+        const row1 = [_]f64{ 1.0, 0.5 };
+        const row2 = [_]f64{ 0.5, 1.0 };
+        const mat = [_][]const f64{ &row1, &row2 };
         const cmap = visualization.structure.ContactMap.init(&labels, &mat, 0.5);
         _ = cmap;
         try out_writer.writeText("Successfully initialized structure visualization (ContactMap for {s}).\n", .{out_path});

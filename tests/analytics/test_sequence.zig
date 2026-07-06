@@ -4,7 +4,7 @@ const analytics = @import("analytics");
 test "sequence metrics edge cases" {
     // Length mismatch
     try std.testing.expectError(error.SequenceLengthMismatch, analytics.sequence.metrics.calculateTiTvRatio("A", "AT"));
-    
+
     // Zero window size
     try std.testing.expectError(error.InvalidWindowParameters, analytics.sequence.metrics.slidingWindowMetrics(std.testing.allocator, "A", 0, 1));
     // Zero step size

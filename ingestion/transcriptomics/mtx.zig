@@ -77,9 +77,9 @@ fn sortRow(indices: []u32, data: []f64) void {
     if (indices.len <= 1) return;
     for (1..indices.len) |i| {
         var j = i;
-        while (j > 0 and indices[j-1] > indices[j]) : (j -= 1) {
-            std.mem.swap(u32, &indices[j-1], &indices[j]);
-            std.mem.swap(f64, &data[j-1], &data[j]);
+        while (j > 0 and indices[j - 1] > indices[j]) : (j -= 1) {
+            std.mem.swap(u32, &indices[j - 1], &indices[j]);
+            std.mem.swap(f64, &data[j - 1], &data[j]);
         }
     }
 }
@@ -96,7 +96,7 @@ pub const MtxParser = struct {
 
         var header_seen = false;
         var dims_line: ?[]const u8 = null;
-        
+
         while (iter.next()) |line| {
             const trimmed = std.mem.trimEnd(u8, line, "\r");
             if (trimmed.len == 0) continue;
@@ -105,7 +105,8 @@ pub const MtxParser = struct {
                     header_seen = true;
                     if (!std.mem.containsAtLeast(u8, trimmed, 1, "matrix") or
                         !std.mem.containsAtLeast(u8, trimmed, 1, "coordinate") or
-                        !std.mem.containsAtLeast(u8, trimmed, 1, "real")) {
+                        !std.mem.containsAtLeast(u8, trimmed, 1, "real"))
+                    {
                         return error.UnsupportedMtxFormat;
                     }
                 }
@@ -138,12 +139,12 @@ pub const MtxParser = struct {
 
         while (iter.next()) |entry_line| {
             if (entry_line.len == 0 or entry_line[0] == '%') continue;
-            
+
             var tokens = std.mem.tokenizeScalar(u8, entry_line, ' ');
             const r_str = tokens.next() orelse return error.MtxRecordMalformed;
             const r = try std.fmt.parseInt(usize, r_str, 10);
             if (r == 0 or r > rows) return error.MtxIndexOutOfBounds;
-            
+
             indptr[r] += 1;
             actual_entries += 1;
         }
@@ -153,7 +154,7 @@ pub const MtxParser = struct {
         var sum: u32 = 0;
         for (1..rows + 1) |i| {
             const count = indptr[i];
-            indptr[i-1] = sum;
+            indptr[i - 1] = sum;
             sum += count;
         }
         indptr[rows] = sum;
@@ -170,7 +171,7 @@ pub const MtxParser = struct {
 
         while (iter.next()) |entry_line| {
             if (entry_line.len == 0 or entry_line[0] == '%') continue;
-            
+
             var tokens = std.mem.tokenizeScalar(u8, entry_line, ' ');
             const r_str = tokens.next().?;
             const c_str = tokens.next() orelse return error.MtxRecordMalformed;
@@ -249,7 +250,7 @@ pub const MtxParser = struct {
 
 pub fn serializeSparse(writer: anytype, mat: expression.SparseMatrix) !void {
     try writer.writeAll("%%MatrixMarket matrix coordinate real general\n");
-    
+
     var entries: usize = 0;
     for (0..mat.rows) |r| {
         entries += mat.indptr[r + 1] - mat.indptr[r];

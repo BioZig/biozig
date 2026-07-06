@@ -33,7 +33,7 @@ test "FMIndex - Normal Query" {
     defer query.deinit();
     const res = fm.count(query.view());
     try testing.expectEqual(@as(usize, 2), res.end - res.start);
-    
+
     var query_empty = try dna.DNA2.init("", alloc);
     defer query_empty.deinit();
     const res_empty = fm.count(query_empty.view());

@@ -31,7 +31,7 @@ pub const SuffixTree = struct {
     pub fn deinit(self: *SuffixTree) void {
         self.freeNode(self.root);
     }
-    
+
     /// O(N^2) naive suffix trie construction algorithm
     pub fn build(self: *SuffixTree) !void {
         for (0..self.text.len) |i| {
@@ -56,7 +56,7 @@ test "Suffix Tree Naive" {
     defer st.deinit();
     try st.build();
     try std.testing.expectEqualStrings("banana$", st.text);
-    
+
     // Check if 'n' exists from root
     try std.testing.expect(st.root.children.contains('n'));
 }

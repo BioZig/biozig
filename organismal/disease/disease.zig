@@ -19,7 +19,7 @@ pub const DiseaseRelationshipType = enum(u8) {
     is_a,
     subclass_of,
     associated_with,
-  };
+};
 
 /// Key-value metadata pair for disease annotations.
 pub const MetadataEntry = struct {

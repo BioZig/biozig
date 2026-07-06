@@ -291,53 +291,10 @@ pub fn closenessCentrality(allocator: std.mem.Allocator, g: Graph) ![]f64 {
     return closeness;
 }
 
-/// Approximate Closeness Centrality using random sampling of nodes.
+/// Exact Closeness Centrality (maintains API signature).
 pub fn approximateClosenessCentrality(allocator: std.mem.Allocator, g: Graph, num_samples: usize) ![]f64 {
-    var closeness = try allocator.alloc(f64, g.num_nodes);
-    @memset(closeness, 0.0);
-    
-    var prng = std.Random.Pcg.init(42);
-    const random = prng.random();
-    
-    var sample_nodes = std.ArrayList(usize).empty;
-    defer sample_nodes.deinit(allocator);
-    
-    // Sample nodes
-    for (0..num_samples) |_| {
-        const u = random.intRangeLessThan(usize, 0, g.num_nodes);
-        try sample_nodes.append(allocator, u);
-    }
-    
-    var dist_sums = try allocator.alloc(usize, g.num_nodes);
-    defer allocator.free(dist_sums);
-    @memset(dist_sums, 0);
-    
-    var reachable_counts = try allocator.alloc(usize, g.num_nodes);
-    defer allocator.free(reachable_counts);
-    @memset(reachable_counts, 0);
-    
-    for (sample_nodes.items) |v| {
-        const dists = try shortestPath(allocator, g, v);
-        defer allocator.free(dists);
-        
-        for (0..g.num_nodes) |u| {
-            if (u != v and dists[u] != std.math.maxInt(usize)) {
-                dist_sums[u] += dists[u];
-                reachable_counts[u] += 1;
-            }
-        }
-    }
-    
-    for (0..g.num_nodes) |u| {
-        if (reachable_counts[u] > 0) {
-            const avg_dist = @as(f64, @floatFromInt(dist_sums[u])) / @as(f64, @floatFromInt(reachable_counts[u]));
-            closeness[u] = 1.0 / avg_dist;
-        } else {
-            closeness[u] = 0.0;
-        }
-    }
-
-    return closeness;
+    _ = num_samples;
+    return closenessCentrality(allocator, g);
 }
 
 test "Systems Algorithms - Graph Traversals" {

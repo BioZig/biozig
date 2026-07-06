@@ -6,11 +6,11 @@ const Nucleotide = dna.Nucleotide;
 const SAIS = struct {
     fn inducedSort(allocator: std.mem.Allocator, S: []const usize, SA: []usize, type_map: []const bool, bucket_ends: []const usize, bucket_heads: []const usize, lms_strings: []const usize, K: usize) !void {
         @memset(SA, std.math.maxInt(usize));
-        
+
         var b_ends = try allocator.alloc(usize, K);
         defer allocator.free(b_ends);
         @memcpy(b_ends, bucket_ends);
-        
+
         var i: usize = lms_strings.len;
         while (i > 0) {
             i -= 1;
@@ -81,7 +81,7 @@ const SAIS = struct {
         var lms_strings = try allocator.alloc(usize, n);
         defer allocator.free(lms_strings);
         var num_lms: usize = 0;
-        
+
         for (1..n) |j| {
             if (isLMS(type_map, j)) {
                 lms_strings[num_lms] = j;
@@ -100,7 +100,7 @@ const SAIS = struct {
         defer allocator.free(bucket_heads);
         var bucket_ends = try allocator.alloc(usize, K);
         defer allocator.free(bucket_ends);
-        
+
         var sum: usize = 0;
         for (0..K) |j| {
             bucket_heads[j] = sum;
@@ -168,7 +168,7 @@ const SAIS = struct {
 
         var sa1 = try allocator.alloc(usize, n1);
         defer allocator.free(sa1);
-        
+
         if (name < n1) {
             try sais(allocator, s1, sa1, name);
         } else {
@@ -343,7 +343,7 @@ test "Suffix Array and BWT" {
 
     var query = try dna_type.DNA2.init("CGT", alloc);
     defer query.deinit();
-    
+
     const res = fm.count(query.view());
     try std.testing.expectEqual(@as(usize, 2), res.end - res.start);
 }
@@ -365,14 +365,14 @@ pub fn computeMinimizers(allocator: std.mem.Allocator, seq: DNA2View, w: usize, 
         hash: u64,
         pos: usize,
     };
-    
+
     var deque = try allocator.alloc(QueueItem, seq.len);
     defer allocator.free(deque);
     var head: usize = 0;
     var tail: usize = 0;
 
     var last_minimizer_pos: ?usize = null;
-    
+
     var current_hash: u64 = 0;
     const mask = if (k == 32) std.math.maxInt(u64) else (@as(u64, 1) << @as(u6, @intCast(2 * k))) - 1;
 
@@ -384,7 +384,7 @@ pub fn computeMinimizers(allocator: std.mem.Allocator, seq: DNA2View, w: usize, 
         } else {
             current_hash = ((current_hash << 2) & mask) | @as(u64, @intFromEnum(seq.get(i + k - 1)));
         }
-        
+
         const mixed_hash = std.hash.Wyhash.hash(0, std.mem.asBytes(&current_hash));
 
         while (tail > head and deque[tail - 1].hash > mixed_hash) {

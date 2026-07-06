@@ -34,7 +34,7 @@ pub const SignalingInteraction = struct {
 pub const SignalingNetwork = struct {
     allocator: std.mem.Allocator,
     interactions: std.ArrayList(SignalingInteraction),
-    
+
     // Quick lookup: source -> list of interaction indices
     downstream: std.StringHashMap(std.ArrayList(usize)),
 
@@ -49,7 +49,7 @@ pub const SignalingNetwork = struct {
     pub fn deinit(self: *SignalingNetwork) void {
         for (self.interactions.items) |*i| i.deinit();
         self.interactions.deinit(self.allocator);
-        
+
         var iter = self.downstream.iterator();
         while (iter.next()) |entry| {
             self.allocator.free(entry.key_ptr.*);
@@ -90,7 +90,7 @@ test "SignalingNetwork cascade" {
 
     const down = net.getDownstreamEvents("MAP2K1");
     try std.testing.expect(down != null);
-    
+
     const inter = net.interactions.items[down.?[0]];
     try std.testing.expectEqualStrings("MAP2K2", inter.target);
     try std.testing.expectEqual(SignalingEvent.Phosphorylation, inter.event);

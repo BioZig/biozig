@@ -29,7 +29,7 @@ pub const PWM = struct {
     /// Scores a sequence window of the same length as the PWM against the PWM.
     pub fn scoreWindow(self: PWM, sequence: DNA2View) f64 {
         std.debug.assert(sequence.len == self.matrix.len);
-        
+
         var score: f64 = 0.0;
         for (0..sequence.len) |i| {
             const idx: usize = @intFromEnum(sequence.get(i));
@@ -68,13 +68,13 @@ test "Sequence Motif - Exact Search" {
     const alloc = std.testing.allocator;
     var seq = try dna_module.DNA2.init("GATTACAGAT", alloc);
     defer seq.deinit();
-    
+
     var motif = try dna_module.DNA2.init("GAT", alloc);
     defer motif.deinit();
 
     const res = try searchMotifExact(alloc, seq.view(), motif.view());
     defer alloc.free(res);
-    
+
     try std.testing.expectEqual(@as(usize, 2), res.len);
     try std.testing.expectEqual(@as(usize, 0), res[0]);
     try std.testing.expectEqual(@as(usize, 7), res[1]);

@@ -10,10 +10,10 @@ pub const MMapReader = struct {
     pub fn init(allocator: std.mem.Allocator, path: []const u8) !MMapReader {
         var threaded = std.Io.Threaded.init(allocator, .{});
         errdefer threaded.deinit();
-        
+
         const io = threaded.io();
         const cwd = std.Io.Dir.cwd();
-        
+
         const file = try std.Io.Dir.openFile(cwd, io, path, .{ .mode = .read_only });
         errdefer std.Io.File.close(file, io);
 
@@ -58,13 +58,13 @@ pub const MMapReader = struct {
 test "MMapReader basic" {
     const tmp_file_path = "mmap_test_file.txt";
     const content = "Hello, world! This is a test for mmap.";
-    
+
     {
         var threaded = std.Io.Threaded.init(std.testing.allocator, .{});
         defer threaded.deinit();
         const io = threaded.io();
         const cwd = std.Io.Dir.cwd();
-        
+
         const file = try std.Io.Dir.createFile(cwd, io, tmp_file_path, .{});
         defer std.Io.File.close(file, io);
         try std.Io.File.writePositionalAll(file, io, content, 0);

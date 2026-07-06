@@ -30,7 +30,7 @@ test "LinkageDisequilibriumRecord - edge cases bounds" {
     var r1 = try ld.LinkageDisequilibriumRecord.init(alloc, "A", "B", 1.0, 1.0);
     defer r1.deinit();
     try std.testing.expectEqual(@as(f64, 1.0), r1.r_squared);
-    
+
     var r2 = try ld.LinkageDisequilibriumRecord.init(alloc, "A", "B", 0.0, -1.0);
     defer r2.deinit();
     try std.testing.expectEqual(@as(f64, -1.0), r2.d_prime);
@@ -59,11 +59,11 @@ test "LDMatrix - init, deinit, and set/get" {
     const val12 = matrix.get(1, 2);
     try std.testing.expectEqual(@as(f64, 0.8), val12.r_squared);
     try std.testing.expectEqual(@as(f64, -0.9), val12.d_prime);
-    
+
     const val21 = matrix.get(2, 1);
     try std.testing.expectEqual(@as(f64, 0.8), val21.r_squared);
     try std.testing.expectEqual(@as(f64, -0.9), val21.d_prime);
-    
+
     // Diagonal should be 0 unless set
     const val00 = matrix.get(0, 0);
     try std.testing.expectEqual(@as(f64, 0.0), val00.r_squared);
@@ -71,10 +71,10 @@ test "LDMatrix - init, deinit, and set/get" {
 
 test "LDMatrix - edge cases" {
     const alloc = std.testing.allocator;
-    const loci = [_][]const u8{ "rs1" };
+    const loci = [_][]const u8{"rs1"};
     var matrix = try ld.LDMatrix.init(alloc, @constCast(&loci));
     defer matrix.deinit();
-    
+
     matrix.set(0, 0, 1.0, 1.0);
-    try std.testing.expectEqual(@as(f64, 1.0), matrix.get(0,0).r_squared);
+    try std.testing.expectEqual(@as(f64, 1.0), matrix.get(0, 0).r_squared);
 }

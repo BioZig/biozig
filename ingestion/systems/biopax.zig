@@ -17,8 +17,6 @@ pub const BiopaxParser = struct {
         var path = try pathway.Pathway.init(self.allocator, "biopax_pathway", "BioPAX Reconstructed Pathway");
         errdefer path.deinit();
 
-
-
         var species_map = std.StringHashMap(usize).init(self.allocator);
         defer {
             var iter = species_map.iterator();
@@ -89,8 +87,9 @@ pub const BiopaxParser = struct {
                 left_components.clearRetainingCapacity();
                 right_components.clearRetainingCapacity();
             } else if (std.mem.eql(u8, tag_name, "bp:Protein") or
-                       std.mem.eql(u8, tag_name, "bp:SmallMolecule") or
-                       std.mem.eql(u8, tag_name, "bp:PhysicalEntity")) {
+                std.mem.eql(u8, tag_name, "bp:SmallMolecule") or
+                std.mem.eql(u8, tag_name, "bp:PhysicalEntity"))
+            {
                 var rdf_id: ?[]const u8 = null;
                 while (tokens.next()) |attr| {
                     if (std.mem.indexOfScalar(u8, attr, '=')) |eq_idx| {

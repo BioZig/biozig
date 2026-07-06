@@ -8,7 +8,7 @@ pub const AtomVisual = struct {
     pos: Vec3,
     label: []const u8,
     color: []const u8, // Hex code or standard CSS color name
-    radius: f64,       // Visual display radius
+    radius: f64, // Visual display radius
 
     pub fn init(id: usize, pos: Vec3, label: []const u8, color: []const u8, radius: f64) AtomVisual {
         return .{
@@ -112,10 +112,10 @@ pub const ContactMap = struct {
                 \\<text x="{d}" y="{d}" font-family="sans-serif" font-size="10" text-anchor="middle" fill="#666666">{s}</text>
                 \\<text x="{d}" y="{d}" font-family="sans-serif" font-size="10" text-anchor="middle" fill="#666666">{s}</text>
             , .{
-                margin - 5.0, margin + cell_size / 2.0, self.labels[0],
-                margin - 5.0, margin + grid_size - cell_size / 2.0, self.labels[n - 1],
-                margin + cell_size / 2.0, margin - 5.0, self.labels[0],
-                margin + grid_size - cell_size / 2.0, margin - 5.0, self.labels[n - 1],
+                margin - 5.0,                         margin + cell_size / 2.0,             self.labels[0],
+                margin - 5.0,                         margin + grid_size - cell_size / 2.0, self.labels[n - 1],
+                margin + cell_size / 2.0,             margin - 5.0,                         self.labels[0],
+                margin + grid_size - cell_size / 2.0, margin - 5.0,                         self.labels[n - 1],
             });
         }
 

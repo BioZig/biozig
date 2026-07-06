@@ -2,7 +2,7 @@ const std = @import("std");
 
 pub fn generateFastaDNA(allocator: std.mem.Allocator, len: usize) ![]u8 {
     const bases = "ACGT";
-    
+
     var out = std.ArrayList(u8).empty;
     try out.appendSlice(allocator, ">seq1 deterministic_dna\n");
     for (0..len) |i| {
@@ -14,7 +14,7 @@ pub fn generateFastaDNA(allocator: std.mem.Allocator, len: usize) ![]u8 {
 
 pub fn generateFastqDNA(allocator: std.mem.Allocator, len: usize) ![]u8 {
     const bases = "ACGT";
-    
+
     var out = std.ArrayList(u8).empty;
     try out.appendSlice(allocator, "@seq1 deterministic_fastq\n");
     for (0..len) |i| {

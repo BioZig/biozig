@@ -63,7 +63,6 @@ export fn biozig_structural_geometry_distance(a: CBiozigGeometryVec3, b: CBiozig
     return structural.geometry.distance(va, vb);
 }
 
-
 // --- Ingestion Structural Parsers Wrappers ---
 
 pub const CBiozigParseResult = extern struct {
@@ -75,7 +74,7 @@ export fn biozig_ingestion_structural_parse_pdb(filepath: [*c]const u8) callconv
     var res = CBiozigParseResult{ .num_items = 0, .data = null };
     const arena_ptr = c_api.c_arena orelse return res;
     const alloc = arena_ptr.allocator();
-    
+
     const path = std.mem.span(filepath);
     var reader = core.io.mmap.MMapReader.init(alloc, path) catch return res;
     defer reader.deinit();
@@ -90,11 +89,11 @@ export fn biozig_ingestion_structural_parse_mmcif(filepath: [*c]const u8) callco
     var res = CBiozigParseResult{ .num_items = 0, .data = null };
     const arena_ptr = c_api.c_arena orelse return res;
     const alloc = arena_ptr.allocator();
-    
+
     const path = std.mem.span(filepath);
     var reader = core.io.mmap.MMapReader.init(alloc, path) catch return res;
     defer reader.deinit();
-    
+
     res.num_items = reader.data.len;
     return res;
 }
@@ -103,11 +102,11 @@ export fn biozig_ingestion_structural_parse_pqr(filepath: [*c]const u8) callconv
     var res = CBiozigParseResult{ .num_items = 0, .data = null };
     const arena_ptr = c_api.c_arena orelse return res;
     const alloc = arena_ptr.allocator();
-    
+
     const path = std.mem.span(filepath);
     var reader = core.io.mmap.MMapReader.init(alloc, path) catch return res;
     defer reader.deinit();
-    
+
     res.num_items = reader.data.len;
     return res;
 }
@@ -116,11 +115,11 @@ export fn biozig_ingestion_structural_parse_mol2(filepath: [*c]const u8) callcon
     var res = CBiozigParseResult{ .num_items = 0, .data = null };
     const arena_ptr = c_api.c_arena orelse return res;
     const alloc = arena_ptr.allocator();
-    
+
     const path = std.mem.span(filepath);
     var reader = core.io.mmap.MMapReader.init(alloc, path) catch return res;
     defer reader.deinit();
-    
+
     res.num_items = reader.data.len;
     return res;
 }
@@ -129,11 +128,11 @@ export fn biozig_ingestion_structural_parse_sdf(filepath: [*c]const u8) callconv
     var res = CBiozigParseResult{ .num_items = 0, .data = null };
     const arena_ptr = c_api.c_arena orelse return res;
     const alloc = arena_ptr.allocator();
-    
+
     const path = std.mem.span(filepath);
     var reader = core.io.mmap.MMapReader.init(alloc, path) catch return res;
     defer reader.deinit();
-    
+
     res.num_items = reader.data.len;
     return res;
 }

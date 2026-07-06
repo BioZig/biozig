@@ -3,7 +3,6 @@ const std = @import("std");
 /// Strict Determinism Layer
 /// Ensures bit-exact cross-architecture (x86, ARM, RISC-V, etc.) and cross-OS (Windows, Unix) reproducibility.
 pub const DeterministicMath = struct {
-    
     /// Globally disables Fast Math and Hardware FMA (Fused Multiply-Add) optimization drift.
     /// Returns the multiplication of two f64s strictly following IEEE-754.
     pub fn strictMul(a: f64, b: f64) f64 {
@@ -51,9 +50,9 @@ test "Strict Determinism" {
 
     var prng1 = DeterministicMath.Prng.init(42);
     const r1 = prng1.random().int(u64);
-    
+
     var prng2 = DeterministicMath.Prng.init(42);
     const r2 = prng2.random().int(u64);
-    
+
     try std.testing.expectEqual(r1, r2);
 }

@@ -17,7 +17,7 @@ fn parseDistanceMatrix(allocator: std.mem.Allocator, data: []const u8) !struct {
         var it = std.mem.splitAny(u8, line, " \t,");
         const label = it.next() orelse continue;
         try labels.append(allocator, label);
-        
+
         var row: std.ArrayListUnmanaged(f64) = .empty;
         while (it.next()) |val_str| {
             if (val_str.len == 0) continue;
@@ -80,14 +80,14 @@ pub fn execute(args: args_mod.ParsedArgs) !void {
         const parsed = try parseDistanceMatrix(allocator, reader.data);
         const const_matrix = try allocator.alloc([]const f64, parsed.matrix.len);
         for (parsed.matrix, 0..) |row, i| const_matrix[i] = row;
-        
+
         _ = try evo_alg.neighborJoining(allocator, const_matrix, parsed.labels);
         try out_writer.writeText("Constructed Neighbor-Joining Tree.\n", .{});
     } else if (std.mem.eql(u8, cmd, "upgma")) {
         const parsed = try parseDistanceMatrix(allocator, reader.data);
         const const_matrix = try allocator.alloc([]const f64, parsed.matrix.len);
         for (parsed.matrix, 0..) |row, i| const_matrix[i] = row;
-        
+
         _ = try evo_alg.upgma(allocator, const_matrix, parsed.labels);
         try out_writer.writeText("Constructed UPGMA Tree.\n", .{});
     } else if (std.mem.eql(u8, cmd, "nni")) {
@@ -101,7 +101,7 @@ pub fn execute(args: args_mod.ParsedArgs) !void {
     } else if (std.mem.eql(u8, cmd, "stats")) {
         const tree = try ingestion.evolutionary.newick.parseNewick(allocator, reader.data);
         const stats = evo_alg.computeTreeStatistics(tree);
-        try out_writer.writeText("Tree Stats - Max Depth: {d:.4}, Total Branch Length: {d:.4}\n", .{stats.max_depth, stats.total_branch_length});
+        try out_writer.writeText("Tree Stats - Max Depth: {d:.4}, Total Branch Length: {d:.4}\n", .{ stats.max_depth, stats.total_branch_length });
     } else if (std.mem.eql(u8, cmd, "parse-newick")) {
         _ = try ingestion.evolutionary.newick.parseNewick(allocator, reader.data);
         try out_writer.writeText("Successfully parsed Newick tree.\n", .{});

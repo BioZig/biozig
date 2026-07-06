@@ -42,11 +42,11 @@ pub fn distance(a: Vec3, b: Vec3) f64 {
 pub fn computeDistanceMatrix(allocator: std.mem.Allocator, points: CoordinateSet) ![]f64 {
     const n = points.x.len;
     var matrix = try allocator.alloc(f64, n * n);
-    
+
     for (0..n) |i| {
         matrix[i * n + i] = 0.0;
         var j: usize = i + 1;
-        
+
         while (j + 4 <= n) : (j += 4) {
             const px = @as(@Vector(4, f64), @splat(points.x[i]));
             const py = @as(@Vector(4, f64), @splat(points.y[i]));
@@ -73,9 +73,9 @@ pub fn computeDistanceMatrix(allocator: std.mem.Allocator, points: CoordinateSet
             matrix[(j + 2) * n + i] = dists[2];
             matrix[(j + 3) * n + i] = dists[3];
         }
-        
+
         while (j < n) : (j += 1) {
-            const dist = distance(.{points.x[i], points.y[i], points.z[i]}, .{points.x[j], points.y[j], points.z[j]});
+            const dist = distance(.{ points.x[i], points.y[i], points.z[i] }, .{ points.x[j], points.y[j], points.z[j] });
             matrix[i * n + j] = dist;
             matrix[j * n + i] = dist;
         }
@@ -87,7 +87,7 @@ pub fn computeDistanceMatrixBlock(allocator: std.mem.Allocator, points_i: []cons
     const ni = points_i.len;
     const nj = points_j.len;
     var matrix = try allocator.alloc(f64, ni * nj);
-    
+
     for (0..ni) |i| {
         for (0..nj) |j| {
             matrix[i * nj + j] = distance(points_i[i], points_j[j]);
@@ -103,7 +103,7 @@ pub fn computeContactMap(allocator: std.mem.Allocator, points: []const Vec3, thr
     @memset(matrix, false);
 
     const Cell = struct { x: i32, y: i32, z: i32 };
-    
+
     var map = std.AutoHashMap(Cell, std.ArrayList(usize)).init(allocator);
     defer {
         var it = map.valueIterator();
@@ -197,28 +197,28 @@ pub fn computeRMSD(a: CoordinateSet, b: CoordinateSet) !f64 {
 
 pub fn computeCentroid(points: CoordinateSet) Vec3 {
     if (points.x.len == 0) return .{ 0, 0, 0 };
-    
+
     var sum_x_vec: @Vector(4, f64) = @splat(0.0);
     var sum_y_vec: @Vector(4, f64) = @splat(0.0);
     var sum_z_vec: @Vector(4, f64) = @splat(0.0);
-    
+
     var i: usize = 0;
     while (i + 4 <= points.x.len) : (i += 4) {
         sum_x_vec += points.x[i .. i + 4][0..4].*;
         sum_y_vec += points.y[i .. i + 4][0..4].*;
         sum_z_vec += points.z[i .. i + 4][0..4].*;
     }
-    
+
     var cx = @reduce(.Add, sum_x_vec);
     var cy = @reduce(.Add, sum_y_vec);
     var cz = @reduce(.Add, sum_z_vec);
-    
+
     while (i < points.x.len) : (i += 1) {
         cx += points.x[i];
         cy += points.y[i];
         cz += points.z[i];
     }
-    
+
     const n = @as(f64, @floatFromInt(points.x.len));
     return .{ cx / n, cy / n, cz / n };
 }
@@ -252,7 +252,7 @@ pub fn computeKabschRotation(a: CoordinateSet, b: CoordinateSet) !RotationMatrix
         const bx: @Vector(4, f64) = b.x[cov_idx .. cov_idx + 4][0..4].*;
         const by: @Vector(4, f64) = b.y[cov_idx .. cov_idx + 4][0..4].*;
         const bz: @Vector(4, f64) = b.z[cov_idx .. cov_idx + 4][0..4].*;
-        
+
         cov[0][0] += @reduce(.Add, ax * bx);
         cov[0][1] += @reduce(.Add, ax * by);
         cov[0][2] += @reduce(.Add, ax * bz);
@@ -263,7 +263,7 @@ pub fn computeKabschRotation(a: CoordinateSet, b: CoordinateSet) !RotationMatrix
         cov[2][1] += @reduce(.Add, az * by);
         cov[2][2] += @reduce(.Add, az * bz);
     }
-    
+
     while (cov_idx < a.x.len) : (cov_idx += 1) {
         cov[0][0] += a.x[cov_idx] * b.x[cov_idx];
         cov[0][1] += a.x[cov_idx] * b.y[cov_idx];
@@ -306,9 +306,9 @@ pub fn computeKabschRotation(a: CoordinateSet, b: CoordinateSet) !RotationMatrix
     const q3 = q[3];
 
     return [_][3]f64{
-        .{ q0*q0 + q1*q1 - q2*q2 - q3*q3, 2*(q1*q2 - q0*q3), 2*(q1*q3 + q0*q2) },
-        .{ 2*(q1*q2 + q0*q3), q0*q0 - q1*q1 + q2*q2 - q3*q3, 2*(q2*q3 - q0*q1) },
-        .{ 2*(q1*q3 - q0*q2), 2*(q2*q3 + q0*q1), q0*q0 - q1*q1 - q2*q2 + q3*q3 },
+        .{ q0 * q0 + q1 * q1 - q2 * q2 - q3 * q3, 2 * (q1 * q2 - q0 * q3), 2 * (q1 * q3 + q0 * q2) },
+        .{ 2 * (q1 * q2 + q0 * q3), q0 * q0 - q1 * q1 + q2 * q2 - q3 * q3, 2 * (q2 * q3 - q0 * q1) },
+        .{ 2 * (q1 * q3 - q0 * q2), 2 * (q2 * q3 + q0 * q1), q0 * q0 - q1 * q1 - q2 * q2 + q3 * q3 },
     };
 }
 
@@ -338,16 +338,16 @@ pub fn computeOptimalRMSD(allocator: std.mem.Allocator, a: CoordinateSet, b: Coo
         const p1x = a_centered.x[i];
         const p1y = a_centered.y[i];
         const p1z = a_centered.z[i];
-        
-        const rx = R[0][0]*p1x + R[0][1]*p1y + R[0][2]*p1z;
-        const ry = R[1][0]*p1x + R[1][1]*p1y + R[1][2]*p1z;
-        const rz = R[2][0]*p1x + R[2][1]*p1y + R[2][2]*p1z;
+
+        const rx = R[0][0] * p1x + R[0][1] * p1y + R[0][2] * p1z;
+        const ry = R[1][0] * p1x + R[1][1] * p1y + R[1][2] * p1z;
+        const rz = R[2][0] * p1x + R[2][1] * p1y + R[2][2] * p1z;
 
         const dx = rx - b_centered.x[i];
         const dy = ry - b_centered.y[i];
         const dz = rz - b_centered.z[i];
-        
-        sum_sq += (dx*dx + dy*dy + dz*dz);
+
+        sum_sq += (dx * dx + dy * dy + dz * dz);
     }
 
     return @sqrt(sum_sq / @as(f64, @floatFromInt(a.x.len)));
@@ -396,8 +396,12 @@ pub fn computePocketStatistics(allocator: std.mem.Allocator, points: []const Vec
     }
 
     const padding = 2.0;
-    min_p[0] -= padding; min_p[1] -= padding; min_p[2] -= padding;
-    max_p[0] += padding; max_p[1] += padding; max_p[2] += padding;
+    min_p[0] -= padding;
+    min_p[1] -= padding;
+    min_p[2] -= padding;
+    max_p[0] += padding;
+    max_p[1] += padding;
+    max_p[2] += padding;
 
     const grid_spacing = 0.5;
     const grid_vol = grid_spacing * grid_spacing * grid_spacing;
@@ -430,7 +434,7 @@ pub fn computePocketStatistics(allocator: std.mem.Allocator, points: []const Vec
                     const dx = p[0] - x;
                     const dy = p[1] - y;
                     const dz = p[2] - z;
-                    const d_sq = dx*dx + dy*dy + dz*dz;
+                    const d_sq = dx * dx + dy * dy + dz * dz;
                     if (d_sq < min_dist_sq) {
                         min_dist_sq = d_sq;
                         nearest_idx = idx;
@@ -440,7 +444,7 @@ pub fn computePocketStatistics(allocator: std.mem.Allocator, points: []const Vec
                 if (min_dist_sq <= radius * radius) {
                     atom_volumes[nearest_idx] += grid_vol;
                     vol += grid_vol;
-                    
+
                     const dist = @sqrt(min_dist_sq);
                     if (dist > radius - grid_spacing) {
                         surface_area_approx += grid_spacing * grid_spacing;
@@ -488,7 +492,7 @@ pub fn computeSurfaceMetrics(points: []const Vec3) f64 {
     const dx = max_p[0] - min_p[0];
     const dy = max_p[1] - min_p[1];
     const dz = max_p[2] - min_p[2];
-    
+
     return 2.0 * (dx * dy + dy * dz + dz * dx);
 }
 
@@ -528,7 +532,7 @@ pub fn simulateVerletMD(
             p.*[0] += velocities[i][0] * dt + forces[i][0] * dt_sq_over_2m;
             p.*[1] += velocities[i][1] * dt + forces[i][1] * dt_sq_over_2m;
             p.*[2] += velocities[i][2] * dt + forces[i][2] * dt_sq_over_2m;
-            
+
             velocities[i][0] += forces[i][0] * dt_over_2m;
             velocities[i][1] += forces[i][1] * dt_over_2m;
             velocities[i][2] += forces[i][2] * dt_over_2m;
@@ -564,7 +568,7 @@ pub fn simulatedAnnealing(
 
     var temp = initial_temp;
     var current_energy = computeEnergy(state);
-    
+
     const backup_state = try allocator.alloc(Vec3, state.len);
     defer allocator.free(backup_state);
 
@@ -573,7 +577,7 @@ pub fn simulatedAnnealing(
             @memcpy(backup_state, state);
             perturbState(state, temp, random);
             const new_energy = computeEnergy(state);
-            
+
             const delta_e = new_energy - current_energy;
             if (delta_e < 0.0) {
                 current_energy = new_energy;
@@ -604,22 +608,22 @@ pub fn computeANMHessian(allocator: std.mem.Allocator, coords: []const Vec3, cut
             const dx = coords[j][0] - coords[i][0];
             const dy = coords[j][1] - coords[i][1];
             const dz = coords[j][2] - coords[i][2];
-            const dist_sq = dx*dx + dy*dy + dz*dz;
-            
+            const dist_sq = dx * dx + dy * dy + dz * dz;
+
             if (dist_sq <= cutoff * cutoff and dist_sq > 0.0) {
                 const H_ij = [_][3]f64{
                     .{ -gamma * dx * dx / dist_sq, -gamma * dx * dy / dist_sq, -gamma * dx * dz / dist_sq },
                     .{ -gamma * dy * dx / dist_sq, -gamma * dy * dy / dist_sq, -gamma * dy * dz / dist_sq },
                     .{ -gamma * dz * dx / dist_sq, -gamma * dz * dy / dist_sq, -gamma * dz * dz / dist_sq },
                 };
-                
+
                 for (0..3) |d1| {
                     for (0..3) |d2| {
-                        hessian[(3*i + d1) * (3*n) + (3*j + d2)] = H_ij[d1][d2];
-                        hessian[(3*j + d1) * (3*n) + (3*i + d2)] = H_ij[d1][d2];
-                        
-                        hessian[(3*i + d1) * (3*n) + (3*i + d2)] -= H_ij[d1][d2];
-                        hessian[(3*j + d1) * (3*n) + (3*j + d2)] -= H_ij[d1][d2];
+                        hessian[(3 * i + d1) * (3 * n) + (3 * j + d2)] = H_ij[d1][d2];
+                        hessian[(3 * j + d1) * (3 * n) + (3 * i + d2)] = H_ij[d1][d2];
+
+                        hessian[(3 * i + d1) * (3 * n) + (3 * i + d2)] -= H_ij[d1][d2];
+                        hessian[(3 * j + d1) * (3 * n) + (3 * j + d2)] -= H_ij[d1][d2];
                     }
                 }
             }
@@ -646,7 +650,7 @@ pub fn threadingDynamicProgramming(allocator: std.mem.Allocator, seq_len: usize,
     @memset(dp_Y, MIN_SCORE);
 
     dp_M[0] = 0.0;
-    
+
     for (1..seq_len + 1) |i| {
         dp_X[i * (template_len + 1)] = gap_open + @as(f64, @floatFromInt(i - 1)) * gap_extend;
     }
@@ -658,20 +662,20 @@ pub fn threadingDynamicProgramming(allocator: std.mem.Allocator, seq_len: usize,
         for (1..template_len + 1) |j| {
             const score_idx = (i - 1) * template_len + (j - 1);
             const s = structural_scores[score_idx];
-            
+
             const M_idx = i * (template_len + 1) + j;
             const M_prev = (i - 1) * (template_len + 1) + (j - 1);
-            
+
             dp_M[M_idx] = s + @max(dp_M[M_prev], @max(dp_X[M_prev], dp_Y[M_prev]));
-            
+
             const X_prev = (i - 1) * (template_len + 1) + j;
             dp_X[M_idx] = @max(dp_M[X_prev] + gap_open, dp_X[X_prev] + gap_extend);
-            
+
             const Y_prev = i * (template_len + 1) + (j - 1);
             dp_Y[M_idx] = @max(dp_M[Y_prev] + gap_open, dp_Y[Y_prev] + gap_extend);
         }
     }
-    
+
     const final_idx = seq_len * (template_len + 1) + template_len;
     return @max(dp_M[final_idx], @max(dp_X[final_idx], dp_Y[final_idx]));
 }
@@ -689,7 +693,7 @@ pub fn greedySidechainPacking(
     allocator: std.mem.Allocator,
     num_residues: usize,
     rotamer_libraries: [][]const Rotamer,
-    computeEnergy: *const fn(res_idx: usize, rot_idx: usize, current_assignments: []const usize) f64,
+    computeEnergy: *const fn (res_idx: usize, rot_idx: usize, current_assignments: []const usize) f64,
 ) ![]usize {
     var assignments = try allocator.alloc(usize, num_residues);
     @memset(assignments, 0);
@@ -704,7 +708,7 @@ pub fn greedySidechainPacking(
 
             for (0..rotamer_libraries[i].len) |r| {
                 if (r == assignments[i]) continue;
-                
+
                 const e = computeEnergy(i, r, assignments);
                 if (e < best_energy) {
                     best_energy = e;
@@ -722,16 +726,16 @@ test "Structural Algorithms - Molecular Dynamics" {
     const alloc = std.testing.allocator;
     var pos = try alloc.alloc(Vec3, 2);
     defer alloc.free(pos);
-    pos[0] = .{0, 0, 0};
-    pos[1] = .{1, 0, 0};
-    
+    pos[0] = .{ 0, 0, 0 };
+    pos[1] = .{ 1, 0, 0 };
+
     const vel = try alloc.alloc(Vec3, 2);
     defer alloc.free(vel);
-    @memset(vel, .{0, 0, 0});
-    
+    @memset(vel, .{ 0, 0, 0 });
+
     const forces = try alloc.alloc(Vec3, 2);
     defer alloc.free(forces);
-    @memset(forces, .{0, 0, 0});
+    @memset(forces, .{ 0, 0, 0 });
 
     const S = struct {
         fn f(p: []const Vec3, fr: []Vec3) void {
@@ -750,11 +754,11 @@ test "Structural Algorithms - Simulated Annealing" {
     const alloc = std.testing.allocator;
     var state = try alloc.alloc(Vec3, 1);
     defer alloc.free(state);
-    state[0] = .{10, 0, 0};
-    
+    state[0] = .{ 10, 0, 0 };
+
     const S = struct {
         fn e(s: []const Vec3) f64 {
-            return s[0][0]*s[0][0] + s[0][1]*s[0][1] + s[0][2]*s[0][2];
+            return s[0][0] * s[0][0] + s[0][1] * s[0][1] + s[0][2] * s[0][2];
         }
         fn p(s: []Vec3, temp: f64, random: std.Random) void {
             s[0][0] += (random.float(f64) - 0.5) * temp;
@@ -769,10 +773,10 @@ test "Structural Algorithms - Simulated Annealing" {
 
 test "Structural Algorithms - ANM Hessian" {
     const alloc = std.testing.allocator;
-    const coords = [_]Vec3{ .{0,0,0}, .{1,0,0}, .{0,1,0} };
+    const coords = [_]Vec3{ .{ 0, 0, 0 }, .{ 1, 0, 0 }, .{ 0, 1, 0 } };
     const H = try computeANMHessian(alloc, &coords, 1.5, 1.0);
     defer alloc.free(H);
-    
+
     try std.testing.expectEqual(@as(usize, 9 * 9), H.len);
     try std.testing.expect(H[0] != 0.0);
 }
@@ -810,17 +814,17 @@ test "Structural Algorithms - Shape and Surface" {
     const alloc = std.testing.allocator;
     const points = [_]Vec3{ .{ 0, 0, 0 }, .{ 1, 0, 0 }, .{ 0, 1, 0 }, .{ 0, 0, 1 } };
     const hydro = [_]f64{ 0.5, -0.5, 0.2, 0.8 };
-    
+
     var px = [_]f64{ 0, 1, 0, 0 };
     var py = [_]f64{ 0, 0, 1, 0 };
     var pz = [_]f64{ 0, 0, 0, 1 };
     const soa_points = CoordinateSet{ .x = &px, .y = &py, .z = &pz };
     const rg = computeRadiusOfGyration(soa_points);
     try std.testing.expect(rg > 0.0);
-    
+
     const sa = computeSurfaceMetrics(&points);
     try std.testing.expectEqual(@as(f64, 6.0), sa);
-    
+
     const p1 = try computePocketStatistics(alloc, &points, &hydro);
     const p2 = try computePocketStatistics(alloc, &points, &hydro);
     const diff = comparePockets(p1, p2);
@@ -860,7 +864,6 @@ test "Structural Algorithms - Centroid" {
 }
 
 test "Structural Algorithms - Kabsch Optimal RMSD" {
-    
     var ax align(32) = [_]f64{ 0.0, 1.0, 0.0 };
     var ay align(32) = [_]f64{ 0.0, 0.0, 1.0 };
     var az align(32) = [_]f64{ 0.0, 0.0, 0.0 };
@@ -884,10 +887,10 @@ test "Structural Algorithms - Kabsch Optimal RMSD" {
 test "Structural Algorithms - Contact Map" {
     const alloc = std.testing.allocator;
     const points = [_]Vec3{ .{ 0, 0, 0 }, .{ 1, 0, 0 }, .{ 5, 0, 0 } };
-    
+
     const cmap = try computeContactMap(alloc, &points, 2.0);
     defer alloc.free(cmap);
-    
-    try std.testing.expect(cmap[0*3 + 1] == true); // dist 1 <= 2.0
-    try std.testing.expect(cmap[0*3 + 2] == false); // dist 5 > 2.0
+
+    try std.testing.expect(cmap[0 * 3 + 1] == true); // dist 1 <= 2.0
+    try std.testing.expect(cmap[0 * 3 + 2] == false); // dist 5 > 2.0
 }

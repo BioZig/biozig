@@ -69,7 +69,7 @@ fn betaCf(x: f64, a: f64, b: f64) f64 {
     while (m <= max_iter) : (m += 1) {
         const m_f = @as(f64, @floatFromInt(m));
         const m2 = 2.0 * m_f;
-        
+
         // Even step
         var aa = m_f * (b - m_f) * x / ((qam + m2) * (a + m2));
         d = 1.0 + aa * d;

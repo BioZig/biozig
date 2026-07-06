@@ -61,7 +61,7 @@ pub const AncestryGraph = struct {
     allocator: std.mem.Allocator,
     populations: std.StringHashMap(Population),
     edges: std.ArrayList(PopulationRelationship),
-    
+
     // Adjacency lists by population ID
     parents_of: std.StringHashMap(std.ArrayList(usize)),
     children_of: std.StringHashMap(std.ArrayList(usize)),
@@ -145,14 +145,14 @@ test "AncestryGraph building" {
     try graph.addPopulation(try Population.init(alloc, "PopA", "Ancestral"));
     try graph.addPopulation(try Population.init(alloc, "PopB", "Derived1"));
     try graph.addPopulation(try Population.init(alloc, "PopC", "Derived2"));
-    
+
     try graph.addRelationship(try PopulationRelationship.init(alloc, "PopA", "PopB", 1000.0, null));
     try graph.addRelationship(try PopulationRelationship.init(alloc, "PopA", "PopC", 1000.0, null));
 
     const children = graph.getDescendants("PopA");
     try std.testing.expect(children != null);
     try std.testing.expectEqual(@as(usize, 2), children.?.len);
-    
+
     const parents = graph.getAncestry("PopB");
     try std.testing.expect(parents != null);
     try std.testing.expectEqual(@as(usize, 1), parents.?.len);

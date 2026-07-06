@@ -37,7 +37,7 @@ pub const BgzfReader = struct {
             xfl: u8,
             os: u8,
         };
-        const header = self.input.takeStruct(Header, .little) catch |err| switch(err) {
+        const header = self.input.takeStruct(Header, .little) catch |err| switch (err) {
             error.EndOfStream => {
                 self.eof = true;
                 return 0;

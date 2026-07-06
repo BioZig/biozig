@@ -64,7 +64,7 @@ pub const PhyloXmlParser = struct {
 
         var idx: usize = 0;
         var root_idx_opt: ?usize = null;
-        
+
         while (idx < input.len) {
             const next_open = std.mem.indexOfPos(u8, input, idx, "<");
             if (next_open == null) break;
@@ -81,7 +81,7 @@ pub const PhyloXmlParser = struct {
                 });
             } else if (std.mem.startsWith(u8, input[idx..], "/clade>")) {
                 idx += 7; // "/clade>"
-                
+
                 var clade = frames.pop() orelse return error.MalformedPhyloXml;
                 errdefer {
                     clade.children.deinit(self.allocator);
@@ -102,7 +102,7 @@ pub const PhyloXmlParser = struct {
                 );
                 const node_idx = self.nodes.items.len;
                 try self.nodes.append(self.allocator, node);
-                
+
                 if (frames.items.len > 0) {
                     try frames.items[frames.items.len - 1].children.append(self.allocator, node_idx);
                 } else {
@@ -113,7 +113,7 @@ pub const PhyloXmlParser = struct {
                 const name_end = std.mem.indexOfPos(u8, input, idx, "</name>");
                 if (name_end) |end_pos| {
                     if (frames.items.len > 0) {
-                        frames.items[frames.items.len - 1].name = input[idx .. end_pos];
+                        frames.items[frames.items.len - 1].name = input[idx..end_pos];
                     }
                     idx = end_pos + 7;
                 } else {
@@ -123,7 +123,7 @@ pub const PhyloXmlParser = struct {
                 idx += 14;
                 const len_end = std.mem.indexOfPos(u8, input, idx, "</branch_length>");
                 if (len_end) |end_pos| {
-                    const len_str = input[idx .. end_pos];
+                    const len_str = input[idx..end_pos];
                     const val = std.fmt.parseFloat(f64, std.mem.trim(u8, len_str, " \t\r\n")) catch 0.0;
                     if (frames.items.len > 0) {
                         frames.items[frames.items.len - 1].branch_length = val;
@@ -178,14 +178,14 @@ fn serializeNode(tree: phylogeny.PhyloTree, node_idx: usize, writer: anytype, de
     const node = tree.nodes[node_idx];
     try indent(writer, depth);
     try writer.writeAll("<clade>\n");
-    
+
     if (node.label.len > 0) {
         try indent(writer, depth + 1);
         try writer.writeAll("<name>");
         try writer.writeAll(node.label);
         try writer.writeAll("</name>\n");
     }
-    
+
     if (node.branch_length > 0.0) {
         try indent(writer, depth + 1);
         try writer.writeAll("<branch_length>");
@@ -250,7 +250,7 @@ test "phyloxml valid parse" {
         parser.freePhyloTree(&tree);
         parser.deinit();
     }
-    
+
     const root = tree.nodes[tree.root];
     try std.testing.expectEqualStrings("Root", root.label);
     try std.testing.expectEqual(@as(usize, 2), root.children.len);
@@ -282,15 +282,13 @@ test "phyloxml malformed parse" {
 }
 
 test "phyloxml serialization and roundtrip" {
-    const nodes = [_]phylogeny.PhyloNode{
-        phylogeny.PhyloNode{
-            .id = 1,
-            .label = try std.testing.allocator.dupe(u8, "Root"),
-            .branch_length = 0.0,
-            .children = &[_]usize{},
-            .metadata = &[_]phylogeny.MetadataEntry{},
-        }
-    };
+    const nodes = [_]phylogeny.PhyloNode{phylogeny.PhyloNode{
+        .id = 1,
+        .label = try std.testing.allocator.dupe(u8, "Root"),
+        .branch_length = 0.0,
+        .children = &[_]usize{},
+        .metadata = &[_]phylogeny.MetadataEntry{},
+    }};
     const tree = phylogeny.PhyloTree{
         .nodes = &nodes,
         .root = 0,

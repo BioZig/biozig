@@ -172,7 +172,7 @@ pub fn hammingDistance(a: anytype, b: anytype) usize {
                 const vec_len = 32;
                 var i: usize = 0;
                 var dist: usize = 0;
-                
+
                 while (i + vec_len <= a.len) : (i += vec_len) {
                     const va: @Vector(vec_len, u8) = sa[i..][0..vec_len].*;
                     const vb: @Vector(vec_len, u8) = sb[i..][0..vec_len].*;

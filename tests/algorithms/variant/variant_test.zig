@@ -9,7 +9,7 @@ test "Variant - isMatch exact" {
     const v3 = VariantParams{ .chrom = "chr1", .pos = 101, .ref = "A", .alt = "T" };
     const v4 = VariantParams{ .chrom = "chr1", .pos = 100, .ref = "C", .alt = "T" };
     const v5 = VariantParams{ .chrom = "chr1", .pos = 100, .ref = "A", .alt = "G" };
-    
+
     try std.testing.expect(variant.isMatch(v1, v1));
     try std.testing.expect(!variant.isMatch(v1, v2));
     try std.testing.expect(!variant.isMatch(v1, v3));
@@ -33,7 +33,7 @@ test "Variant - sortVariants logic" {
         .{ .chrom = "chr2", .pos = 100, .ref = "A", .alt = "G" },
         .{ .chrom = "chr1", .pos = 200, .ref = "C", .alt = "T" },
         .{ .chrom = "chr1", .pos = 100, .ref = "G", .alt = "A" },
-        .{ .chrom = "chr3", .pos = 50,  .ref = "T", .alt = "C" },
+        .{ .chrom = "chr3", .pos = 50, .ref = "T", .alt = "C" },
         .{ .chrom = "chr1", .pos = 100, .ref = "A", .alt = "C" }, // tie on chrom and pos
     };
 
@@ -41,13 +41,13 @@ test "Variant - sortVariants logic" {
 
     try std.testing.expectEqualStrings("chr1", variants[0].chrom);
     try std.testing.expectEqual(@as(usize, 100), variants[0].pos);
-    
+
     try std.testing.expectEqualStrings("chr1", variants[1].chrom);
     try std.testing.expectEqual(@as(usize, 100), variants[1].pos);
-    
+
     try std.testing.expectEqualStrings("chr1", variants[2].chrom);
     try std.testing.expectEqual(@as(usize, 200), variants[2].pos);
-    
+
     try std.testing.expectEqualStrings("chr2", variants[3].chrom);
     try std.testing.expectEqualStrings("chr3", variants[4].chrom);
 }
@@ -87,7 +87,7 @@ test "Variant - computeStatistics empty and infinity" {
     try std.testing.expectEqual(@as(usize, 0), s1.transitions);
     try std.testing.expectEqual(@as(usize, 0), s1.transversions);
     try std.testing.expectEqual(@as(f64, 0.0), s1.ts_tv_ratio);
-    
+
     // Only transitions -> ts_tv_ratio should be INF
     const ts_only = [_]VariantParams{
         .{ .chrom = "chr1", .pos = 100, .ref = "A", .alt = "G" },

@@ -93,7 +93,7 @@ pub const Binomial = struct {
         if (k > self.n) return 0.0;
         const n_f = @as(f64, @floatFromInt(self.n));
         const k_f = @as(f64, @floatFromInt(k));
-        
+
         // nCr using lnGamma
         const ln_ncr = @import("math_utils.zig").lgamma(n_f + 1.0) - @import("math_utils.zig").lgamma(k_f + 1.0) - @import("math_utils.zig").lgamma(n_f - k_f + 1.0);
         return math.exp(ln_ncr + k_f * math.log(f64, math.e, self.p) + (n_f - k_f) * math.log(f64, math.e, 1.0 - self.p));
@@ -120,13 +120,13 @@ pub const Hypergeometric = struct {
     N: usize, // Population size
     K: usize, // Number of success states in population
     n: usize, // Number of draws
-    
+
     pub fn pdf(self: Hypergeometric, k: usize) f64 {
         if (k > self.K or k > self.n or (self.n - k) > (self.N - self.K)) return 0.0;
-        
-        const log_p = @import("math_utils.zig").lnNcr(self.K, k) + 
-                     @import("math_utils.zig").lnNcr(self.N - self.K, self.n - k) - 
-                     @import("math_utils.zig").lnNcr(self.N, self.n);
+
+        const log_p = @import("math_utils.zig").lnNcr(self.K, k) +
+            @import("math_utils.zig").lnNcr(self.N - self.K, self.n - k) -
+            @import("math_utils.zig").lnNcr(self.N, self.n);
         return math.exp(log_p);
     }
 

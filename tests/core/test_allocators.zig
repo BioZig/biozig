@@ -13,6 +13,6 @@ test "allocators OOB and boundary" {
 
     const p1 = try alloc.alloc(u8, 1);
     alloc.free(p1);
-    
+
     try std.testing.expectEqual(tracker.getBytesAllocated(), tracker.getBytesFreed());
 }

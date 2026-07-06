@@ -5,7 +5,7 @@ pub const Gff3Record = struct {
     source: []const u8,
     feature_type: []const u8,
     start: usize, // 0-based coordinate internally
-    end: usize,   // 0-based coordinate internally (inclusive)
+    end: usize, // 0-based coordinate internally (inclusive)
     score: ?f64 = null,
     strand: u8,
     phase: ?u8 = null,
@@ -106,7 +106,7 @@ pub fn Gff3Iterator(comptime ReaderType: type) type {
                     .source = try self.allocator.dupe(u8, source),
                     .feature_type = try self.allocator.dupe(u8, feature_type),
                     .start = parsed_start - 1, // 1-based inclusive -> 0-based
-                    .end = parsed_end - 1,     // 1-based inclusive -> 0-based
+                    .end = parsed_end - 1, // 1-based inclusive -> 0-based
                     .score = score,
                     .strand = if (strand_str.len > 0) strand_str[0] else '.',
                     .phase = phase,

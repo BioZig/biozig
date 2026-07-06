@@ -34,9 +34,9 @@ pub fn computeTransitions(allocator: std.mem.Allocator, sequence: []const u8, th
     for (0..num_threads) |i| {
         const start = i * chunk_size;
         const end = if (i == num_threads - 1) sequence.len else (i + 1) * chunk_size + 1; // +1 to capture transition across boundary
-        
+
         const chunk = sequence[start..@min(end, sequence.len)];
-        thread_pool[i] = try std.Thread.spawn(.{}, computeTransitionsSerial, .{chunk, &thread_matrices[i]});
+        thread_pool[i] = try std.Thread.spawn(.{}, computeTransitionsSerial, .{ chunk, &thread_matrices[i] });
     }
 
     for (0..num_threads) |i| {

@@ -68,7 +68,7 @@ fn validateMolecularPipeline(allocator: std.mem.Allocator) !void {
     var iter = ingestion.genomics.fasta.fastaIterator(fasta);
     const rec = try iter.next();
     const dna_len = rec.?.sequence.len;
-    
+
     try printResult("FASTA -> DNA Parsing", "Deterministic FASTA", "50 bases", "50 bases", dna_len == 50);
     try printResult("DNA -> Algorithm", "DNA Sequence", "Algorithm Success", "Algorithm Success", true);
 }
@@ -90,7 +90,9 @@ fn validateSystemsPipeline(allocator: std.mem.Allocator) !void {
     var parser = ingestion.systems.sbml.SbmlParser.init(allocator);
     var parsed = try parser.parse(sbml);
     defer {
-        for (parsed.net.nodes.items) |*n| { allocator.free(n.id); }
+        for (parsed.net.nodes.items) |*n| {
+            allocator.free(n.id);
+        }
         parsed.net.nodes.deinit(allocator);
         parsed.net.edges.deinit(allocator);
     }

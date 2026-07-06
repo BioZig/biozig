@@ -10,7 +10,7 @@ const SpinLock = struct {
     }
 };
 
-/// Barnes-Hut t-SNE approximate implementation.
+/// Exact t-SNE implementation.
 /// `data` is the high-dimensional input matrix (rows x cols).
 /// `threads` specifies the number of parallel threads.
 /// Returns a flattened matrix of size `rows` x 2 (2D embedding).
@@ -26,7 +26,7 @@ pub fn tsne(
 
     const embedding = try allocator.alloc(f64, rows * 2);
     errdefer allocator.free(embedding);
-    
+
     var prng = std.Random.Pcg.init(42);
     const random = prng.random();
     for (embedding) |*val| {
@@ -57,7 +57,7 @@ pub fn tsne(
             fn run(ctx_opaque: ?*anyopaque) void {
                 const ctx = @as(*Context, @ptrCast(@alignCast(ctx_opaque))).*;
                 defer _ = ctx.pending.fetchSub(1, .release);
-                
+
                 var local_grads = std.heap.page_allocator.alloc(f64, (ctx.end_row - ctx.start_row) * 2) catch return;
                 defer std.heap.page_allocator.free(local_grads);
                 @memset(local_grads, 0.0);
@@ -82,7 +82,7 @@ pub fn tsne(
                     const idx_y = i * 2 + 1;
                     const loc_x = (i - ctx.start_row) * 2;
                     const loc_y = loc_x + 1;
-                    
+
                     {
                         const ptr: *u64 = @ptrCast(&ctx.grads[idx_x]);
                         var current = @atomicLoad(u64, ptr, .acquire);
@@ -165,9 +165,9 @@ test "tsne basic" {
         3.0, 6.0, 9.0,
         4.0, 8.0, 12.0,
     };
-    
+
     const emb = try tsne(allocator, &data, 4, 3, 2);
     defer allocator.free(emb);
-    
+
     try std.testing.expectEqual(@as(usize, 8), emb.len);
 }

@@ -8,7 +8,7 @@ pub const Strand = enum {
 
 pub const Exon = struct {
     start: usize, // 0-indexed genomic start coordinate
-    end: usize,   // 0-indexed genomic end coordinate (exclusive)
+    end: usize, // 0-indexed genomic end coordinate (exclusive)
 
     pub fn len(self: Exon) usize {
         std.debug.assert(self.end >= self.start);

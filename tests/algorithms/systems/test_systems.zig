@@ -13,7 +13,7 @@ test "Systems - GraphBuilder and Graph lifecycle" {
     defer g.deinit(alloc);
 
     try std.testing.expectEqual(@as(usize, 3), g.num_nodes);
-    
+
     const nbrs0 = g.neighbors(0);
     try std.testing.expectEqual(@as(usize, 1), nbrs0.len);
     try std.testing.expectEqual(@as(usize, 1), nbrs0[0]);
@@ -132,7 +132,7 @@ test "Systems - closenessCentrality" {
 
     const cc = try systems.closenessCentrality(alloc, g);
     defer alloc.free(cc);
-    
+
     const approx_cc = try systems.approximateClosenessCentrality(alloc, g, 2);
     defer alloc.free(approx_cc);
 }
@@ -151,7 +151,7 @@ test "Systems - PageRank" {
 
     const pr = try systems.pageRank(alloc, g, 0.85, 100, 1e-6);
     defer alloc.free(pr);
-    
+
     // Sum of PR should be roughly 1.0
     var sum: f64 = 0;
     for (pr) |p| sum += p;
@@ -175,7 +175,7 @@ test "Systems - countTriangles" {
 
     const triangles = try systems.countTriangles(alloc, g);
     // directed edges, we just count directed triangles
-    // Since 0->1, 1->2, 2->0 exists? countTriangles considers undirected logic usually, 
+    // Since 0->1, 1->2, 2->0 exists? countTriangles considers undirected logic usually,
     // let's just make sure it runs and returns a number.
     _ = triangles;
 }

@@ -87,9 +87,9 @@ pub const NewickParser = struct {
                 }
             }
         }
-        
+
         if (frames.items.len != 1) return error.MalformedNewickUnbalancedParentheses;
-        
+
         var root_children = frames.pop().?;
         defer root_children.deinit(self.allocator);
         if (root_children.items.len != 1) return error.MalformedNewickExtraData;
@@ -128,7 +128,7 @@ pub const NewickParser = struct {
             idx.* += 1; // Consume '['
             const meta_start = idx.*;
             while (idx.* < str.len and str[idx.*] != ']') : (idx.* += 1) {}
-            
+
             if (idx.* >= str.len) {
                 for (metadata.items) |m| {
                     self.allocator.free(m.key);
@@ -137,7 +137,7 @@ pub const NewickParser = struct {
                 metadata.deinit(self.allocator);
                 return error.MalformedNewickUnbalancedBrackets;
             }
-            
+
             const meta_str = str[meta_start..idx.*];
             idx.* += 1; // Consume ']'
 
@@ -170,7 +170,7 @@ pub const NewickParser = struct {
             children,
             try metadata.toOwnedSlice(self.allocator),
         );
-        
+
         const node_idx = self.nodes.items.len;
         try self.nodes.append(self.allocator, node);
         return node_idx;
@@ -213,18 +213,18 @@ fn serializeNode(tree: phylogeny.PhyloTree, node_idx: usize, writer: anytype) !v
         }
         try writer.writeByte(')');
     }
-    
+
     if (node.label.len > 0) {
         try writer.writeAll(node.label);
     }
-    
+
     if (node.branch_length > 0.0 or node.children.len > 0) {
         try writer.writeByte(':');
         var buf: [64]u8 = undefined;
         const len_str = try std.fmt.bufPrint(&buf, "{d}", .{node.branch_length});
         try writer.writeAll(len_str);
     }
-    
+
     if (node.metadata.len > 0) {
         try writer.writeAll("[&&NHX");
         for (node.metadata) |m| {

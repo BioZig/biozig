@@ -25,9 +25,9 @@ test "Structural - computeDistanceMatrix empty and NaNs" {
     defer alloc.free(empty_mat);
     try std.testing.expectEqual(@as(usize, 0), empty_mat.len);
 
-    var nan_x = [_]f64{std.math.nan(f64), 0};
-    var nan_y = [_]f64{std.math.nan(f64), 0};
-    var nan_z = [_]f64{std.math.nan(f64), 0};
+    var nan_x = [_]f64{ std.math.nan(f64), 0 };
+    var nan_y = [_]f64{ std.math.nan(f64), 0 };
+    var nan_z = [_]f64{ std.math.nan(f64), 0 };
     const nan_cs = CoordinateSet{ .x = &nan_x, .y = &nan_y, .z = &nan_z };
     const nan_mat = try structural.computeDistanceMatrix(alloc, nan_cs);
     defer alloc.free(nan_mat);
@@ -49,11 +49,11 @@ test "Structural - computeContactMap edge cases" {
     defer alloc.free(empty_map);
     try std.testing.expectEqual(@as(usize, 0), empty_map.len);
 
-    const points = [_]Vec3{ .{0,0,0}, .{1.1,0,0} };
+    const points = [_]Vec3{ .{ 0, 0, 0 }, .{ 1.1, 0, 0 } };
     const map = try structural.computeContactMap(alloc, &points, 1.0);
     defer alloc.free(map);
-    try std.testing.expect(map[0*2+0]); // self
-    try std.testing.expect(!map[0*2+1]); // 1.1 > 1.0
+    try std.testing.expect(map[0 * 2 + 0]); // self
+    try std.testing.expect(!map[0 * 2 + 1]); // 1.1 > 1.0
 }
 
 test "Structural - computeRMSD empty" {
@@ -61,7 +61,7 @@ test "Structural - computeRMSD empty" {
     var empty_y = [_]f64{};
     var empty_z = [_]f64{};
     const empty_cs = CoordinateSet{ .x = &empty_x, .y = &empty_y, .z = &empty_z };
-    
+
     const rmsd = try structural.computeRMSD(empty_cs, empty_cs);
     try std.testing.expectEqual(@as(f64, 0.0), rmsd);
 }
@@ -70,13 +70,13 @@ test "Structural - computeRMSD length mismatch" {
     var x1 = [_]f64{1.0};
     var y1 = [_]f64{1.0};
     var z1 = [_]f64{1.0};
-    var x2 = [_]f64{1.0, 2.0};
-    var y2 = [_]f64{1.0, 2.0};
-    var z2 = [_]f64{1.0, 2.0};
-    
+    var x2 = [_]f64{ 1.0, 2.0 };
+    var y2 = [_]f64{ 1.0, 2.0 };
+    var z2 = [_]f64{ 1.0, 2.0 };
+
     const cs1 = CoordinateSet{ .x = &x1, .y = &y1, .z = &z1 };
     const cs2 = CoordinateSet{ .x = &x2, .y = &y2, .z = &z2 };
-    
+
     try std.testing.expectError(error.LengthMismatch, structural.computeRMSD(cs1, cs2));
 }
 
@@ -104,7 +104,7 @@ test "Structural - computeKabschRotation exact match" {
     var z = [_]f64{ 1.0, 2.0 };
     const a = CoordinateSet{ .x = &x, .y = &y, .z = &z };
     const r = try structural.computeKabschRotation(a, a);
-    
+
     // Should be identity matrix
     try std.testing.expectApproxEqAbs(1.0, r[0][0], 1e-5);
     try std.testing.expectApproxEqAbs(0.0, r[0][1], 1e-5);
@@ -122,9 +122,9 @@ test "Structural - computeOptimalRMSD mismatch" {
     var x1 = [_]f64{1.0};
     var y1 = [_]f64{1.0};
     var z1 = [_]f64{1.0};
-    var x2 = [_]f64{1.0, 2.0};
-    var y2 = [_]f64{1.0, 2.0};
-    var z2 = [_]f64{1.0, 2.0};
+    var x2 = [_]f64{ 1.0, 2.0 };
+    var y2 = [_]f64{ 1.0, 2.0 };
+    var z2 = [_]f64{ 1.0, 2.0 };
     const cs1 = CoordinateSet{ .x = &x1, .y = &y1, .z = &z1 };
     const cs2 = CoordinateSet{ .x = &x2, .y = &y2, .z = &z2 };
     try std.testing.expectError(error.LengthMismatch, structural.computeOptimalRMSD(alloc, cs1, cs2));
@@ -132,9 +132,9 @@ test "Structural - computeOptimalRMSD mismatch" {
 
 test "Structural - detectHydrogenBonds edge case max dist" {
     const alloc = std.testing.allocator;
-    const donors = [_]Vec3{ .{0,0,0} };
-    const acceptors = [_]Vec3{ .{0.5,0,0} };
-    
+    const donors = [_]Vec3{.{ 0, 0, 0 }};
+    const acceptors = [_]Vec3{.{ 0.5, 0, 0 }};
+
     const hbonds1 = try structural.detectHydrogenBonds(alloc, &donors, &acceptors, 0.4);
     defer alloc.free(hbonds1);
     try std.testing.expectEqual(@as(usize, 0), hbonds1.len);
@@ -151,7 +151,7 @@ test "Structural - computePocketStatistics edge cases" {
     const stats1 = try structural.computePocketStatistics(alloc, &empty_points, &empty_hydro);
     try std.testing.expectEqual(@as(f64, 0.0), stats1.volume);
 
-    const points = [_]Vec3{ .{0,0,0} };
+    const points = [_]Vec3{.{ 0, 0, 0 }};
     const hydro_mismatch = [_]f64{};
     try std.testing.expectError(error.LengthMismatch, structural.computePocketStatistics(alloc, &points, &hydro_mismatch));
 }
@@ -176,10 +176,10 @@ test "Structural - computeRadiusOfGyration empty" {
 
 test "Structural - computeANMHessian cutoff logic" {
     const alloc = std.testing.allocator;
-    const coords = [_]Vec3{ .{0,0,0}, .{10,0,0} }; // far apart
+    const coords = [_]Vec3{ .{ 0, 0, 0 }, .{ 10, 0, 0 } }; // far apart
     const H = try structural.computeANMHessian(alloc, &coords, 5.0, 1.0); // cutoff is 5.0
     defer alloc.free(H);
-    
+
     // Everything should be 0 since dist is 10 > 5
     for (H) |val| {
         try std.testing.expectEqual(@as(f64, 0.0), val);

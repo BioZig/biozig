@@ -1,6 +1,5 @@
 const std = @import("std");
 
-
 pub fn PackedIntArray(comptime bits: usize) type {
     std.debug.assert(bits >= 1 and bits <= 8);
     return struct {
@@ -58,7 +57,6 @@ pub fn PackedIntArray(comptime bits: usize) type {
     };
 }
 
-
 pub const BitReader = struct {
     bytes: []const u8,
     bit_offset: usize = 0,
@@ -104,7 +102,6 @@ pub const BitReader = struct {
         self.bit_offset = ((self.bit_offset + 7) / 8) * 8;
     }
 };
-
 
 pub const BitWriter = struct {
     bytes: []u8,

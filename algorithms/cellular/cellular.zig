@@ -72,7 +72,7 @@ pub const KdTree = struct {
         if (items.len == 0) return null;
 
         const axis = depth % 2;
-        
+
         if (axis == 0) {
             std.sort.block(Item, items, {}, struct {
                 fn lessThan(_: void, a: Item, b: Item) bool {
@@ -93,7 +93,7 @@ pub const KdTree = struct {
         node.y = items[mid].y;
         node.index = items[mid].idx;
         node.left = try buildTree(allocator, items[0..mid], depth + 1);
-        node.right = try buildTree(allocator, items[mid + 1..], depth + 1);
+        node.right = try buildTree(allocator, items[mid + 1 ..], depth + 1);
         return node;
     }
 
@@ -177,7 +177,7 @@ pub fn scoreCellCycle(cell_expression: []const f64, g1_s_mask: []const bool, g2_
 
     var g1_s_sum: f64 = 0;
     var g1_s_count: usize = 0;
-    
+
     var g2_m_sum: f64 = 0;
     var g2_m_count: usize = 0;
 
@@ -197,7 +197,7 @@ pub fn scoreCellCycle(cell_expression: []const f64, g1_s_mask: []const bool, g2_
 
     // Phase assignment logic based on standard Seurat-like heuristic thresholds (simplified to max score > 0)
     var phase: @TypeOf((CellCycleScores{ .g1_s = 0, .g2_m = 0, .phase = .G1 }).phase) = .G1;
-    
+
     if (g1_s_score > 0 or g2_m_score > 0) {
         if (g1_s_score > g2_m_score) {
             phase = .S;
@@ -217,7 +217,7 @@ test "Cellular Algorithms - Expression Stats" {
     const expr = [_]f64{ 2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0 };
     const mean = meanExpression(&expr);
     try std.testing.expectEqual(@as(f64, 5.0), mean);
-    
+
     const variance = varianceExpression(&expr);
     try std.testing.expect(variance > 4.5 and variance < 4.6); // 32 / 7 ≈ 4.57
 }
@@ -227,10 +227,10 @@ test "Cellular Algorithms - Spatial Neighborhood" {
     const px = [_]f64{ 0, 1, 0, 10 };
     const py = [_]f64{ 0, 0, 2, 10 };
     const points = CoordinateSet2D{ .x = &px, .y = &py };
-    
+
     const neighbors = try spatialNeighborhood(alloc, 0, 0, points, 1.5);
     defer alloc.free(neighbors);
-    
+
     try std.testing.expectEqual(@as(usize, 1), neighbors.len);
     try std.testing.expectEqual(@as(usize, 1), neighbors[0].index); // {1,0} is inside
 }
@@ -306,7 +306,7 @@ pub const SparseMatrixOps = struct {
         std.debug.assert(x.len == mat.cols);
         const y = try allocator.alloc(f64, mat.rows);
         @memset(y, 0.0);
-        
+
         if (mat.format == .csr) {
             for (0..mat.rows) |r| {
                 const start = mat.indptr[r];
@@ -344,7 +344,7 @@ pub const DifferentialExpression = struct {
         const multiple_testing = @import("analytics").statistics.multiple_testing;
 
         const results = try allocator.alloc(TestResult, mat.cols);
-        
+
         var p_values = try allocator.alloc(f64, mat.cols);
         defer allocator.free(p_values);
 
@@ -373,23 +373,29 @@ pub const DifferentialExpression = struct {
 
             const mean1 = if (len1 > 0) sum1 / len1 else 0;
             const mean2 = if (len2 > 0) sum2 / len2 else 0;
-            
+
             const pseudo_count = 1e-4;
             const log2fc = @log2((mean1 + pseudo_count) / (mean2 + pseudo_count));
-            
+
             var p_val: f64 = 1.0;
             if (len1 > 1 and len2 > 1) {
                 var var1: f64 = 0;
                 var var2: f64 = 0;
-                for (group1_vals) |v| { const d = v - mean1; var1 += d*d; }
-                for (group2_vals) |v| { const d = v - mean2; var2 += d*d; }
-                
+                for (group1_vals) |v| {
+                    const d = v - mean1;
+                    var1 += d * d;
+                }
+                for (group2_vals) |v| {
+                    const d = v - mean2;
+                    var2 += d * d;
+                }
+
                 if (var1 > 0 or var2 > 0) {
                     const test_res = hypothesis.welchTTest(group1_vals, group2_vals);
                     p_val = test_res.p_value;
                 }
             }
-            
+
             results[c] = .{
                 .log2fc = log2fc,
                 .p_value = p_val,
@@ -413,18 +419,18 @@ pub const PCA = struct {
     pub fn topComponent(allocator: std.mem.Allocator, mat: SparseMatrix, iterations: usize) ![]f64 {
         var v = try allocator.alloc(f64, mat.cols);
         for (v, 0..) |_, i| v[i] = 1.0;
-        
+
         for (0..iterations) |_| {
             const Av = try SparseMatrixOps.multiplyVector(allocator, mat, v);
             defer allocator.free(Av);
-            
+
             var new_v = try allocator.alloc(f64, mat.cols);
             @memset(new_v, 0.0);
-            
+
             if (mat.format == .csr) {
                 for (0..mat.rows) |r| {
                     const start = mat.indptr[r];
-                    const end = mat.indptr[r+1];
+                    const end = mat.indptr[r + 1];
                     for (start..end) |idx| {
                         const c = mat.indices[idx];
                         new_v[c] += mat.data[idx] * Av[r];
@@ -433,7 +439,7 @@ pub const PCA = struct {
             } else {
                 for (0..mat.cols) |c| {
                     const start = mat.indptr[c];
-                    const end = mat.indptr[c+1];
+                    const end = mat.indptr[c + 1];
                     var sum: f64 = 0.0;
                     for (start..end) |idx| {
                         sum += mat.data[idx] * Av[mat.indices[idx]];
@@ -441,11 +447,11 @@ pub const PCA = struct {
                     new_v[c] = sum;
                 }
             }
-            
+
             var norm: f64 = 0.0;
             for (new_v) |val| norm += val * val;
             norm = @sqrt(norm);
-            
+
             if (norm > 0) {
                 for (new_v, 0..) |val, i| v[i] = val / norm;
             }
@@ -460,31 +466,31 @@ pub const IncrementalPCA = struct {
     pub fn onlineTopComponent(allocator: std.mem.Allocator, mat: SparseMatrix, learning_rate: f64) ![]f64 {
         var w = try allocator.alloc(f64, mat.cols);
         for (w, 0..) |_, i| w[i] = 1.0 / @sqrt(@as(f64, @floatFromInt(mat.cols)));
-        
+
         if (mat.format == .csr) {
             for (0..mat.rows) |r| {
                 const start = mat.indptr[r];
-                const end = mat.indptr[r+1];
-                
+                const end = mat.indptr[r + 1];
+
                 var y: f64 = 0.0;
                 for (start..end) |idx| {
                     y += mat.data[idx] * w[mat.indices[idx]];
                 }
-                
+
                 for (start..end) |idx| {
                     const c = mat.indices[idx];
                     w[c] += learning_rate * y * (mat.data[idx] - y * w[c]);
                 }
             }
         }
-        
+
         var norm: f64 = 0.0;
         for (w) |val| norm += val * val;
         norm = @sqrt(norm);
         if (norm > 0) {
             for (w, 0..) |val, i| w[i] = val / norm;
         }
-        
+
         return w;
     }
 };

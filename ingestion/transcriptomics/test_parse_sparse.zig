@@ -11,7 +11,7 @@ test "matrix.zig parseSparseMmap O(NNZ) memory usage" {
         \\Cell1,0.0,1.5,0.0
         \\Cell2,2.0,0.0,3.0
     ;
-    
+
     // We should be able to call matrix.parseSparseMmap
     var sparse = try matrix.parseSparseMmap(testing.allocator, csv_content, ',');
     defer sparse.deinit();

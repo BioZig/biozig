@@ -22,7 +22,7 @@ test "Cellular - Spatial Distances and KdTree" {
 
     const neighbors = try cellular.spatialNeighborhood(alloc, 0.0, 0.0, points, 1.5);
     defer alloc.free(neighbors);
-    
+
     // should find (1.0, 0.0), but not (0.0, 0.0) itself because distance > 0 is checked
     try std.testing.expectEqual(@as(usize, 1), neighbors.len);
     try std.testing.expectEqual(@as(usize, 1), neighbors[0].index);

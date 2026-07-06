@@ -25,8 +25,13 @@ fn atomicAddF64(ptr: *f64, val: f64) void {
 }
 
 const PearsonCtx1 = struct {
-    x: []const f64, y: []const f64, start: usize, end: usize,
-    sx: *f64, sy: *f64, pending: *std.atomic.Value(usize),
+    x: []const f64,
+    y: []const f64,
+    start: usize,
+    end: usize,
+    sx: *f64,
+    sy: *f64,
+    pending: *std.atomic.Value(usize),
     fn run(ctx_opaque: ?*anyopaque) void {
         const ctx = @as(*PearsonCtx1, @ptrCast(@alignCast(ctx_opaque))).*;
         defer _ = ctx.pending.fetchSub(1, .release);
@@ -51,8 +56,16 @@ const PearsonCtx1 = struct {
 };
 
 const PearsonCtx2 = struct {
-    x: []const f64, y: []const f64, start: usize, end: usize,
-    mx: f64, my: f64, cov: *f64, vx: *f64, vy: *f64, pending: *std.atomic.Value(usize),
+    x: []const f64,
+    y: []const f64,
+    start: usize,
+    end: usize,
+    mx: f64,
+    my: f64,
+    cov: *f64,
+    vx: *f64,
+    vy: *f64,
+    pending: *std.atomic.Value(usize),
     fn run(ctx_opaque: ?*anyopaque) void {
         const ctx = @as(*PearsonCtx2, @ptrCast(@alignCast(ctx_opaque))).*;
         defer _ = ctx.pending.fetchSub(1, .release);
@@ -114,7 +127,7 @@ pub fn pearson(allocator_opt: ?std.mem.Allocator, x: []const f64, y: []const f64
         }
         const mean_x = sum_x / nf;
         const mean_y = sum_y / nf;
-        
+
         var cov_v: V = @splat(0.0);
         var var_x_v: V = @splat(0.0);
         var var_y_v: V = @splat(0.0);
@@ -213,8 +226,13 @@ pub fn spearman(x: []const f64, y: []const f64, allocator: std.mem.Allocator) !C
 }
 
 const KendallCtx = struct {
-    x: []const f64, y: []const f64, start_i: usize, end_i: usize, n: usize,
-    conc: *std.atomic.Value(usize), disc: *std.atomic.Value(usize),
+    x: []const f64,
+    y: []const f64,
+    start_i: usize,
+    end_i: usize,
+    n: usize,
+    conc: *std.atomic.Value(usize),
+    disc: *std.atomic.Value(usize),
     pending: *std.atomic.Value(usize),
     fn run(ctx_opaque: ?*anyopaque) void {
         const ctx = @as(*KendallCtx, @ptrCast(@alignCast(ctx_opaque))).*;
@@ -226,8 +244,7 @@ const KendallCtx = struct {
                 const x_diff = ctx.x[i] - ctx.x[j];
                 const y_diff = ctx.y[i] - ctx.y[j];
                 const product = x_diff * y_diff;
-                if (product > 0) lc += 1
-                else if (product < 0) ld += 1;
+                if (product > 0) lc += 1 else if (product < 0) ld += 1;
             }
         }
         _ = ctx.conc.fetchAdd(lc, .monotonic);
@@ -251,8 +268,7 @@ pub fn kendallTau(allocator_opt: ?std.mem.Allocator, x: []const f64, y: []const 
                 const x_diff = x[i] - x[j];
                 const y_diff = y[i] - y[j];
                 const product = x_diff * y_diff;
-                if (product > 0) concordant += 1
-                else if (product < 0) discordant += 1;
+                if (product > 0) concordant += 1 else if (product < 0) discordant += 1;
             }
         }
     } else {
@@ -320,7 +336,7 @@ fn rank(slice: []const f64, allocator: std.mem.Allocator) ![]f64 {
         while (j < slice.len and items[j].val == items[i].val) {
             j += 1;
         }
-        
+
         // Average rank for ties
         const avg_rank = @as(f64, @floatFromInt(i + j + 1)) / 2.0;
         for (i..j) |k| {

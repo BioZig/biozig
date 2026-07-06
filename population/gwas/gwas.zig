@@ -45,7 +45,7 @@ pub const AssociationRecord = struct {
         const effect_size = try serialization.deserialize(reader, f64, allocator);
         const ci_lower = try serialization.deserialize(reader, f64, allocator);
         const ci_upper = try serialization.deserialize(reader, f64, allocator);
-        
+
         const record = try AssociationRecord.init(allocator, variant_id, trait_id, p_value, effect_size, ci_lower, ci_upper);
         allocator.free(variant_id);
         allocator.free(trait_id);
@@ -57,7 +57,7 @@ pub const AssociationRecord = struct {
 pub const AssociationCollection = struct {
     allocator: std.mem.Allocator,
     records: std.ArrayList(AssociationRecord),
-    
+
     // Quick indices
     variant_idx: std.StringHashMap(std.ArrayList(usize)),
     trait_idx: std.StringHashMap(std.ArrayList(usize)),
@@ -74,7 +74,7 @@ pub const AssociationCollection = struct {
     pub fn deinit(self: *AssociationCollection) void {
         for (self.records.items) |*r| r.deinit();
         self.records.deinit(self.allocator);
-        
+
         var v_iter = self.variant_idx.iterator();
         while (v_iter.next()) |entry| {
             self.allocator.free(entry.key_ptr.*);
@@ -127,14 +127,14 @@ test "AssociationRecord and Collection" {
 
     const r1 = try AssociationRecord.init(alloc, "rs1042522", "Height", 5e-8, 1.2, 1.0, 1.4);
     try col.addRecord(r1);
-    
+
     const r2 = try AssociationRecord.init(alloc, "rs1042522", "Weight", 0.05, 0.5, -0.1, 1.1);
     try col.addRecord(r2);
 
     const hits = col.getByVariant("rs1042522");
     try std.testing.expect(hits != null);
     try std.testing.expectEqual(@as(usize, 2), hits.?.len);
-    
+
     const traits = col.getByTrait("Height");
     try std.testing.expect(traits != null);
     try std.testing.expectEqual(@as(usize, 1), traits.?.len);

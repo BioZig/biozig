@@ -38,171 +38,171 @@ pub fn SdfIterator(comptime ReaderType: type) type {
             };
         }
 
-    pub fn deinit(self: *Self) void {
-        self.line_buf.deinit(self.allocator);
-    }
-
-    pub fn next(self: *Self) !?model_mod.Model {
-        if (self.eof) return null;
-
-        var temp_atoms = std.ArrayList(TempAtom).empty;
-        defer {
-            for (temp_atoms.items) |ta| {
-                self.allocator.free(ta.name);
-                self.allocator.free(ta.res_name);
-                self.allocator.free(ta.chain_id);
-            }
-            temp_atoms.deinit(self.allocator);
+        pub fn deinit(self: *Self) void {
+            self.line_buf.deinit(self.allocator);
         }
 
-        // Header: 3 lines
-        var line1 = std.ArrayList(u8).empty;
-        defer line1.deinit(self.allocator);
-        var line2 = std.ArrayList(u8).empty;
-        defer line2.deinit(self.allocator);
-        var line3 = std.ArrayList(u8).empty;
-        defer line3.deinit(self.allocator);
+        pub fn next(self: *Self) !?model_mod.Model {
+            if (self.eof) return null;
 
-        while (true) {
-            const b = self.reader.readByte() catch |err| {
-                if (err == error.EndOfStream) {
-                    self.eof = true;
-                    return null;
+            var temp_atoms = std.ArrayList(TempAtom).empty;
+            defer {
+                for (temp_atoms.items) |ta| {
+                    self.allocator.free(ta.name);
+                    self.allocator.free(ta.res_name);
+                    self.allocator.free(ta.chain_id);
                 }
-                return err;
-            };
-            if (b == '\n') break;
-            try line1.append(self.allocator, b);
-        }
-        while (true) {
-            const b = self.reader.readByte() catch |err| {
-                if (err == error.EndOfStream) return error.MalformedSdfTruncatedHeader;
-                return err;
-            };
-            if (b == '\n') break;
-            try line2.append(self.allocator, b);
-        }
-        while (true) {
-            const b = self.reader.readByte() catch |err| {
-                if (err == error.EndOfStream) return error.MalformedSdfTruncatedHeader;
-                return err;
-            };
-            if (b == '\n') break;
-            try line3.append(self.allocator, b);
-        }
-
-        // 4th line: Counts line (first 3 chars for num_atoms, next 3 for num_bonds)
-        self.line_buf.clearRetainingCapacity();
-        while (true) {
-            const b = self.reader.readByte() catch |err| {
-                if (err == error.EndOfStream) return error.MalformedSdfTruncatedCounts;
-                return err;
-            };
-            if (b == '\n') break;
-            try self.line_buf.append(self.allocator, b);
-        }
-
-        const counts_line = std.mem.trimEnd(u8, self.line_buf.items, "\r");
-        if (counts_line.len < 6) return error.MalformedSdfCountsLineTooShort;
-
-        const num_atoms_str = std.mem.trim(u8, counts_line[0..3], " ");
-        const num_bonds_str = std.mem.trim(u8, counts_line[3..6], " ");
-
-        const num_atoms = try std.fmt.parseInt(usize, num_atoms_str, 10);
-        const num_bonds = try std.fmt.parseInt(usize, num_bonds_str, 10);
-
-        // Read atoms
-        var a_idx: usize = 0;
-        while (a_idx < num_atoms) : (a_idx += 1) {
-            self.line_buf.clearRetainingCapacity();
-            while (true) {
-                const b = self.reader.readByte() catch |err| {
-                    if (err == error.EndOfStream) return error.MalformedSdfTruncatedAtoms;
-                    return err;
-                };
-                if (b == '\n') break;
-                try self.line_buf.append(self.allocator, b);
-            }
-            const atom_line = std.mem.trimEnd(u8, self.line_buf.items, "\r");
-            if (atom_line.len < 34) return error.MalformedSdfAtomLineTooShort;
-
-            const x_str = std.mem.trim(u8, atom_line[0..10], " ");
-            const y_str = std.mem.trim(u8, atom_line[10..20], " ");
-            const z_str = std.mem.trim(u8, atom_line[20..30], " ");
-            const sym = std.mem.trim(u8, atom_line[31..34], " ");
-
-            const x = try std.fmt.parseFloat(f64, x_str);
-            const y = try std.fmt.parseFloat(f64, y_str);
-            const z = try std.fmt.parseFloat(f64, z_str);
-
-            var formal_charge: ?i8 = null;
-            if (atom_line.len >= 37) {
-                const charge_str = std.mem.trim(u8, atom_line[34..37], " ");
-                if (charge_str.len > 0) {
-                    const code = std.fmt.parseInt(u8, charge_str, 10) catch 0;
-                    formal_charge = switch (code) {
-                        1 => 3,
-                        2 => 2,
-                        3 => 1,
-                        5 => -1,
-                        6 => -2,
-                        7 => -3,
-                        else => null,
-                    };
-                }
+                temp_atoms.deinit(self.allocator);
             }
 
-            try temp_atoms.append(self.allocator, .{
-                .id = a_idx + 1,
-                .name = try self.allocator.dupe(u8, sym),
-                .element = parseElement(sym),
-                .pos = Vec3.init(x, y, z),
-                .occupancy = 1.0,
-                .b_factor = 0.0,
-                .formal_charge = formal_charge,
-                .res_seq = 1,
-                .res_name = try self.allocator.dupe(u8, "MOL"),
-                .chain_id = try self.allocator.dupe(u8, "A"),
-            });
-        }
+            // Header: 3 lines
+            var line1 = std.ArrayList(u8).empty;
+            defer line1.deinit(self.allocator);
+            var line2 = std.ArrayList(u8).empty;
+            defer line2.deinit(self.allocator);
+            var line3 = std.ArrayList(u8).empty;
+            defer line3.deinit(self.allocator);
 
-        // Skip bonds
-        var b_idx: usize = 0;
-        while (b_idx < num_bonds) : (b_idx += 1) {
-            self.line_buf.clearRetainingCapacity();
-            while (true) {
-                const b = self.reader.readByte() catch |err| {
-                    if (err == error.EndOfStream) break;
-                    return err;
-                };
-                if (b == '\n') break;
-                try self.line_buf.append(self.allocator, b);
-            }
-        }
-
-        // Read remaining lines until "$$$$"
-        main_loop: while (true) {
-            self.line_buf.clearRetainingCapacity();
             while (true) {
                 const b = self.reader.readByte() catch |err| {
                     if (err == error.EndOfStream) {
                         self.eof = true;
-                        break :main_loop;
+                        return null;
                     }
+                    return err;
+                };
+                if (b == '\n') break;
+                try line1.append(self.allocator, b);
+            }
+            while (true) {
+                const b = self.reader.readByte() catch |err| {
+                    if (err == error.EndOfStream) return error.MalformedSdfTruncatedHeader;
+                    return err;
+                };
+                if (b == '\n') break;
+                try line2.append(self.allocator, b);
+            }
+            while (true) {
+                const b = self.reader.readByte() catch |err| {
+                    if (err == error.EndOfStream) return error.MalformedSdfTruncatedHeader;
+                    return err;
+                };
+                if (b == '\n') break;
+                try line3.append(self.allocator, b);
+            }
+
+            // 4th line: Counts line (first 3 chars for num_atoms, next 3 for num_bonds)
+            self.line_buf.clearRetainingCapacity();
+            while (true) {
+                const b = self.reader.readByte() catch |err| {
+                    if (err == error.EndOfStream) return error.MalformedSdfTruncatedCounts;
                     return err;
                 };
                 if (b == '\n') break;
                 try self.line_buf.append(self.allocator, b);
             }
-            const line = std.mem.trim(u8, self.line_buf.items, " \r\t");
-            if (std.mem.eql(u8, line, "$$$$")) {
-                break;
-            }
-        }
 
-        return try buildModel(self.allocator, 1, temp_atoms.items);
-    }
-};
+            const counts_line = std.mem.trimEnd(u8, self.line_buf.items, "\r");
+            if (counts_line.len < 6) return error.MalformedSdfCountsLineTooShort;
+
+            const num_atoms_str = std.mem.trim(u8, counts_line[0..3], " ");
+            const num_bonds_str = std.mem.trim(u8, counts_line[3..6], " ");
+
+            const num_atoms = try std.fmt.parseInt(usize, num_atoms_str, 10);
+            const num_bonds = try std.fmt.parseInt(usize, num_bonds_str, 10);
+
+            // Read atoms
+            var a_idx: usize = 0;
+            while (a_idx < num_atoms) : (a_idx += 1) {
+                self.line_buf.clearRetainingCapacity();
+                while (true) {
+                    const b = self.reader.readByte() catch |err| {
+                        if (err == error.EndOfStream) return error.MalformedSdfTruncatedAtoms;
+                        return err;
+                    };
+                    if (b == '\n') break;
+                    try self.line_buf.append(self.allocator, b);
+                }
+                const atom_line = std.mem.trimEnd(u8, self.line_buf.items, "\r");
+                if (atom_line.len < 34) return error.MalformedSdfAtomLineTooShort;
+
+                const x_str = std.mem.trim(u8, atom_line[0..10], " ");
+                const y_str = std.mem.trim(u8, atom_line[10..20], " ");
+                const z_str = std.mem.trim(u8, atom_line[20..30], " ");
+                const sym = std.mem.trim(u8, atom_line[31..34], " ");
+
+                const x = try std.fmt.parseFloat(f64, x_str);
+                const y = try std.fmt.parseFloat(f64, y_str);
+                const z = try std.fmt.parseFloat(f64, z_str);
+
+                var formal_charge: ?i8 = null;
+                if (atom_line.len >= 37) {
+                    const charge_str = std.mem.trim(u8, atom_line[34..37], " ");
+                    if (charge_str.len > 0) {
+                        const code = std.fmt.parseInt(u8, charge_str, 10) catch 0;
+                        formal_charge = switch (code) {
+                            1 => 3,
+                            2 => 2,
+                            3 => 1,
+                            5 => -1,
+                            6 => -2,
+                            7 => -3,
+                            else => null,
+                        };
+                    }
+                }
+
+                try temp_atoms.append(self.allocator, .{
+                    .id = a_idx + 1,
+                    .name = try self.allocator.dupe(u8, sym),
+                    .element = parseElement(sym),
+                    .pos = Vec3.init(x, y, z),
+                    .occupancy = 1.0,
+                    .b_factor = 0.0,
+                    .formal_charge = formal_charge,
+                    .res_seq = 1,
+                    .res_name = try self.allocator.dupe(u8, "MOL"),
+                    .chain_id = try self.allocator.dupe(u8, "A"),
+                });
+            }
+
+            // Skip bonds
+            var b_idx: usize = 0;
+            while (b_idx < num_bonds) : (b_idx += 1) {
+                self.line_buf.clearRetainingCapacity();
+                while (true) {
+                    const b = self.reader.readByte() catch |err| {
+                        if (err == error.EndOfStream) break;
+                        return err;
+                    };
+                    if (b == '\n') break;
+                    try self.line_buf.append(self.allocator, b);
+                }
+            }
+
+            // Read remaining lines until "$$$$"
+            main_loop: while (true) {
+                self.line_buf.clearRetainingCapacity();
+                while (true) {
+                    const b = self.reader.readByte() catch |err| {
+                        if (err == error.EndOfStream) {
+                            self.eof = true;
+                            break :main_loop;
+                        }
+                        return err;
+                    };
+                    if (b == '\n') break;
+                    try self.line_buf.append(self.allocator, b);
+                }
+                const line = std.mem.trim(u8, self.line_buf.items, " \r\t");
+                if (std.mem.eql(u8, line, "$$$$")) {
+                    break;
+                }
+            }
+
+            return try buildModel(self.allocator, 1, temp_atoms.items);
+        }
+    };
 }
 
 fn parseElement(sym: []const u8) atom_mod.Element {
@@ -401,7 +401,7 @@ pub fn parseSdfCoords(allocator: std.mem.Allocator, buffer: []const u8) ![]Vec3 
 
 test "sdf zero-copy memory optimization" {
     const allocator = std.testing.allocator;
-    const data = 
+    const data =
         \\Molecule
         \\  Comments
         \\
@@ -410,16 +410,16 @@ test "sdf zero-copy memory optimization" {
         \\   11.6390    6.0710   -5.1470 C   0  0  0  0  0  0  0  0  0  0  0  0
         \\   10.8250    5.0520   -4.3260 C   0  0  0  0  0  0  0  0  0  0  0  0
         \\$$$$
-        ;
+    ;
     var arena = std.heap.ArenaAllocator.init(allocator);
     defer arena.deinit();
     const arena_allocator = arena.allocator();
     const start_memory = arena.queryCapacity();
-    
+
     const coords = try parseSdfCoords(arena_allocator, data);
     try std.testing.expectEqual(@as(usize, 3), coords.len);
     try std.testing.expectEqual(@as(f64, 11.104), coords[0].x);
-    
+
     const end_memory = arena.queryCapacity();
     try std.testing.expect(end_memory - start_memory < 500);
 }

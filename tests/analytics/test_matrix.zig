@@ -6,7 +6,7 @@ test "matrix sparse edge cases" {
     const values = [_]f64{};
     const col_indices = [_]usize{};
     const row_ptr = [_]usize{0};
-    
+
     const mat = analytics.matrix.sparse.CsrMatrix{
         .values = &values,
         .col_indices = &col_indices,
@@ -14,7 +14,7 @@ test "matrix sparse edge cases" {
         .rows = 0,
         .cols = 0,
     };
-    
+
     var vec = [_]f64{};
     const res = try analytics.matrix.sparse.multiplyCsrVector(alloc, mat, &vec, 1);
     defer alloc.free(res);

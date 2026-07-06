@@ -5,7 +5,7 @@ const testing = std.testing;
 
 test "MMap Edge Case: Empty file (0 bytes)" {
     const tmp_path = "empty_mmap.txt";
-    
+
     // Create empty file
     {
         var threaded = std.Io.Threaded.init(testing.allocator, .{});
@@ -23,7 +23,7 @@ test "MMap Edge Case: Empty file (0 bytes)" {
 
     var reader = try MMapReader.init(testing.allocator, tmp_path);
     defer reader.deinit();
-    
+
     // Should be successfully mapped but have 0 length
     try testing.expectEqual(@as(usize, 0), reader.data.len);
 }
@@ -35,7 +35,7 @@ test "MMap Edge Case: File does not exist" {
 
 test "MMap Edge Case: Null byte file" {
     const tmp_path = "null_byte.txt";
-    
+
     // Create file with just \0
     {
         var threaded = std.Io.Threaded.init(testing.allocator, .{});
@@ -54,14 +54,14 @@ test "MMap Edge Case: Null byte file" {
 
     var reader = try MMapReader.init(testing.allocator, tmp_path);
     defer reader.deinit();
-    
+
     try testing.expectEqual(@as(usize, 1), reader.data.len);
     try testing.expectEqual(@as(u8, 0), reader.data[0]);
 }
 
 test "MMap Edge Case: Read Only Protection" {
     const tmp_path = "readonly_mmap.txt";
-    
+
     {
         var threaded = std.Io.Threaded.init(testing.allocator, .{});
         defer threaded.deinit();
@@ -79,7 +79,7 @@ test "MMap Edge Case: Read Only Protection" {
 
     var reader = try MMapReader.init(testing.allocator, tmp_path);
     defer reader.deinit();
-    
+
     // The data is a []const u8 slice. The compiler statically enforces read-only.
     // If we tried to cast it and mutate it, it would segfault in OS since the protection
     // is set to { .read = true, .write = false }.

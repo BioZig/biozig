@@ -37,7 +37,7 @@ pub const FastaIterator = struct {
 
     pub fn next(self: *FastaIterator) !?FastaRecord {
         var header: []const u8 = "";
-        
+
         if (self.peek_header) |h| {
             header = h;
             self.peek_header = null;
@@ -77,7 +77,7 @@ pub const FastaIterator = struct {
                 self.pos = next_pos;
                 break;
             }
-            
+
             for (line) |c| {
                 if (!std.ascii.isAlphabetic(c) and c != '*' and c != '-') {
                     return error.InvalidSequenceCharacter;
@@ -117,15 +117,14 @@ pub fn serialize(writer: anytype, header: []const u8, sequence: []const u8) !voi
 }
 
 test "benchmark zero-copy FASTA iterator" {
-    const test_data = 
+    const test_data =
         ">seq1\nACGT\nACGT\n" ** 5000;
-    
+
     var it = FastaIterator.init(test_data);
     var count: usize = 0;
     while (try it.next()) |_| {
         count += 1;
     }
-    
+
     try std.testing.expectEqual(@as(usize, 5000), count);
 }
-

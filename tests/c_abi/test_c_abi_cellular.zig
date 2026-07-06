@@ -18,11 +18,11 @@ test "biozig_cellular_cell_create" {
     _ = @import("c_api");
     _ = biozig_context_create();
     defer _ = biozig_context_destroy();
-    
+
     const id = "cell_1\x00";
     const cell = biozig_cellular_cell_create(id.ptr, 100);
     try std.testing.expect(cell != null);
-    
+
     const key = "type\x00";
     const val = "T-cell\x00";
     const ret = biozig_cellular_cell_add_metadata(cell, key.ptr, val.ptr);
@@ -32,10 +32,10 @@ test "biozig_cellular_cell_create" {
 test "biozig_cellular_cellcycle" {
     _ = biozig_context_create();
     defer _ = biozig_context_destroy();
-    
+
     const phase = biozig_cellular_cellcycle_assign_phase(0.1, 0.8, 0.1);
     try std.testing.expect(phase >= 0);
-    
+
     const state = biozig_cellular_cellcycle_state_create(phase);
     try std.testing.expect(state != null);
 }
@@ -43,7 +43,7 @@ test "biozig_cellular_cellcycle" {
 test "biozig_cellular_dense_matrix_create" {
     _ = biozig_context_create();
     defer _ = biozig_context_destroy();
-    
+
     const mat = biozig_cellular_dense_matrix_create(10, 10);
     try std.testing.expect(mat != null);
 }

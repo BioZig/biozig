@@ -15,7 +15,7 @@ pub const ChunkStreamer = struct {
 
         const _io = threaded.io();
         const cwd = io.Dir.cwd();
-        
+
         const file = try io.Dir.openFile(cwd, _io, path, .{ .mode = .read_only });
         errdefer io.File.close(file, _io);
 
@@ -59,13 +59,13 @@ pub const ChunkStreamer = struct {
 test "ChunkStreamer basic" {
     const tmp_file_path = "streamer_test_file.txt";
     const content = "1234567890ABCDEF";
-    
+
     {
         var threaded = io.Threaded.init(std.testing.allocator, .{});
         defer threaded.deinit();
         const _io = threaded.io();
         const cwd = io.Dir.cwd();
-        
+
         const file = try io.Dir.createFile(cwd, _io, tmp_file_path, .{});
         defer io.File.close(file, _io);
         try io.File.writePositionalAll(file, _io, content, 0);
@@ -83,7 +83,7 @@ test "ChunkStreamer basic" {
 
     const chunk1 = (try streamer.nextChunk(5)).?;
     try std.testing.expectEqualStrings("12345", chunk1);
-    
+
     const chunk2 = (try streamer.nextChunk(5)).?;
     try std.testing.expectEqualStrings("678", chunk2);
 

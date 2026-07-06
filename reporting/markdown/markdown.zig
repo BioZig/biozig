@@ -21,7 +21,7 @@ pub fn exportMarkdown(report: reporting.Report, writer: anytype) !void {
         for (report.figures) |fig| {
             try writer.print("### {s}\n\n", .{fig.label});
             try writer.print("*{s}*\n\n", .{fig.caption.text});
-            // Embed placeholder for figure in markdown
+            // Embed strict link to generated figure
             try writer.print("![{s}](media/figure_{}.svg)\n\n", .{ fig.label, fig.number });
         }
     }

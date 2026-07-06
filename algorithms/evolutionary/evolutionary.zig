@@ -47,16 +47,16 @@ pub fn areTreesIdentical(tree1: PhyloTree, tree2: PhyloTree) bool {
 fn areNodesIdentical(tree1: PhyloTree, idx1: usize, tree2: PhyloTree, idx2: usize) bool {
     const node1 = tree1.nodes[idx1];
     const node2 = tree2.nodes[idx2];
-    
+
     if (node1.id != node2.id) return false;
     if (!std.mem.eql(u8, node1.label, node2.label)) return false;
-    
+
     // Using a tiny epsilon for float comparison
     const diff = node1.branch_length - node2.branch_length;
     if (diff > 1e-6 or diff < -1e-6) return false;
 
     if (node1.children.len != node2.children.len) return false;
-    
+
     for (node1.children, 0..) |child1, i| {
         if (!areNodesIdentical(tree1, child1, tree2, node2.children[i])) return false;
     }
@@ -90,7 +90,7 @@ fn collectSubtreeLeafSets(allocator: std.mem.Allocator, tree: PhyloTree, node_id
 
     // Sort leaves to create a unique signature for this subtree/clade
     std.mem.sort(usize, leaves.items, {}, std.sort.asc(usize));
-    
+
     const sig = hashLeafSet(leaves.items);
     try bp.put(sig, {});
 
@@ -101,7 +101,7 @@ fn collectSubtreeLeafSets(allocator: std.mem.Allocator, tree: PhyloTree, node_id
 pub fn robinsonFouldsDistance(allocator: std.mem.Allocator, tree1: PhyloTree, tree2: PhyloTree) !usize {
     var bp1 = std.AutoHashMap(u64, void).init(allocator);
     defer bp1.deinit();
-    
+
     var bp2 = std.AutoHashMap(u64, void).init(allocator);
     defer bp2.deinit();
 
@@ -111,7 +111,7 @@ pub fn robinsonFouldsDistance(allocator: std.mem.Allocator, tree1: PhyloTree, tr
     leaves2.deinit(allocator);
 
     var distance: usize = 0;
-    
+
     var it1 = bp1.keyIterator();
     while (it1.next()) |k| {
         if (!bp2.contains(k.*)) distance += 1;
@@ -135,13 +135,7 @@ pub fn parsimonyFitch(allocator: std.mem.Allocator, tree: PhyloTree, leaf_states
     return score;
 }
 
-fn fitchDownpass(
-    allocator: std.mem.Allocator, 
-    tree: PhyloTree,
-    node_idx: usize, 
-    leaf_states: std.AutoHashMap(usize, usize), 
-    score: *usize
-) !std.AutoHashMap(usize, void) {
+fn fitchDownpass(allocator: std.mem.Allocator, tree: PhyloTree, node_idx: usize, leaf_states: std.AutoHashMap(usize, usize), score: *usize) !std.AutoHashMap(usize, void) {
     const node = tree.nodes[node_idx];
     var node_states = std.AutoHashMap(usize, void).init(allocator);
 
@@ -239,7 +233,7 @@ pub fn upgma(allocator: std.mem.Allocator, distance_matrix: [][]const f64, label
     }
 
     var nodes = try allocator.alloc(PhyloNode, 2 * n - 1);
-    
+
     for (0..n) |i| {
         nodes[i] = PhyloNode.init(i, try allocator.dupe(u8, labels[i]), 0.0, &[_]usize{}, &[_]visualization.phylogeny.MetadataEntry{});
     }
@@ -249,10 +243,10 @@ pub fn upgma(allocator: std.mem.Allocator, distance_matrix: [][]const f64, label
 
     var dists = try allocator.alloc([]f64, 2 * n - 1);
     defer {
-        for (0..2*n-1) |i| allocator.free(dists[i]);
+        for (0..2 * n - 1) |i| allocator.free(dists[i]);
         allocator.free(dists);
     }
-    for (0..2*n-1) |i| {
+    for (0..2 * n - 1) |i| {
         dists[i] = try allocator.alloc(f64, 2 * n - 1);
         @memset(dists[i], 0.0);
     }
@@ -286,9 +280,9 @@ pub fn upgma(allocator: std.mem.Allocator, distance_matrix: [][]const f64, label
 
         const c1 = active_clusters.items[min_i];
         const c2 = active_clusters.items[min_j];
-        
+
         const new_height = min_dist / 2.0;
-        
+
         var children = try allocator.alloc(usize, 2);
         children[0] = c1.node_idx;
         children[1] = c2.node_idx;
@@ -296,13 +290,7 @@ pub fn upgma(allocator: std.mem.Allocator, distance_matrix: [][]const f64, label
         nodes[c1.node_idx].branch_length = new_height - c1.height;
         nodes[c2.node_idx].branch_length = new_height - c2.height;
 
-        nodes[next_node_idx] = PhyloNode.init(
-            next_node_idx,
-            "",
-            0.0,
-            children,
-            &[_]visualization.phylogeny.MetadataEntry{}
-        );
+        nodes[next_node_idx] = PhyloNode.init(next_node_idx, "", 0.0, children, &[_]visualization.phylogeny.MetadataEntry{});
 
         const new_cluster = UPGMA_NJ_Cluster{
             .node_idx = next_node_idx,
@@ -342,7 +330,7 @@ pub fn neighborJoining(allocator: std.mem.Allocator, distance_matrix: [][]const 
     }
 
     var nodes = try allocator.alloc(PhyloNode, 2 * n - 2);
-    
+
     for (0..n) |i| {
         nodes[i] = PhyloNode.init(i, try allocator.dupe(u8, labels[i]), 0.0, &[_]usize{}, &[_]visualization.phylogeny.MetadataEntry{});
     }
@@ -352,10 +340,10 @@ pub fn neighborJoining(allocator: std.mem.Allocator, distance_matrix: [][]const 
 
     var dists = try allocator.alloc([]f64, 2 * n - 2);
     defer {
-        for (0..2*n-2) |i| allocator.free(dists[i]);
+        for (0..2 * n - 2) |i| allocator.free(dists[i]);
         allocator.free(dists);
     }
-    for (0..2*n-2) |i| {
+    for (0..2 * n - 2) |i| {
         dists[i] = try allocator.alloc(f64, 2 * n - 2);
         @memset(dists[i], 0.0);
     }
@@ -371,7 +359,7 @@ pub fn neighborJoining(allocator: std.mem.Allocator, distance_matrix: [][]const 
 
     while (active_nodes.items.len > 2) {
         const k = @as(f64, @floatFromInt(active_nodes.items.len));
-        
+
         var min_q: f64 = std.math.inf(f64);
         var min_i: usize = 0;
         var min_j: usize = 0;
@@ -380,7 +368,7 @@ pub fn neighborJoining(allocator: std.mem.Allocator, distance_matrix: [][]const 
             for (i + 1..active_nodes.items.len) |j| {
                 const ni = active_nodes.items[i];
                 const nj = active_nodes.items[j];
-                
+
                 var r_i: f64 = 0.0;
                 for (active_nodes.items) |m| {
                     if (m != ni) r_i += dists[ni][m];
@@ -401,7 +389,7 @@ pub fn neighborJoining(allocator: std.mem.Allocator, distance_matrix: [][]const 
 
         const ni = active_nodes.items[min_i];
         const nj = active_nodes.items[min_j];
-        
+
         var r_i: f64 = 0.0;
         for (active_nodes.items) |m| {
             if (m != ni) r_i += dists[ni][m];
@@ -421,13 +409,7 @@ pub fn neighborJoining(allocator: std.mem.Allocator, distance_matrix: [][]const 
         nodes[ni].branch_length = @max(0.0, branch_i);
         nodes[nj].branch_length = @max(0.0, branch_j);
 
-        nodes[next_node_idx] = PhyloNode.init(
-            next_node_idx,
-            "",
-            0.0,
-            children,
-            &[_]visualization.phylogeny.MetadataEntry{}
-        );
+        nodes[next_node_idx] = PhyloNode.init(next_node_idx, "", 0.0, children, &[_]visualization.phylogeny.MetadataEntry{});
 
         for (active_nodes.items, 0..) |m, idx| {
             if (idx == min_i or idx == min_j) continue;
@@ -446,7 +428,7 @@ pub fn neighborJoining(allocator: std.mem.Allocator, distance_matrix: [][]const 
     const n1 = active_nodes.items[0];
     const n2 = active_nodes.items[1];
     nodes[n1].branch_length = dists[n1][n2];
-    
+
     var children = try allocator.alloc(usize, 1);
     children[0] = n1;
     nodes[n2].children = children;
@@ -482,7 +464,7 @@ fn felsensteinDownpass(
     node_likelihoods: *std.AutoHashMap(usize, [4]f64),
 ) !void {
     const node = tree.nodes[node_idx];
-    
+
     if (node.isLeaf()) {
         var L = [4]f64{ 0.0, 0.0, 0.0, 0.0 };
         if (leaf_states.get(node.id)) |state| {
@@ -500,7 +482,7 @@ fn felsensteinDownpass(
         const child_L = node_likelihoods.get(child_idx).?;
         const child_node = tree.nodes[child_idx];
         const t = @max(1e-8, child_node.branch_length);
-        
+
         const p_same = SubstitutionModels.JC69.pSame(t, mu);
         const p_diff = SubstitutionModels.JC69.pDiff(t, mu);
 
@@ -528,7 +510,10 @@ pub fn nearestNeighborInterchange(allocator: std.mem.Allocator, tree: PhyloTree)
                 if (!child.isLeaf() and child.children.len >= 2) {
                     var sibling_idx: usize = 0;
                     for (node.children) |c| {
-                        if (c != child_idx) { sibling_idx = c; break; }
+                        if (c != child_idx) {
+                            sibling_idx = c;
+                            break;
+                        }
                     }
                     var nodes1 = try allocator.alloc(PhyloNode, tree.nodes.len);
                     @memcpy(nodes1, tree.nodes);
@@ -536,10 +521,20 @@ pub fn nearestNeighborInterchange(allocator: std.mem.Allocator, tree: PhyloTree)
                     @memcpy(new_node_children1, node.children);
                     const new_child_children1 = try allocator.alloc(usize, child.children.len);
                     @memcpy(new_child_children1, child.children);
-                    
-                    for (new_node_children1) |*c| { if (c.* == sibling_idx) { c.* = child.children[0]; break; } }
-                    for (new_child_children1) |*c| { if (c.* == child.children[0]) { c.* = sibling_idx; break; } }
-                    
+
+                    for (new_node_children1) |*c| {
+                        if (c.* == sibling_idx) {
+                            c.* = child.children[0];
+                            break;
+                        }
+                    }
+                    for (new_child_children1) |*c| {
+                        if (c.* == child.children[0]) {
+                            c.* = sibling_idx;
+                            break;
+                        }
+                    }
+
                     nodes1[i].children = new_node_children1;
                     nodes1[child_idx].children = new_child_children1;
                     try neighbors.append(allocator, PhyloTree.init(nodes1, tree.root, tree.is_rooted));
@@ -551,10 +546,20 @@ pub fn nearestNeighborInterchange(allocator: std.mem.Allocator, tree: PhyloTree)
                         @memcpy(new_node_children2, node.children);
                         const new_child_children2 = try allocator.alloc(usize, child.children.len);
                         @memcpy(new_child_children2, child.children);
-                        
-                        for (new_node_children2) |*c| { if (c.* == sibling_idx) { c.* = child.children[1]; break; } }
-                        for (new_child_children2) |*c| { if (c.* == child.children[1]) { c.* = sibling_idx; break; } }
-                        
+
+                        for (new_node_children2) |*c| {
+                            if (c.* == sibling_idx) {
+                                c.* = child.children[1];
+                                break;
+                            }
+                        }
+                        for (new_child_children2) |*c| {
+                            if (c.* == child.children[1]) {
+                                c.* = sibling_idx;
+                                break;
+                            }
+                        }
+
                         nodes2[i].children = new_node_children2;
                         nodes2[child_idx].children = new_child_children2;
                         try neighbors.append(allocator, PhyloTree.init(nodes2, tree.root, tree.is_rooted));
@@ -587,15 +592,15 @@ pub fn bayesianMCMC(allocator: std.mem.Allocator, initial_tree: PhyloTree, leaf_
     var best_logL = try felsensteinPruning(allocator, best_tree, leaf_states, 1.0);
     var current_tree = initial_tree;
     var current_logL = best_logL;
-    
+
     for (0..iterations) |_| {
         var neighbors = try nearestNeighborInterchange(allocator, current_tree);
         defer neighbors.deinit(allocator);
-        
+
         if (neighbors.items.len > 0) {
             const proposal = neighbors.items[0];
             const proposal_logL = try felsensteinPruning(allocator, proposal, leaf_states, 1.0);
-            
+
             if (proposal_logL > current_logL) {
                 current_tree = proposal;
                 current_logL = proposal_logL;
@@ -616,19 +621,19 @@ test "Evolutionary algorithms test" {
     const leaf1 = PhyloNode.init(1, "Species A", 1.0, &[_]usize{}, &[_]visualization.phylogeny.MetadataEntry{});
     const leaf2 = PhyloNode.init(2, "Species B", 1.0, &[_]usize{}, &[_]visualization.phylogeny.MetadataEntry{});
     const leaf3 = PhyloNode.init(3, "Species C", 2.0, &[_]usize{}, &[_]visualization.phylogeny.MetadataEntry{});
-    
+
     const children1 = [_]usize{ 0, 1 };
     const internal1 = PhyloNode.init(4, "", 1.0, &children1, &[_]visualization.phylogeny.MetadataEntry{});
-    
+
     const root_children = [_]usize{ 3, 2 };
     const root = PhyloNode.init(5, "", 0.0, &root_children, &[_]visualization.phylogeny.MetadataEntry{});
-    
+
     const nodes = [_]PhyloNode{ leaf1, leaf2, leaf3, internal1, root };
     const tree1 = PhyloTree.init(&nodes, 4, true);
 
     const stats = computeTreeStatistics(tree1);
     try testing.expectEqual(@as(usize, 3), stats.num_leaves);
-    
+
     var leaf_states = std.AutoHashMap(usize, usize).init(allocator);
     defer leaf_states.deinit();
     try leaf_states.put(1, 0);
@@ -647,11 +652,11 @@ test "Advanced evolutionary algorithms" {
 
     var dist_matrix = try allocator.alloc([]const f64, 3);
     defer allocator.free(dist_matrix);
-    
-    var d0 = [_]f64{0.0, 0.2, 0.3};
-    var d1 = [_]f64{0.2, 0.0, 0.4};
-    var d2 = [_]f64{0.3, 0.4, 0.0};
-    
+
+    var d0 = [_]f64{ 0.0, 0.2, 0.3 };
+    var d1 = [_]f64{ 0.2, 0.0, 0.4 };
+    var d2 = [_]f64{ 0.3, 0.4, 0.0 };
+
     dist_matrix[0] = &d0;
     dist_matrix[1] = &d1;
     dist_matrix[2] = &d2;
@@ -664,7 +669,7 @@ test "Advanced evolutionary algorithms" {
 
     const tree_upgma = try upgma(allocator, dist_matrix, labels);
     try testing.expectEqual(@as(usize, 5), tree_upgma.nodes.len);
-    
+
     const tree_nj = try neighborJoining(allocator, dist_matrix, labels);
     try testing.expectEqual(@as(usize, 4), tree_nj.nodes.len);
 
@@ -673,7 +678,7 @@ test "Advanced evolutionary algorithms" {
     try leaf_states.put(0, Nucleotide.A);
     try leaf_states.put(1, Nucleotide.A);
     try leaf_states.put(2, Nucleotide.G);
-    
+
     const likelihood = try felsensteinPruning(allocator, tree_upgma, leaf_states, 1.0);
     try testing.expect(likelihood > 0.0);
 

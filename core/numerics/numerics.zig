@@ -105,7 +105,7 @@ pub fn covariance(x: []const f64, y: []const f64) f64 {
         const x_v: V = x[i .. i + vlen][0..vlen].*;
         const y_v: V = y[i .. i + vlen][0..vlen].*;
         const val_v = (x_v - xm_v) * (y_v - ym_v);
-        
+
         const term_v = val_v - c_v;
         const t_v = sum_v + term_v;
         c_v = (t_v - sum_v) - term_v;
@@ -183,27 +183,27 @@ test "quantiles" {
 test "vector operations" {
     const x = [_]f64{ 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0 };
     const y = [_]f64{ 9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0, 1.0 };
-    
+
     // dot product
     const dot = dotProduct(&x, &y);
     try std.testing.expectApproxEqAbs(@as(f64, 165.0), dot, 1e-5);
-    
+
     // norm
     const n = norm(&x);
     try std.testing.expectApproxEqAbs(@as(f64, 16.8819430161), n, 1e-5);
-    
+
     // vector add
     var add_res: [9]f64 = undefined;
     vectorAdd(&add_res, &x, &y);
     try std.testing.expectApproxEqAbs(@as(f64, 10.0), add_res[0], 1e-5);
     try std.testing.expectApproxEqAbs(@as(f64, 10.0), add_res[8], 1e-5);
-    
+
     // vector sub
     var sub_res: [9]f64 = undefined;
     vectorSub(&sub_res, &x, &y);
     try std.testing.expectApproxEqAbs(@as(f64, -8.0), sub_res[0], 1e-5);
     try std.testing.expectApproxEqAbs(@as(f64, 8.0), sub_res[8], 1e-5);
-    
+
     // normalize
     var norm_arr = [_]f64{ 3.0, 4.0 };
     normalize(&norm_arr);

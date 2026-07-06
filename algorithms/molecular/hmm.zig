@@ -4,7 +4,7 @@ pub const HMM = struct {
     allocator: std.mem.Allocator,
     num_states: usize,
     num_emissions: usize,
-    
+
     // Probabilities are typically stored as logs, but here we use simple f64 for brevity.
     initial_probs: []f64,
     transition_probs: [][]f64, // transition_probs[i][j] = P(j | i)
@@ -111,23 +111,23 @@ test "HMM Viterbi" {
     const alloc = std.testing.allocator;
     var hmm = try HMM.init(alloc, 2, 2);
     defer hmm.deinit();
-    
+
     hmm.initial_probs[0] = 0.6;
     hmm.initial_probs[1] = 0.4;
-    
+
     hmm.transition_probs[0][0] = 0.7;
     hmm.transition_probs[0][1] = 0.3;
     hmm.transition_probs[1][0] = 0.4;
     hmm.transition_probs[1][1] = 0.6;
-    
+
     hmm.emission_probs[0][0] = 0.5;
     hmm.emission_probs[0][1] = 0.5;
     hmm.emission_probs[1][0] = 0.1;
     hmm.emission_probs[1][1] = 0.9;
-    
+
     const emissions = [_]usize{ 0, 1, 1 };
     const path = try hmm.viterbi(alloc, &emissions);
     defer alloc.free(path);
-    
+
     try std.testing.expectEqual(@as(usize, 3), path.len);
 }

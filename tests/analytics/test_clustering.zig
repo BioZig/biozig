@@ -19,7 +19,7 @@ test "clustering dbscan edge cases" {
     var data = [_]f64{ 1.0, 1.0, 2.0, 2.0 };
     // Invalid thread count
     try std.testing.expectError(error.InvalidThreadCount, analytics.clustering.dbscan.dbscan(alloc, &data, 2, 1.0, 2, 0));
-    
+
     // NaN handling edge case (should not crash, might return all noise)
     var nan_data = [_]f64{ std.math.nan(f64), 1.0, 2.0, 2.0 };
     const res = try analytics.clustering.dbscan.dbscan(alloc, &nan_data, 2, 1.0, 2, 1);

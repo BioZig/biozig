@@ -8,7 +8,7 @@ pub const VariantType = enum {
 };
 
 pub const Variant = struct {
-    position: usize,       // 0-indexed genomic coordinate
+    position: usize, // 0-indexed genomic coordinate
     reference: []const u8, // Reference allele string (e.g. "A", "C", "CAG")
     alternate: []const u8, // Alternate allele string (e.g. "G", "T", "CG")
     allocator: std.mem.Allocator,
@@ -58,7 +58,7 @@ pub const Variant = struct {
         // Position validation (no special constraints other than standard bounds)
         // Alleles must not be empty at the same time
         if (self.reference.len == 0 and self.alternate.len == 0) return false;
-        
+
         // Reference and Alternate must not be identical
         if (std.mem.eql(u8, self.reference, self.alternate)) return false;
 
@@ -75,10 +75,7 @@ pub const Variant = struct {
 
     fn isValidBase(c: u8) bool {
         return switch (c) {
-            'A', 'a', 'C', 'c', 'G', 'g', 'T', 't', 'U', 'u',
-            'R', 'r', 'Y', 'y', 'S', 's', 'W', 'w', 'K', 'k',
-            'M', 'm', 'B', 'b', 'D', 'd', 'H', 'h', 'V', 'v',
-            'N', 'n', '-' => true,
+            'A', 'a', 'C', 'c', 'G', 'g', 'T', 't', 'U', 'u', 'R', 'r', 'Y', 'y', 'S', 's', 'W', 'w', 'K', 'k', 'M', 'm', 'B', 'b', 'D', 'd', 'H', 'h', 'V', 'v', 'N', 'n', '-' => true,
             else => false,
         };
     }

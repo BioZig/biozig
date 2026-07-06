@@ -24,7 +24,7 @@ pub fn hypergeometricPValue(k: usize, K: usize, n: usize, N: usize) f64 {
     var p_val: f64 = 0.0;
     const max_k = @min(n, K);
     if (k > max_k) return 0.0;
-    
+
     var i: usize = k;
     while (i <= max_k) : (i += 1) {
         p_val += hypergeometricPdf(i, K, n, N);
@@ -117,7 +117,7 @@ pub fn performGsea(
         }
 
         const perm_es = calculateEnrichmentScore(permuted_list, gene_set, p);
-        
+
         if (actual_es >= 0) {
             if (perm_es >= 0) {
                 valid_perms += 1;

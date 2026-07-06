@@ -14,7 +14,7 @@ test "biozig_parse_fasta_not_found" {
     _ = @import("c_api");
     _ = biozig_context_create();
     defer _ = biozig_context_destroy();
-    
+
     const bad_path = "nonexistent_file.fasta\x00";
     const res = biozig_parse_fasta(bad_path.ptr);
     try std.testing.expect(res.error_code != 0);

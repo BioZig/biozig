@@ -135,8 +135,8 @@ test "deterministic task scheduling DAG" {
     // Task 4 depends on 2 and 3. Task 2 and 3 depend on 1.
     // Order: 1 -> (2, 3) -> 4
     try sched.addTask(4, &[_]usize{ 2, 3 }, SchedTestCtx.run, &c4);
-    try sched.addTask(2, &[_]usize{ 1 }, SchedTestCtx.run, &c2);
-    try sched.addTask(3, &[_]usize{ 1 }, SchedTestCtx.run, &c3);
+    try sched.addTask(2, &[_]usize{1}, SchedTestCtx.run, &c2);
+    try sched.addTask(3, &[_]usize{1}, SchedTestCtx.run, &c3);
     try sched.addTask(1, &[_]usize{}, SchedTestCtx.run, &c1);
 
     try sched.runDeterministic();
@@ -158,8 +158,8 @@ test "circular dependency detection" {
     var c1 = SchedTestCtx{ .id = 1, .order = &order, .allocator = std.testing.allocator };
     var c2 = SchedTestCtx{ .id = 2, .order = &order, .allocator = std.testing.allocator };
 
-    try sched.addTask(1, &[_]usize{ 2 }, SchedTestCtx.run, &c1);
-    try sched.addTask(2, &[_]usize{ 1 }, SchedTestCtx.run, &c2);
+    try sched.addTask(1, &[_]usize{2}, SchedTestCtx.run, &c1);
+    try sched.addTask(2, &[_]usize{1}, SchedTestCtx.run, &c2);
 
     try std.testing.expectError(error.CircularDependency, sched.runDeterministic());
 }

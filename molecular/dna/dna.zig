@@ -16,29 +16,33 @@ pub const IUPAC = enum(u4) {
     C = 2,
     G = 4,
     T = 8,
-    R = 1 | 4,       // A or G
-    Y = 2 | 8,       // C or T
-    S = 2 | 4,       // G or C
-    W = 1 | 8,       // A or T
-    K = 4 | 8,       // G or T
-    M = 1 | 2,       // A or C
-    B = 2 | 4 | 8,   // C or G or T
-    D = 1 | 4 | 8,   // A or G or T
-    H = 1 | 2 | 8,   // A or C or T
-    V = 1 | 2 | 4,   // A or C or G
+    R = 1 | 4, // A or G
+    Y = 2 | 8, // C or T
+    S = 2 | 4, // G or C
+    W = 1 | 8, // A or T
+    K = 4 | 8, // G or T
+    M = 1 | 2, // A or C
+    B = 2 | 4 | 8, // C or G or T
+    D = 1 | 4 | 8, // A or G or T
+    H = 1 | 2 | 8, // A or C or T
+    V = 1 | 2 | 4, // A or C or G
     N = 1 | 2 | 4 | 8, // Any base
 };
 
 const NucLookup = struct {
     table: [256]u8,
     const invalid = 255;
-    
+
     fn init() [256]u8 {
         var t = [_]u8{invalid} ** 256;
-        t['A'] = @intFromEnum(Nucleotide.A); t['a'] = @intFromEnum(Nucleotide.A);
-        t['C'] = @intFromEnum(Nucleotide.C); t['c'] = @intFromEnum(Nucleotide.C);
-        t['G'] = @intFromEnum(Nucleotide.G); t['g'] = @intFromEnum(Nucleotide.G);
-        t['T'] = @intFromEnum(Nucleotide.T); t['t'] = @intFromEnum(Nucleotide.T);
+        t['A'] = @intFromEnum(Nucleotide.A);
+        t['a'] = @intFromEnum(Nucleotide.A);
+        t['C'] = @intFromEnum(Nucleotide.C);
+        t['c'] = @intFromEnum(Nucleotide.C);
+        t['G'] = @intFromEnum(Nucleotide.G);
+        t['g'] = @intFromEnum(Nucleotide.G);
+        t['T'] = @intFromEnum(Nucleotide.T);
+        t['t'] = @intFromEnum(Nucleotide.T);
         return t;
     }
 };
@@ -59,25 +63,41 @@ pub fn nucleotideToChar(n: Nucleotide) u8 {
 const IupacLookup = struct {
     table: [256]u8,
     const invalid = 255;
-    
+
     fn init() [256]u8 {
         var t = [_]u8{invalid} ** 256;
-        t['A'] = @intFromEnum(IUPAC.A); t['a'] = @intFromEnum(IUPAC.A);
-        t['C'] = @intFromEnum(IUPAC.C); t['c'] = @intFromEnum(IUPAC.C);
-        t['G'] = @intFromEnum(IUPAC.G); t['g'] = @intFromEnum(IUPAC.G);
-        t['T'] = @intFromEnum(IUPAC.T); t['t'] = @intFromEnum(IUPAC.T);
-        t['U'] = @intFromEnum(IUPAC.T); t['u'] = @intFromEnum(IUPAC.T);
-        t['R'] = @intFromEnum(IUPAC.R); t['r'] = @intFromEnum(IUPAC.R);
-        t['Y'] = @intFromEnum(IUPAC.Y); t['y'] = @intFromEnum(IUPAC.Y);
-        t['S'] = @intFromEnum(IUPAC.S); t['s'] = @intFromEnum(IUPAC.S);
-        t['W'] = @intFromEnum(IUPAC.W); t['w'] = @intFromEnum(IUPAC.W);
-        t['K'] = @intFromEnum(IUPAC.K); t['k'] = @intFromEnum(IUPAC.K);
-        t['M'] = @intFromEnum(IUPAC.M); t['m'] = @intFromEnum(IUPAC.M);
-        t['B'] = @intFromEnum(IUPAC.B); t['b'] = @intFromEnum(IUPAC.B);
-        t['D'] = @intFromEnum(IUPAC.D); t['d'] = @intFromEnum(IUPAC.D);
-        t['H'] = @intFromEnum(IUPAC.H); t['h'] = @intFromEnum(IUPAC.H);
-        t['V'] = @intFromEnum(IUPAC.V); t['v'] = @intFromEnum(IUPAC.V);
-        t['N'] = @intFromEnum(IUPAC.N); t['n'] = @intFromEnum(IUPAC.N);
+        t['A'] = @intFromEnum(IUPAC.A);
+        t['a'] = @intFromEnum(IUPAC.A);
+        t['C'] = @intFromEnum(IUPAC.C);
+        t['c'] = @intFromEnum(IUPAC.C);
+        t['G'] = @intFromEnum(IUPAC.G);
+        t['g'] = @intFromEnum(IUPAC.G);
+        t['T'] = @intFromEnum(IUPAC.T);
+        t['t'] = @intFromEnum(IUPAC.T);
+        t['U'] = @intFromEnum(IUPAC.T);
+        t['u'] = @intFromEnum(IUPAC.T);
+        t['R'] = @intFromEnum(IUPAC.R);
+        t['r'] = @intFromEnum(IUPAC.R);
+        t['Y'] = @intFromEnum(IUPAC.Y);
+        t['y'] = @intFromEnum(IUPAC.Y);
+        t['S'] = @intFromEnum(IUPAC.S);
+        t['s'] = @intFromEnum(IUPAC.S);
+        t['W'] = @intFromEnum(IUPAC.W);
+        t['w'] = @intFromEnum(IUPAC.W);
+        t['K'] = @intFromEnum(IUPAC.K);
+        t['k'] = @intFromEnum(IUPAC.K);
+        t['M'] = @intFromEnum(IUPAC.M);
+        t['m'] = @intFromEnum(IUPAC.M);
+        t['B'] = @intFromEnum(IUPAC.B);
+        t['b'] = @intFromEnum(IUPAC.B);
+        t['D'] = @intFromEnum(IUPAC.D);
+        t['d'] = @intFromEnum(IUPAC.D);
+        t['H'] = @intFromEnum(IUPAC.H);
+        t['h'] = @intFromEnum(IUPAC.H);
+        t['V'] = @intFromEnum(IUPAC.V);
+        t['v'] = @intFromEnum(IUPAC.V);
+        t['N'] = @intFromEnum(IUPAC.N);
+        t['n'] = @intFromEnum(IUPAC.N);
         return t;
     }
 };
@@ -89,9 +109,7 @@ pub fn charToIUPAC(c: u8) !IUPAC {
     return @as(IUPAC, @enumFromInt(val));
 }
 
-const iupac_char_map = [_]u8{
-    '?', 'A', 'C', 'M', 'G', 'R', 'S', 'V', 'T', 'W', 'Y', 'H', 'K', 'D', 'B', 'N'
-};
+const iupac_char_map = [_]u8{ '?', 'A', 'C', 'M', 'G', 'R', 'S', 'V', 'T', 'W', 'Y', 'H', 'K', 'D', 'B', 'N' };
 
 pub fn iupacToChar(i: IUPAC) u8 {
     return iupac_char_map[@intFromEnum(i)];
@@ -251,7 +269,7 @@ pub const DNA2View = struct {
             }
 
             // Remainder
-            for (bytes_len * 4 .. self.len) |idx| {
+            for (bytes_len * 4..self.len) |idx| {
                 const n = self.get(idx);
                 if (n == .G or n == .C) {
                     gc_count += 1;

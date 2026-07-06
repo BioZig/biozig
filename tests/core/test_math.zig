@@ -7,12 +7,12 @@ test "math boundary conditions" {
     // test infinity and NaN handling
     const inf = std.math.inf(f64);
     const nan = std.math.nan(f64);
-    
+
     // Strict Add
     try std.testing.expectEqual(math.strictAdd(inf, 1.0), inf);
     try std.testing.expect(std.math.isNan(math.strictAdd(inf, -inf)));
     try std.testing.expect(std.math.isNan(math.strictAdd(nan, 1.0)));
-    
+
     // Strict Sub
     try std.testing.expectEqual(math.strictSub(inf, 1.0), inf);
     try std.testing.expect(std.math.isNan(math.strictSub(inf, inf)));

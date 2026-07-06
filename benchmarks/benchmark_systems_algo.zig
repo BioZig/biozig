@@ -5,21 +5,21 @@ pub fn main(init: std.process.Init) !void {
     const allocator = std.heap.page_allocator;
     var args = std.process.Args.Iterator.init(init.minimal.args);
     _ = args.next(); // skip exe
-    
+
     const algo_name = args.next() orelse return error.MissingAlgoName;
-    
+
     const num_nodes = 100000;
     const num_edges = 500000;
-    
+
     var builder = algorithms.systems.GraphBuilder.init(num_nodes);
     defer builder.deinit(allocator);
-    
+
     for (0..num_edges) |i| {
         const u = i % num_nodes;
         const v = (i * 7) % num_nodes;
         try builder.addEdge(allocator, u, v);
     }
-    
+
     var graph = try builder.build(allocator);
     defer graph.deinit(allocator);
 
@@ -81,6 +81,6 @@ pub fn main(init: std.process.Init) !void {
     }
 
     std.debug.print("Algorithm: {s}\n", .{algo_name});
-    std.debug.print("Data: {} nodes, {} edges\n", .{num_nodes, num_edges});
-    std.debug.print("Accuracy Check: {s}\n", .{ if (accuracy_pass) "PASS" else "FAIL" });
+    std.debug.print("Data: {} nodes, {} edges\n", .{ num_nodes, num_edges });
+    std.debug.print("Accuracy Check: {s}\n", .{if (accuracy_pass) "PASS" else "FAIL"});
 }

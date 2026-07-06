@@ -135,9 +135,9 @@ pub const DevelopmentalTimeline = struct {
             if (std.mem.eql(u8, rel.parent_id, u_id)) {
                 const v = self.findStageIndex(rel.child_id).?;
                 if (!visited[v]) {
-                     try self.dfsCheckCycle(v, visited, rec_stack);
+                    try self.dfsCheckCycle(v, visited, rec_stack);
                 } else if (rec_stack[v]) {
-                     return error.DevelopmentalCycle;
+                    return error.DevelopmentalCycle;
                 }
             }
         }

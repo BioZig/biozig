@@ -36,14 +36,14 @@ pub const TwoBitFile = struct {
         var bytes: [@sizeOf(T)]u8 = undefined;
         @memcpy(&bytes, self.data[offset.* .. offset.* + @sizeOf(T)]);
         offset.* += @sizeOf(T);
-        
+
         const endian: std.builtin.Endian = if (self.swap_endian) .big else .little;
         return std.mem.readInt(T, &bytes, endian);
     }
 
     pub fn init(allocator: Allocator, data: []const u8) !TwoBitFile {
         var offset: usize = 0;
-        
+
         if (data.len < 16) return TwoBitError.InvalidFormat;
 
         var bytes4: [4]u8 = undefined;
@@ -169,10 +169,10 @@ pub const TwoBitFile = struct {
         for (start..end) |pos| {
             const byte_idx = pos / 4;
             const bit_offset = 6 - (pos % 4) * 2;
-            
+
             if (dna_offset + byte_idx >= self.data.len) return TwoBitError.InvalidFormat;
             const b = self.data[dna_offset + byte_idx];
-            
+
             const val = (b >> @intCast(bit_offset)) & 0b11;
             seq_buf[pos - start] = char_map[val];
         }
@@ -181,7 +181,7 @@ pub const TwoBitFile = struct {
         for (0..n_block_count) |i| {
             const n_start = n_starts[i];
             const n_end = n_start + n_lens[i];
-            
+
             // Check intersection with [start, end)
             if (n_end <= start or n_start >= end) continue;
 
@@ -220,30 +220,46 @@ test "TwoBit basic operations" {
 
     var buffer: [128]u8 = undefined;
     var offset: usize = 0;
-    
+
     // Header
-    std.mem.writeInt(u32, buffer[offset..][0..4], 0x1A412743, .little); offset += 4;
-    std.mem.writeInt(u32, buffer[offset..][0..4], 0, .little); offset += 4;
-    std.mem.writeInt(u32, buffer[offset..][0..4], 1, .little); offset += 4;
-    std.mem.writeInt(u32, buffer[offset..][0..4], 0, .little); offset += 4;
+    std.mem.writeInt(u32, buffer[offset..][0..4], 0x1A412743, .little);
+    offset += 4;
+    std.mem.writeInt(u32, buffer[offset..][0..4], 0, .little);
+    offset += 4;
+    std.mem.writeInt(u32, buffer[offset..][0..4], 1, .little);
+    offset += 4;
+    std.mem.writeInt(u32, buffer[offset..][0..4], 0, .little);
+    offset += 4;
 
     // Index
-    buffer[offset] = 4; offset += 1;
-    @memcpy(buffer[offset..offset+4], "chr1"); offset += 4;
-    std.mem.writeInt(u32, buffer[offset..][0..4], 25, .little); offset += 4;
+    buffer[offset] = 4;
+    offset += 1;
+    @memcpy(buffer[offset .. offset + 4], "chr1");
+    offset += 4;
+    std.mem.writeInt(u32, buffer[offset..][0..4], 25, .little);
+    offset += 4;
 
     // Sequence Record
-    std.mem.writeInt(u32, buffer[offset..][0..4], 10, .little); offset += 4; // dnaSize
-    std.mem.writeInt(u32, buffer[offset..][0..4], 1, .little); offset += 4; // nBlockCount
-    std.mem.writeInt(u32, buffer[offset..][0..4], 4, .little); offset += 4; // nStarts
-    std.mem.writeInt(u32, buffer[offset..][0..4], 2, .little); offset += 4; // nLens
-    std.mem.writeInt(u32, buffer[offset..][0..4], 0, .little); offset += 4; // maskBlockCount
-    std.mem.writeInt(u32, buffer[offset..][0..4], 0, .little); offset += 4; // reserved
+    std.mem.writeInt(u32, buffer[offset..][0..4], 10, .little);
+    offset += 4; // dnaSize
+    std.mem.writeInt(u32, buffer[offset..][0..4], 1, .little);
+    offset += 4; // nBlockCount
+    std.mem.writeInt(u32, buffer[offset..][0..4], 4, .little);
+    offset += 4; // nStarts
+    std.mem.writeInt(u32, buffer[offset..][0..4], 2, .little);
+    offset += 4; // nLens
+    std.mem.writeInt(u32, buffer[offset..][0..4], 0, .little);
+    offset += 4; // maskBlockCount
+    std.mem.writeInt(u32, buffer[offset..][0..4], 0, .little);
+    offset += 4; // reserved
 
     // DNA
-    buffer[offset] = 0x1B; offset += 1;
-    buffer[offset] = 0x11; offset += 1;
-    buffer[offset] = 0xB0; offset += 1;
+    buffer[offset] = 0x1B;
+    offset += 1;
+    buffer[offset] = 0x11;
+    offset += 1;
+    buffer[offset] = 0xB0;
+    offset += 1;
 
     var tb = try TwoBitFile.init(allocator, buffer[0..offset]);
     defer tb.deinit();
@@ -254,7 +270,7 @@ test "TwoBit basic operations" {
     const seq1 = try tb.fetchSequence("chr1", 0, 10);
     defer allocator.free(seq1);
     try std.testing.expectEqualStrings("TCAGNNTCAG", seq1);
-    
+
     const seq2 = try tb.fetchSequence("chr1", 2, 7);
     defer allocator.free(seq2);
     try std.testing.expectEqualStrings("AGNNT", seq2);

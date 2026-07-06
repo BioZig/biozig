@@ -58,7 +58,7 @@ pub const LinkageDisequilibriumRecord = struct {
         const locus_b = try serialization.deserialize(reader, []const u8, allocator);
         const r_squared = try serialization.deserialize(reader, f64, allocator);
         const d_prime = try serialization.deserialize(reader, f64, allocator);
-        
+
         var record = try LinkageDisequilibriumRecord.init(allocator, locus_a, locus_b, r_squared, d_prime);
         allocator.free(locus_a);
         allocator.free(locus_b);
@@ -88,7 +88,7 @@ pub const LDMatrix = struct {
         @memset(r2, 0.0);
         const dp = try allocator.alloc(f64, size * size);
         @memset(dp, 0.0);
-        
+
         var duped_loci = try allocator.alloc([]const u8, size);
         for (loci, 0..) |l, i| {
             duped_loci[i] = try allocator.dupe(u8, l);
@@ -114,7 +114,7 @@ pub const LDMatrix = struct {
         std.debug.assert(i < self.size and j < self.size);
         std.debug.assert(r2 >= 0.0 and r2 <= 1.0);
         std.debug.assert(dp >= -1.0 and dp <= 1.0);
-        
+
         self.r_squared_matrix[i * self.size + j] = r2;
         self.r_squared_matrix[j * self.size + i] = r2;
         self.d_prime_matrix[i * self.size + j] = dp;

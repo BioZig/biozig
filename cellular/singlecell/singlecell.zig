@@ -38,7 +38,7 @@ pub const Cell = struct {
     pub fn serialize(self: Cell, writer: anytype) !void {
         try serialization.serialize(writer, self.id);
         try serialization.serialize(writer, self.features);
-        
+
         try serialization.serialize(writer, @as(u64, self.metadata.count()));
         var iter = self.metadata.iterator();
         while (iter.next()) |entry| {
@@ -51,7 +51,7 @@ pub const Cell = struct {
         const id = try serialization.deserialize(reader, []const u8, allocator);
         const features = try serialization.deserialize(reader, []f64, allocator);
         const count = try serialization.deserialize(reader, u64, allocator);
-        
+
         var metadata = std.StringHashMap([]const u8).init(allocator);
         var i: u64 = 0;
         while (i < count) : (i += 1) {
@@ -59,7 +59,7 @@ pub const Cell = struct {
             const v = try serialization.deserialize(reader, []const u8, allocator);
             try metadata.put(k, v);
         }
-        
+
         return .{
             .allocator = allocator,
             .id = id,
@@ -99,13 +99,13 @@ pub const CellCollection = struct {
     pub fn addCell(self: *CellCollection, cell: Cell) !void {
         try self.cells.append(self.allocator, cell);
     }
-    
+
     pub fn serialize(self: CellCollection, writer: anytype) !void {
         try serialization.serialize(writer, @as(u64, self.cells.items.len));
         for (self.cells.items) |cell| {
             try cell.serialize(writer);
         }
-        
+
         try serialization.serialize(writer, @as(u64, self.annotations.count()));
         var iter = self.annotations.iterator();
         while (iter.next()) |entry| {
@@ -121,7 +121,7 @@ pub const CellCollection = struct {
         while (i < cell_count) : (i += 1) {
             try cells.append(allocator, try Cell.deserialize(reader, allocator));
         }
-        
+
         const ann_count = try serialization.deserialize(reader, u64, allocator);
         var annotations = std.StringHashMap([]const u8).init(allocator);
         var j: u64 = 0;
@@ -130,22 +130,22 @@ pub const CellCollection = struct {
             const v = try serialization.deserialize(reader, []const u8, allocator);
             try annotations.put(k, v);
         }
-        
+
         return .{
             .allocator = allocator,
             .cells = cells,
             .annotations = annotations,
         };
     }
-    
+
     /// Neighborhood representation: adjacency list of cell indices.
     pub const Neighborhood = struct {
         adj: std.AutoHashMap(usize, std.ArrayList(usize)),
-        
+
         pub fn init(allocator: std.mem.Allocator) Neighborhood {
             return .{ .adj = std.AutoHashMap(usize, std.ArrayList(usize)).init(allocator) };
         }
-        
+
         pub fn deinit(self: *Neighborhood) void {
             var iter = self.adj.iterator();
             while (iter.next()) |entry| {
@@ -153,7 +153,7 @@ pub const CellCollection = struct {
             }
             self.adj.deinit();
         }
-        
+
         pub fn addEdge(self: *Neighborhood, a: usize, b: usize) !void {
             const entry1 = try self.adj.getOrPut(a);
             if (!entry1.found_existing) entry1.value_ptr.* = .empty;
@@ -170,13 +170,13 @@ test "Cell and CellCollection basic usage" {
     const alloc = std.testing.allocator;
     var cell = try Cell.init(alloc, "Cell_A", 5);
     defer cell.deinit();
-    
+
     try cell.addMetadata("type", "Neuron");
     try std.testing.expectEqualStrings("Neuron", cell.metadata.get("type").?);
 
     var collection = CellCollection.init(alloc);
     defer collection.deinit();
-    
+
     try collection.addCell(try Cell.init(alloc, "Cell_B", 5));
     try std.testing.expectEqual(@as(usize, 1), collection.cells.items.len);
 }

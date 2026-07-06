@@ -61,7 +61,7 @@ pub const Reaction = struct {
 pub const MetabolicNetwork = struct {
     allocator: std.mem.Allocator,
     reactions: std.ArrayList(Reaction),
-    
+
     // Maps metabolite_id -> list of reaction indices where it is a substrate
     metabolite_as_substrate: std.StringHashMap(std.ArrayList(usize)),
     // Maps metabolite_id -> list of reaction indices where it is a product
@@ -149,7 +149,7 @@ test "MetabolicNetwork reaction building" {
     const producers = net.getReactionsProducing("G6P");
     try std.testing.expect(producers != null);
     try std.testing.expectEqual(@as(usize, 1), producers.?.len);
-    
+
     const consumers = net.getReactionsUsingSubstrate("ATP");
     try std.testing.expect(consumers != null);
     try std.testing.expectEqual(@as(usize, 1), consumers.?.len);

@@ -6,7 +6,7 @@ const DNA2View = dna_module.DNA2View;
 /// Returns error.LengthMismatch if lengths differ.
 pub fn hammingDistance(a: DNA2View, b: DNA2View) !usize {
     if (a.len != b.len) return error.LengthMismatch;
-    
+
     var dist: usize = 0;
 
     // Check if we can do byte-aligned fast comparison
@@ -33,7 +33,7 @@ pub fn hammingDistance(a: DNA2View, b: DNA2View) !usize {
         }
 
         // Remainder
-        for (bytes_len * 4 .. a.len) |idx| {
+        for (bytes_len * 4..a.len) |idx| {
             if (a.get(idx) != b.get(idx)) dist += 1;
         }
     } else {
@@ -42,7 +42,7 @@ pub fn hammingDistance(a: DNA2View, b: DNA2View) !usize {
             if (a.get(idx) != b.get(idx)) dist += 1;
         }
     }
-    
+
     return dist;
 }
 
@@ -70,7 +70,7 @@ pub fn levenshteinDistance(allocator: std.mem.Allocator, a: DNA2View, b: DNA2Vie
         for (0..s1.len) |i| {
             const char1 = s1.get(i);
             const cost: usize = if (char1 == char2) 0 else 1;
-            
+
             const del = prev_row[i + 1] + 1;
             const ins = curr_row[i] + 1;
             const sub = prev_row[i] + cost;
@@ -105,7 +105,7 @@ test "Sequence Distance - Hamming" {
 
 test "Sequence Distance - Levenshtein" {
     const alloc = std.testing.allocator;
-    
+
     var a1 = try dna_module.DNA2.init("GATTACA", alloc);
     defer a1.deinit();
     var b1 = try dna_module.DNA2.init("GATACCA", alloc);

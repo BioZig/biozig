@@ -28,10 +28,10 @@ test "Ontology - Ancestry validation" {
     _ = try ont.addTerm("GO:001", "A");
     _ = try ont.addTerm("GO:002", "B");
     try ont.addRelationship("GO:001", "GO:002");
-    
+
     const valid = try ont.isValidDAG();
     try testing.expect(valid);
-    
+
     const anc = try ont.getAncestors("GO:002", alloc);
     defer alloc.free(anc);
     try testing.expectEqual(@as(usize, 1), anc.len);

@@ -17,16 +17,16 @@ pub const IUPAC = enum(u4) {
     C = 2,
     G = 4,
     U = 8,
-    R = 1 | 4,       // A or G
-    Y = 2 | 8,       // C or U
-    S = 2 | 4,       // G or C
-    W = 1 | 8,       // A or U
-    K = 4 | 8,       // G or U
-    M = 1 | 2,       // A or C
-    B = 2 | 4 | 8,   // C or G or U
-    D = 1 | 4 | 8,   // A or G or U
-    H = 1 | 2 | 8,   // A or C or U
-    V = 1 | 2 | 4,   // A or C or G
+    R = 1 | 4, // A or G
+    Y = 2 | 8, // C or U
+    S = 2 | 4, // G or C
+    W = 1 | 8, // A or U
+    K = 4 | 8, // G or U
+    M = 1 | 2, // A or C
+    B = 2 | 4 | 8, // C or G or U
+    D = 1 | 4 | 8, // A or G or U
+    H = 1 | 2 | 8, // A or C or U
+    V = 1 | 2 | 4, // A or C or G
     N = 1 | 2 | 4 | 8, // Any base
 };
 
@@ -244,7 +244,7 @@ pub const RNA2View = struct {
             }
 
             // Remainder
-            for (bytes_len * 4 .. self.len) |idx| {
+            for (bytes_len * 4..self.len) |idx| {
                 const n = self.get(idx);
                 if (n == .G or n == .C) {
                     gc_count += 1;

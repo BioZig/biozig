@@ -57,7 +57,7 @@ pub const State = struct {
         const phase = try core.serialization.deserialize(reader, Phase, allocator);
         const confidence = try core.serialization.deserialize(reader, f64, allocator);
         const count = try core.serialization.deserialize(reader, u64, allocator);
-        
+
         var metadata = std.StringHashMap([]const u8).init(allocator);
         var i: u64 = 0;
         while (i < count) : (i += 1) {
@@ -65,7 +65,7 @@ pub const State = struct {
             const v = try core.serialization.deserialize(reader, []const u8, allocator);
             try metadata.put(k, v);
         }
-        
+
         return .{
             .allocator = allocator,
             .phase = phase,
@@ -88,7 +88,7 @@ pub const Utils = struct {
 test "Cell cycle phase assignment" {
     const p = Utils.assignPhase(0.1, 0.8, 0.2);
     try std.testing.expectEqual(Phase.S, p);
-    
+
     var state = State.init(std.testing.allocator, .M);
     defer state.deinit();
     try state.addMetadata("marker", "phospho-H3");

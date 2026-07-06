@@ -35,11 +35,11 @@ pub const DeBruijnGraph = struct {
         while (i <= seq.len - self.k) : (i += 1) {
             const kmer = seq[i .. i + self.k];
             const u = kmer[0 .. self.k - 1];
-            const v = kmer[1 .. self.k];
-            
+            const v = kmer[1..self.k];
+
             const u_dup = try self.allocator.dupe(u8, u);
             const v_dup = try self.allocator.dupe(u8, v);
-            
+
             var res = try self.edges.getOrPut(u_dup);
             if (!res.found_existing) {
                 res.value_ptr.* = std.ArrayList([]const u8).empty;
@@ -59,7 +59,7 @@ test "De Bruijn Graph basic" {
     try graph.addSequence("AATATG");
     // kmers: AAT, ATA, TAT, ATG
     // edges: AA -> AT, AT -> TA, TA -> AT, AT -> TG
-    
+
     const at_edges = graph.edges.get("AT").?;
     try std.testing.expectEqual(@as(usize, 2), at_edges.items.len);
 }

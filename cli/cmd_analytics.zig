@@ -13,7 +13,7 @@ const MatrixData = struct {
 fn readMatrix(allocator: std.mem.Allocator, path: []const u8) !MatrixData {
     var reader = try MMapReader.init(allocator, path);
     defer reader.deinit();
-    
+
     var floats = std.ArrayList(f64).empty;
     var lines = std.mem.splitScalar(u8, reader.data, '\n');
     var cols: usize = 0;
@@ -31,7 +31,7 @@ fn readMatrix(allocator: std.mem.Allocator, path: []const u8) !MatrixData {
         if (cols == 0) cols = line_cols else if (cols != line_cols) return error.InvalidMatrix;
         rows += 1;
     }
-    
+
     if (rows == 0 or cols == 0) return error.EmptyMatrix;
     return MatrixData{ .floats = floats.toOwnedSlice(allocator) catch unreachable, .rows = rows, .cols = cols };
 }
@@ -39,7 +39,7 @@ fn readMatrix(allocator: std.mem.Allocator, path: []const u8) !MatrixData {
 fn readSequence(allocator: std.mem.Allocator, path: []const u8) ![]u8 {
     var reader = try MMapReader.init(allocator, path);
     defer reader.deinit();
-    
+
     var seq = std.ArrayList(u8).empty;
     var lines = std.mem.splitScalar(u8, reader.data, '\n');
     while (lines.next()) |line| {
@@ -87,11 +87,10 @@ pub fn execute(args: ParsedArgs) !void {
             \\  --eps            Epsilon radius (DBSCAN)
             \\  --min-pts        Minimum points (DBSCAN)
             \\
-            , .{}
-        );
+        , .{});
         return;
     }
-    
+
     if (args.run) |cmd| {
         const in_path = args.input orelse {
             std.debug.print("Error: Command requires an --input file (-i).\n", .{});
@@ -99,11 +98,11 @@ pub fn execute(args: ParsedArgs) !void {
         };
         const threads = args.threads orelse 1;
         var out_writer = output.OutputWriter.init(.text);
-        
+
         if (std.mem.eql(u8, cmd, "markov") or std.mem.eql(u8, cmd, "kmer_stats")) {
             const seq = try readSequence(std.heap.page_allocator, in_path);
             defer std.heap.page_allocator.free(seq);
-            
+
             if (std.mem.eql(u8, cmd, "markov")) {
                 const res = try analytics.sequence.markov.computeTransitions(std.heap.page_allocator, seq, threads);
                 defer std.heap.page_allocator.destroy(res);
@@ -113,7 +112,7 @@ pub fn execute(args: ParsedArgs) !void {
                     if (sum > 0) {
                         try out_writer.writeText("{c}: ", .{@as(u8, @intCast(i))});
                         for (row, 0..) |v, j| {
-                            if (v > 0) try out_writer.writeText("{c}({d}) ", .{@as(u8, @intCast(j)), v});
+                            if (v > 0) try out_writer.writeText("{c}({d}) ", .{ @as(u8, @intCast(j)), v });
                         }
                         try out_writer.writeText("\n", .{});
                     }
@@ -124,22 +123,21 @@ pub fn execute(args: ParsedArgs) !void {
                 defer res.deinit();
                 var it = res.iterator();
                 while (it.next()) |entry| {
-                    try out_writer.writeText("{s}: {d}\n", .{entry.key_ptr.*, entry.value_ptr.*});
+                    try out_writer.writeText("{s}: {d}\n", .{ entry.key_ptr.*, entry.value_ptr.* });
                 }
             }
             return;
         }
-        
+
         if (std.mem.eql(u8, cmd, "pca") or std.mem.eql(u8, cmd, "umap") or std.mem.eql(u8, cmd, "tsne") or std.mem.eql(u8, cmd, "kmeans") or std.mem.eql(u8, cmd, "dbscan") or std.mem.eql(u8, cmd, "hierarchical") or std.mem.eql(u8, cmd, "svd") or std.mem.eql(u8, cmd, "nmf") or std.mem.eql(u8, cmd, "descriptive") or std.mem.eql(u8, cmd, "correlation") or std.mem.eql(u8, cmd, "regression") or std.mem.eql(u8, cmd, "hypothesis") or std.mem.eql(u8, cmd, "node2vec") or std.mem.eql(u8, cmd, "spectral") or std.mem.eql(u8, cmd, "spia")) {
-            
             const mat = try readMatrix(std.heap.page_allocator, in_path);
             defer std.heap.page_allocator.free(mat.floats);
-            
+
             if (std.mem.eql(u8, cmd, "pca")) {
-                const n_comps: usize = @min(2, mat.cols); 
+                const n_comps: usize = @min(2, mat.cols);
                 const res = try analytics.dimensionality.pca.pca(std.heap.page_allocator, mat.floats, mat.rows, mat.cols, n_comps, threads);
                 defer std.heap.page_allocator.free(res);
-                
+
                 var j: usize = 0;
                 while (j < mat.cols) : (j += 1) {
                     var k_idx: usize = 0;
@@ -151,18 +149,18 @@ pub fn execute(args: ParsedArgs) !void {
             } else if (std.mem.eql(u8, cmd, "umap")) {
                 const res = try analytics.dimensionality.umap.umap(std.heap.page_allocator, mat.floats, mat.rows, mat.cols, threads);
                 defer std.heap.page_allocator.free(res);
-                
+
                 var j: usize = 0;
                 while (j < mat.rows) : (j += 1) {
-                    try out_writer.writeText("{d:.4} {d:.4}\n", .{res[j * 2], res[j * 2 + 1]});
+                    try out_writer.writeText("{d:.4} {d:.4}\n", .{ res[j * 2], res[j * 2 + 1] });
                 }
             } else if (std.mem.eql(u8, cmd, "tsne")) {
                 const res = try analytics.dimensionality.tsne.tsne(std.heap.page_allocator, mat.floats, mat.rows, mat.cols, threads);
                 defer std.heap.page_allocator.free(res);
-                
+
                 var j: usize = 0;
                 while (j < mat.rows) : (j += 1) {
-                    try out_writer.writeText("{d:.4} {d:.4}\n", .{res[j * 2], res[j * 2 + 1]});
+                    try out_writer.writeText("{d:.4} {d:.4}\n", .{ res[j * 2], res[j * 2 + 1] });
                 }
             } else if (std.mem.eql(u8, cmd, "kmeans")) {
                 const k = args.k orelse 3;
@@ -212,28 +210,28 @@ pub fn execute(args: ParsedArgs) !void {
             } else if (std.mem.eql(u8, cmd, "correlation")) {
                 const half = mat.floats.len / 2;
                 const x = mat.floats[0..half];
-                const y = mat.floats[half..half*2];
+                const y = mat.floats[half .. half * 2];
                 const res = try analytics.statistics.correlation.pearson(std.heap.page_allocator, x, y);
                 try out_writer.writeText("Pearson Correlation: {d:.4}\n", .{res.coefficient});
             } else if (std.mem.eql(u8, cmd, "regression")) {
                 const half = mat.floats.len / 2;
                 const x = mat.floats[0..half];
-                const y = mat.floats[half..half*2];
+                const y = mat.floats[half .. half * 2];
                 const res = try analytics.statistics.regression.simpleLinearRegression(x, y, std.heap.page_allocator);
-                try out_writer.writeText("Slope: {d:.4}, Intercept: {d:.4}\n", .{res.slope, res.intercept});
+                try out_writer.writeText("Slope: {d:.4}, Intercept: {d:.4}\n", .{ res.slope, res.intercept });
             } else if (std.mem.eql(u8, cmd, "hypothesis")) {
                 const half = mat.floats.len / 2;
                 const x = mat.floats[0..half];
-                const y = mat.floats[half..half*2];
+                const y = mat.floats[half .. half * 2];
                 const res = analytics.statistics.hypothesis.studentTTestTwoSample(x, y);
-                try out_writer.writeText("T-test stat: {d:.4}, p-value: {d:.4}\n", .{res.statistic, res.p_value});
+                try out_writer.writeText("T-test stat: {d:.4}, p-value: {d:.4}\n", .{ res.statistic, res.p_value });
             } else if (std.mem.eql(u8, cmd, "node2vec")) {
                 var graph = try analytics.graphml.node2vec.Graph.init(std.heap.page_allocator, @intCast(mat.rows));
                 defer graph.deinit();
                 var i: usize = 0;
                 while (i < mat.rows) : (i += 1) {
                     if (mat.cols >= 2) {
-                        try graph.addEdge(@intFromFloat(mat.floats[i*mat.cols]), @intFromFloat(mat.floats[i*mat.cols + 1]));
+                        try graph.addEdge(@intFromFloat(mat.floats[i * mat.cols]), @intFromFloat(mat.floats[i * mat.cols + 1]));
                     }
                 }
                 const walks = try analytics.graphml.node2vec.Node2Vec.simulateWalks(std.heap.page_allocator, &graph, 10, 5, threads);
@@ -245,7 +243,7 @@ pub fn execute(args: ParsedArgs) !void {
                 var i: usize = 0;
                 while (i < mat.rows) : (i += 1) {
                     if (mat.cols >= 2) {
-                        try graph.addEdge(@intFromFloat(mat.floats[i*mat.cols]), @intFromFloat(mat.floats[i*mat.cols + 1]));
+                        try graph.addEdge(@intFromFloat(mat.floats[i * mat.cols]), @intFromFloat(mat.floats[i * mat.cols + 1]));
                     }
                 }
                 const lap = try analytics.graphml.spectral.Spectral.computeLaplacian(std.heap.page_allocator, &graph);
@@ -253,7 +251,7 @@ pub fn execute(args: ParsedArgs) !void {
                 try out_writer.writeText("Spectral Laplacian computed.\n", .{});
             } else if (std.mem.eql(u8, cmd, "spia")) {
                 const res = try analytics.pathways.spia.performSpia(std.heap.page_allocator, mat.floats, mat.floats, threads);
-                try out_writer.writeText("SPIA computed. tA={d:.4}, p-value={d:.4}\n", .{res.tA, res.p_value});
+                try out_writer.writeText("SPIA computed. tA={d:.4}, p-value={d:.4}\n", .{ res.tA, res.p_value });
             } else {
                 std.debug.print("Routing to {s} (Pending full pipeline integration)...\n", .{cmd});
             }

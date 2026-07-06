@@ -71,7 +71,7 @@ pub fn parseMol2(allocator: std.mem.Allocator, reader: anytype) ![]const model_m
             const y_str = tokens.next() orelse return error.MalformedMol2Atom;
             const z_str = tokens.next() orelse return error.MalformedMol2Atom;
             const type_str = tokens.next() orelse return error.MalformedMol2Atom;
-            
+
             const subst_id_str = tokens.next();
             const subst_name = tokens.next() orelse "SUB";
             const charge_str = tokens.next();
@@ -246,7 +246,7 @@ fn buildModel(allocator: std.mem.Allocator, id: usize, temp_atoms: []const TempA
 /// Serializes models to MOL2 ATOM format
 pub fn serializeMol2(writer: anytype, models: []const model_mod.Model) !void {
     try writer.writeAll("@<TRIPOS>MOLECULE\nBioZigMolecules\n");
-    
+
     // Count total atoms
     var total_atoms: usize = 0;
     for (models) |m| {
@@ -317,21 +317,21 @@ pub fn parseMol2Coords(allocator: std.mem.Allocator, buffer: []const u8) ![]Vec3
 
 test "mol2 zero-copy memory optimization" {
     const allocator = std.testing.allocator;
-    const data = 
+    const data =
         \\@<TRIPOS>ATOM
         \\1 N 11.104 6.134 -6.504 N.am 1 ALA 0.0000
         \\2 CA 11.639 6.071 -5.147 C.3 1 ALA 0.0000
         \\3 C 10.825 5.052 -4.326 C.2 1 ALA 0.0000
-        ;
+    ;
     var arena = std.heap.ArenaAllocator.init(allocator);
     defer arena.deinit();
     const arena_allocator = arena.allocator();
     const start_memory = arena.queryCapacity();
-    
+
     const coords = try parseMol2Coords(arena_allocator, data);
     try std.testing.expectEqual(@as(usize, 3), coords.len);
     try std.testing.expectEqual(@as(f64, 11.104), coords[0].x);
-    
+
     const end_memory = arena.queryCapacity();
     try std.testing.expect(end_memory - start_memory < 500);
 }

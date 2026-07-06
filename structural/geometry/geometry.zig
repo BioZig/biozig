@@ -96,28 +96,28 @@ pub fn distance(a: Vec3, b: Vec3) f64 {
 
 pub fn centroid(points: CoordinateSet) Vec3 {
     if (points.x.len == 0) return Vec3.init(0, 0, 0);
-    
+
     var sum_x_vec: @Vector(4, f64) = @splat(0.0);
     var sum_y_vec: @Vector(4, f64) = @splat(0.0);
     var sum_z_vec: @Vector(4, f64) = @splat(0.0);
-    
+
     var idx: usize = 0;
     while (idx + 4 <= points.x.len) : (idx += 4) {
         sum_x_vec += points.x[idx .. idx + 4][0..4].*;
         sum_y_vec += points.y[idx .. idx + 4][0..4].*;
         sum_z_vec += points.z[idx .. idx + 4][0..4].*;
     }
-    
+
     var sum_x = @reduce(.Add, sum_x_vec);
     var sum_y = @reduce(.Add, sum_y_vec);
     var sum_z = @reduce(.Add, sum_z_vec);
-    
+
     while (idx < points.x.len) : (idx += 1) {
         sum_x += points.x[idx];
         sum_y += points.y[idx];
         sum_z += points.z[idx];
     }
-    
+
     const scale = 1.0 / @as(f64, @floatFromInt(points.x.len));
     return Vec3.init(sum_x * scale, sum_y * scale, sum_z * scale);
 }
@@ -327,7 +327,7 @@ pub fn svd3(H: [3][3]f64, U: *[3][3]f64, S: *[3]f64, V: *[3][3]f64) void {
 pub const Transformation = struct {
     translation_x: Vec3, // Translation for X
     translation_y: Vec3, // Translation for Y
-    rotation: [3][3]f64,  // Rotation matrix
+    rotation: [3][3]f64, // Rotation matrix
 };
 
 /// Computes the optimal translation and rotation to superimpose points X onto Y
@@ -406,16 +406,16 @@ pub fn kabsch(x: CoordinateSet, y: CoordinateSet) !struct { Transformation, f64 
 
     // 4. Calculate determinant of V * U^T to check for reflection
     // V_det * U_det
-    const V_det: f64 = V[0][0]*(V[1][1]*V[2][2] - V[1][2]*V[2][1]) -
-                       V[0][1]*(V[1][0]*V[2][2] - V[1][2]*V[2][0]) +
-                       V[0][2]*(V[1][0]*V[2][1] - V[1][1]*V[2][0]);
-    var U_det: f64 = U[0][0]*(U[1][1]*U[2][2] - U[1][2]*U[2][1]) -
-                     U[0][1]*(U[1][0]*U[2][2] - U[1][2]*U[2][0]) +
-                     U[0][2]*(U[1][0]*V[2][1] - U[1][1]*U[2][0]); // wait, minor typo in determinant formula?
+    const V_det: f64 = V[0][0] * (V[1][1] * V[2][2] - V[1][2] * V[2][1]) -
+        V[0][1] * (V[1][0] * V[2][2] - V[1][2] * V[2][0]) +
+        V[0][2] * (V[1][0] * V[2][1] - V[1][1] * V[2][0]);
+    var U_det: f64 = U[0][0] * (U[1][1] * U[2][2] - U[1][2] * U[2][1]) -
+        U[0][1] * (U[1][0] * U[2][2] - U[1][2] * U[2][0]) +
+        U[0][2] * (U[1][0] * V[2][1] - U[1][1] * U[2][0]); // wait, minor typo in determinant formula?
     // Let's write the correct det formula for U:
-    U_det = U[0][0]*(U[1][1]*U[2][2] - U[1][2]*U[2][1]) -
-            U[0][1]*(U[1][0]*U[2][2] - U[1][2]*U[2][0]) +
-            U[0][2]*(U[1][0]*U[2][1] - U[1][1]*U[2][0]);
+    U_det = U[0][0] * (U[1][1] * U[2][2] - U[1][2] * U[2][1]) -
+        U[0][1] * (U[1][0] * U[2][2] - U[1][2] * U[2][0]) +
+        U[0][2] * (U[1][0] * U[2][1] - U[1][1] * U[2][0]);
 
     const det_sign = V_det * U_det;
 
@@ -449,7 +449,7 @@ pub fn kabsch(x: CoordinateSet, y: CoordinateSet) !struct { Transformation, f64 
         const xx = x.x[idx .. idx + 4][0..4].*;
         const xy = x.y[idx .. idx + 4][0..4].*;
         const xz = x.z[idx .. idx + 4][0..4].*;
-        
+
         const yx = y.x[idx .. idx + 4][0..4].*;
         const yy = y.y[idx .. idx + 4][0..4].*;
         const yz = y.z[idx .. idx + 4][0..4].*;
@@ -479,9 +479,9 @@ pub fn kabsch(x: CoordinateSet, y: CoordinateSet) !struct { Transformation, f64 
         const dy = Vec3.init(y.x[idx], y.y[idx], y.z[idx]).sub(centroid_y);
 
         const rx = Vec3.init(
-            R[0][0]*dx.x + R[0][1]*dx.y + R[0][2]*dx.z,
-            R[1][0]*dx.x + R[1][1]*dx.y + R[1][2]*dx.z,
-            R[2][0]*dx.x + R[2][1]*dx.y + R[2][2]*dx.z,
+            R[0][0] * dx.x + R[0][1] * dx.y + R[0][2] * dx.z,
+            R[1][0] * dx.x + R[1][1] * dx.y + R[1][2] * dx.z,
+            R[2][0] * dx.x + R[2][1] * dx.y + R[2][2] * dx.z,
         );
 
         rmsd_sum += distance2(rx, dy);
@@ -501,7 +501,7 @@ pub fn rmsd(x: CoordinateSet, y: CoordinateSet) f64 {
         const dz = x.z[idx .. idx + 4][0..4].* - y.z[idx .. idx + 4][0..4].*;
         rmsd_sum_vec += dx * dx + dy * dy + dz * dz;
     }
-    
+
     var sum = @reduce(.Add, rmsd_sum_vec);
     while (idx < x.x.len) : (idx += 1) {
         const dx = x.x[idx] - y.x[idx];
@@ -541,7 +541,7 @@ pub fn pairwiseDistances(x: CoordinateSet, y: CoordinateSet, out: []f64) void {
         const px = @as(@Vector(4, f64), @splat(x.x[i]));
         const py = @as(@Vector(4, f64), @splat(x.y[i]));
         const pz = @as(@Vector(4, f64), @splat(x.z[i]));
-        
+
         var j: usize = 0;
         const out_row = out[i * y.x.len .. (i + 1) * y.x.len];
         while (j + 4 <= y.x.len) : (j += 4) {
@@ -560,4 +560,3 @@ pub fn pairwiseDistances(x: CoordinateSet, y: CoordinateSet, out: []f64) void {
         }
     }
 }
-

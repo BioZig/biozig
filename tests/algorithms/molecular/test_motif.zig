@@ -12,7 +12,7 @@ test "searchMotifExact - Empty sequence and empty motif" {
     defer seq.deinit();
     var m = try dna.DNA2.init("", alloc);
     defer m.deinit();
-    
+
     const res = try motif.searchMotifExact(alloc, seq.view(), m.view());
     defer alloc.free(res);
     try testing.expectEqual(@as(usize, 0), res.len);
@@ -24,7 +24,7 @@ test "searchMotifExact - Motif longer than sequence" {
     defer seq.deinit();
     var m = try dna.DNA2.init("ATG", alloc);
     defer m.deinit();
-    
+
     const res = try motif.searchMotifExact(alloc, seq.view(), m.view());
     defer alloc.free(res);
     try testing.expectEqual(@as(usize, 0), res.len);
@@ -34,13 +34,13 @@ test "searchMotifExact - Normal Match" {
     const alloc = testing.allocator;
     var seq = try dna.DNA2.init("GATTACAGAT", alloc);
     defer seq.deinit();
-    
+
     var m = try dna.DNA2.init("GAT", alloc);
     defer m.deinit();
 
     const res = try motif.searchMotifExact(alloc, seq.view(), m.view());
     defer alloc.free(res);
-    
+
     try testing.expectEqual(@as(usize, 2), res.len);
     try testing.expectEqual(@as(usize, 0), res[0]);
     try testing.expectEqual(@as(usize, 7), res[1]);
@@ -52,10 +52,10 @@ test "PWM - Empty Sequence" {
         .{ 0.1, 0.1, 0.1, 0.9 },
     };
     const pwm = motif.PWM{ .matrix = &pwm_data };
-    
+
     var seq = try dna.DNA2.init("", alloc);
     defer seq.deinit();
-    
+
     const hits = try pwm.scanThreshold(alloc, seq.view(), 0.0);
     defer alloc.free(hits);
     try testing.expectEqual(@as(usize, 0), hits.len);

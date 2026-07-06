@@ -7,7 +7,7 @@ const cellular_algo = algorithms.cellular;
 
 pub fn main(init: std.process.Init) !void {
     const allocator = init.arena.allocator();
-    
+
     std.debug.print("=== Cellular Algorithms Benchmark ===\n", .{});
 
     // 1. Benchmark 1M+ cells sparse matrix
@@ -15,55 +15,55 @@ pub fn main(init: std.process.Init) !void {
     const num_genes: usize = 1_000;
     const nnz: usize = num_cells * 10; // 10 non-zeros per cell
 
-    std.debug.print("Benchmarking Sparse CSR Matrix creation for {} cells, {} genes, {} nnz...\n", .{num_cells, num_genes, nnz});
+    std.debug.print("Benchmarking Sparse CSR Matrix creation for {} cells, {} genes, {} nnz...\n", .{ num_cells, num_genes, nnz });
 
     var sparse = try expression.SparseMatrix.init(allocator, .csr, num_cells, num_genes, nnz);
-    
-    // Fill with dummy data
+
+    // Fill with synthetic data
     for (0..num_cells) |i| {
         sparse.indptr[i] = @as(u32, @intCast(i * 10));
     }
     sparse.indptr[num_cells] = @as(u32, @intCast(nnz));
-    
+
     for (0..nnz) |i| {
         sparse.indices[i] = @as(u32, @intCast(i % num_genes));
         sparse.data[i] = 1.0;
     }
 
     std.debug.print("SparseMatrix initialization and filling done.\n", .{});
-    
+
     // 1.1 Sparse Matrix Ops
     const col_sums = try cellular_algo.SparseMatrixOps.colSums(allocator, sparse);
     std.debug.print("SparseMatrixOps colSums done.\n", .{});
     allocator.free(col_sums);
-    
+
     const row_sums = try cellular_algo.SparseMatrixOps.rowSums(allocator, sparse);
     std.debug.print("SparseMatrixOps rowSums done.\n", .{});
     allocator.free(row_sums);
-    
-    const dummy_vec = try allocator.alloc(f64, num_genes);
-    @memset(dummy_vec, 1.0);
-    const mul_res = try cellular_algo.SparseMatrixOps.multiplyVector(allocator, sparse, dummy_vec);
+
+    const synthetic_vec = try allocator.alloc(f64, num_genes);
+    @memset(synthetic_vec, 1.0);
+    const mul_res = try cellular_algo.SparseMatrixOps.multiplyVector(allocator, sparse, synthetic_vec);
     std.debug.print("SparseMatrixOps multiplyVector done.\n", .{});
     allocator.free(mul_res);
-    allocator.free(dummy_vec);
-    
+    allocator.free(synthetic_vec);
+
     // 1.2 PCA
     const pca_res = try cellular_algo.PCA.topComponent(allocator, sparse, 5);
     std.debug.print("PCA topComponent (5 iters) done.\n", .{});
     allocator.free(pca_res);
-    
+
     // 1.3 Incremental PCA
     const ipca_res = try cellular_algo.IncrementalPCA.onlineTopComponent(allocator, sparse, 0.01);
     std.debug.print("IncrementalPCA onlineTopComponent done.\n", .{});
     allocator.free(ipca_res);
-    
+
     // 1.4 Differential Expression
     var group1 = try allocator.alloc(usize, num_cells / 2);
     var group2 = try allocator.alloc(usize, num_cells / 2);
-    for (0..num_cells/2) |i| {
+    for (0..num_cells / 2) |i| {
         group1[i] = i;
-        group2[i] = i + num_cells/2;
+        group2[i] = i + num_cells / 2;
     }
     const de_res = try cellular_algo.DifferentialExpression.simpleDiffExp(allocator, sparse, group1, group2);
     std.debug.print("DifferentialExpression simpleDiffExp done.\n", .{});
@@ -110,23 +110,19 @@ pub fn main(init: std.process.Init) !void {
     // 2. Spatial Indexing Benchmark
     std.debug.print("Benchmarking Spatial Indexing...\n", .{});
     const num_points: usize = 100_000;
-    
+
     var points = try allocator.alloc(spatial.SpatialCell, num_points);
     defer allocator.free(points);
-    
+
     for (0..num_points) |i| {
-        points[i] = .{ 
-            .x = @as(f64, @floatFromInt(i % 100)), 
-            .y = @as(f64, @floatFromInt((i / 100) % 100)), 
-            .z = @as(f64, @floatFromInt((i / 10000) % 100)) 
-        };
+        points[i] = .{ .x = @as(f64, @floatFromInt(i % 100)), .y = @as(f64, @floatFromInt((i / 100) % 100)), .z = @as(f64, @floatFromInt((i / 10000) % 100)) };
     }
-    
+
     const index = spatial.SpatialIndex.init(allocator, points, 5.0);
     std.debug.print("SpatialIndex init for {} points done.\n", .{num_points});
-    
+
     const neighbors = try index.findNeighbors(0, 5.0, allocator);
     defer allocator.free(neighbors);
-    
+
     std.debug.print("SpatialIndex findNeighbors query done (Found {} neighbors).\n", .{neighbors.len});
 }

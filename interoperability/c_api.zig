@@ -45,13 +45,7 @@ pub const CBiozigAlignmentResult = extern struct {
 /// Performs Needleman-Wunsch global sequence alignment on two raw C strings.
 /// It dynamically allocates the result strings inside the BioZig Arena.
 /// Ensure `biozig_context_create()` has been called prior.
-export fn biozig_align_global(
-    seq_a_c: [*c]const u8,
-    seq_b_c: [*c]const u8,
-    match_score: c_int,
-    mismatch_penalty: c_int,
-    gap_penalty: c_int
-) callconv(.c) CBiozigAlignmentResult {
+export fn biozig_align_global(seq_a_c: [*c]const u8, seq_b_c: [*c]const u8, match_score: c_int, mismatch_penalty: c_int, gap_penalty: c_int) callconv(.c) CBiozigAlignmentResult {
     const error_res = CBiozigAlignmentResult{ .score = -999999, .aligned_a = null, .aligned_b = null };
 
     const arena_ptr = c_arena orelse return error_res;
@@ -96,10 +90,10 @@ export fn biozig_shannon_entropy(seq_c: [*c]const u8) callconv(.c) f64 {
     const seq = std.mem.span(seq_c);
     const dna = @import("molecular").dna;
     const information = @import("algorithms").molecular.information;
-    
+
     const dna2 = dna.DNA2.init(seq, alloc) catch return 0.0;
     const view = dna2.view();
-    
+
     return information.shannonEntropy(view);
 }
 
@@ -111,13 +105,13 @@ export fn biozig_translate_dna(seq_c: [*c]const u8) callconv(.c) [*c]const u8 {
     const seq = std.mem.span(seq_c);
     const dna = @import("molecular").dna;
     const coding = @import("algorithms").molecular.coding;
-    
+
     const dna2 = dna.DNA2.init(seq, alloc) catch return null;
     const view = dna2.view();
-    
+
     const protein = coding.translateDNA(alloc, view) catch return null;
     const c_protein = alloc.dupeZ(u8, protein) catch return null;
-    
+
     return c_protein.ptr;
 }
 
@@ -131,10 +125,24 @@ test "C-ABI Context" {
 comptime {
     _ = @import("c_abi_parsers.zig");
 }
-comptime { _ = @import("c_abi_structural.zig"); }
-comptime { _ = @import("c_abi_molecular.zig"); }
-comptime { _ = @import("c_abi_analytics.zig"); }
-comptime { _ = @import("c_abi_cellular.zig"); }
-comptime { _ = @import("c_abi_systems.zig"); }
-comptime { _ = @import("c_abi_evolutionary.zig"); }
-comptime { _ = @import("c_abi_population.zig"); }
+comptime {
+    _ = @import("c_abi_structural.zig");
+}
+comptime {
+    _ = @import("c_abi_molecular.zig");
+}
+comptime {
+    _ = @import("c_abi_analytics.zig");
+}
+comptime {
+    _ = @import("c_abi_cellular.zig");
+}
+comptime {
+    _ = @import("c_abi_systems.zig");
+}
+comptime {
+    _ = @import("c_abi_evolutionary.zig");
+}
+comptime {
+    _ = @import("c_abi_population.zig");
+}

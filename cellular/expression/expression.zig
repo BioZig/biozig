@@ -15,12 +15,12 @@ pub const DenseMatrix = struct {
     pub fn init(allocator: std.mem.Allocator, rows: usize, cols: usize) !DenseMatrix {
         const data = try allocator.alloc(f64, rows * cols);
         @memset(data, 0.0);
-        
+
         const sample_names = try allocator.alloc(?[]const u8, rows);
         @memset(sample_names, null);
         const feature_names = try allocator.alloc(?[]const u8, cols);
         @memset(feature_names, null);
-        
+
         return .{
             .allocator = allocator,
             .sample_names = sample_names,
@@ -123,7 +123,7 @@ pub const SparseMatrix = struct {
         @memset(sample_names, null);
         const feature_names = try allocator.alloc(?[]const u8, cols);
         @memset(feature_names, null);
-        
+
         const data = try allocator.alloc(f64, nnz);
         const indices = try allocator.alloc(u32, nnz);
         const indptr_len = if (format == .csr) rows + 1 else cols + 1;
@@ -150,7 +150,7 @@ pub const SparseMatrix = struct {
         }
 
         var sparse = try SparseMatrix.init(allocator, format, dense.rows, dense.cols, nnz);
-        
+
         for (0..dense.rows) |r| {
             if (dense.sample_names[r]) |name| {
                 sparse.sample_names[r] = try allocator.dupe(u8, name);
@@ -210,11 +210,11 @@ pub const SparseMatrix = struct {
 
     pub fn get(self: SparseMatrix, row: usize, col: usize) f64 {
         std.debug.assert(row < self.rows and col < self.cols);
-        
+
         if (self.format == .csr) {
             const start = self.indptr[row];
             const end = self.indptr[row + 1];
-            
+
             for (self.indices[start..end], 0..) |idx, i| {
                 if (idx == @as(u32, @intCast(col))) {
                     return self.data[start + i];
@@ -224,7 +224,7 @@ pub const SparseMatrix = struct {
         } else {
             const start = self.indptr[col];
             const end = self.indptr[col + 1];
-            
+
             for (self.indices[start..end], 0..) |idx, i| {
                 if (idx == @as(u32, @intCast(row))) {
                     return self.data[start + i];
@@ -277,7 +277,7 @@ test "DenseMatrix basic operations" {
     try matrix.setSampleName(0, "Cell1");
     try matrix.setFeatureName(0, "GeneA");
     matrix.set(0, 0, 1.5);
-    
+
     try std.testing.expectEqual(@as(f64, 1.5), matrix.get(0, 0));
     try std.testing.expectEqualStrings("Cell1", matrix.sample_names[0].?);
     try std.testing.expectEqualStrings("GeneA", matrix.feature_names[0].?);
@@ -287,7 +287,7 @@ test "DenseMatrix serialization" {
     const alloc = std.testing.allocator;
     var matrix = try DenseMatrix.init(alloc, 2, 2);
     defer matrix.deinit();
-    
+
     try matrix.setSampleName(0, "S1");
     try matrix.setSampleName(1, "S2");
     try matrix.setFeatureName(0, "G1");
@@ -297,13 +297,13 @@ test "DenseMatrix serialization" {
 
     var buf: [1024]u8 = undefined;
     var writer = std.Io.Writer.fixed(&buf);
-    
+
     try matrix.serialize(&writer);
-    
+
     var reader = std.Io.Reader.fixed(writer.buffered());
     var deserialized = try DenseMatrix.deserialize(&reader, alloc);
     defer deserialized.deinit();
-    
+
     try std.testing.expectEqual(matrix.rows, deserialized.rows);
     try std.testing.expectEqual(matrix.cols, deserialized.cols);
     try std.testing.expectEqual(matrix.get(1, 1), deserialized.get(1, 1));
@@ -314,7 +314,7 @@ test "SparseMatrix CSR operations" {
     const alloc = std.testing.allocator;
     var dense = try DenseMatrix.init(alloc, 3, 3);
     defer dense.deinit();
-    
+
     dense.set(0, 0, 1.0);
     dense.set(0, 2, 2.0);
     dense.set(1, 1, 3.0);
@@ -330,7 +330,7 @@ test "SparseMatrix CSR operations" {
     try std.testing.expectEqual(@as(f64, 3.0), sparse.get(1, 1));
     try std.testing.expectEqual(@as(f64, 4.0), sparse.get(2, 0));
     try std.testing.expectEqual(@as(f64, 5.0), sparse.get(2, 2));
-    
+
     try std.testing.expectEqual(@as(usize, 5), sparse.data.len);
     try std.testing.expectEqual(@as(u32, 0), sparse.indptr[0]);
     try std.testing.expectEqual(@as(u32, 2), sparse.indptr[1]);
@@ -342,7 +342,7 @@ test "SparseMatrix CSC operations" {
     const alloc = std.testing.allocator;
     var dense = try DenseMatrix.init(alloc, 3, 3);
     defer dense.deinit();
-    
+
     dense.set(0, 0, 1.0);
     dense.set(0, 2, 2.0);
     dense.set(1, 1, 3.0);
@@ -358,7 +358,7 @@ test "SparseMatrix CSC operations" {
     try std.testing.expectEqual(@as(f64, 3.0), sparse.get(1, 1));
     try std.testing.expectEqual(@as(f64, 4.0), sparse.get(2, 0));
     try std.testing.expectEqual(@as(f64, 5.0), sparse.get(2, 2));
-    
+
     try std.testing.expectEqual(@as(usize, 5), sparse.data.len);
     try std.testing.expectEqual(@as(u32, 0), sparse.indptr[0]);
     try std.testing.expectEqual(@as(u32, 2), sparse.indptr[1]);

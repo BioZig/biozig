@@ -18,12 +18,12 @@ export fn biozig_ld_record_create(locus_a: [*c]const u8, locus_b: [*c]const u8, 
 export fn biozig_ld_matrix_create(loci: [*c][*c]const u8, num_loci: usize) callconv(.c) ?*ld.LDMatrix {
     const arena = c_api.c_arena orelse return null;
     const alloc = arena.allocator();
-    
+
     var loci_slice = alloc.alloc([]const u8, num_loci) catch return null;
     for (0..num_loci) |i| {
         loci_slice[i] = std.mem.span(loci[i]);
     }
-    
+
     const ptr = alloc.create(ld.LDMatrix) catch return null;
     ptr.* = ld.LDMatrix.init(alloc, loci_slice) catch return null;
     return ptr;
@@ -47,7 +47,6 @@ export fn biozig_ld_matrix_get(matrix: ?*ld.LDMatrix, i: usize, j: usize) callco
     }
     return .{ .r_squared = 0.0, .d_prime = 0.0 };
 }
-
 
 // --- population/gwas.zig ---
 const gwas = population.gwas;
@@ -73,7 +72,6 @@ export fn biozig_gwas_collection_add(col: ?*gwas.AssociationCollection, rec: ?*g
     col.?.addRecord(rec.?.*) catch return -1;
     return 0;
 }
-
 
 // --- population/epidemiology.zig ---
 const epi = population.epidemiology;
@@ -101,7 +99,6 @@ export fn biozig_epi_case_control_study_add_assoc(study: ?*epi.CaseControlStudy,
     return 0;
 }
 
-
 // --- population/haplotype.zig ---
 const hap = population.haplotype;
 
@@ -118,7 +115,6 @@ export fn biozig_haplotype_add_variant(h: ?*hap.Haplotype, var_id: [*c]const u8,
     h.?.addVariant(std.mem.span(var_id), std.mem.span(allele)) catch return -1;
     return 0;
 }
-
 
 // --- population/ancestry.zig ---
 const ancestry = population.ancestry;
@@ -145,7 +141,6 @@ export fn biozig_ancestry_graph_add_population(graph: ?*ancestry.AncestryGraph, 
     return 0;
 }
 
-
 // --- population/selection.zig ---
 const selection = population.selection;
 
@@ -171,7 +166,6 @@ export fn biozig_selection_collection_add(col: ?*selection.SelectionCollection, 
     return 0;
 }
 
-
 // --- population/genotype.zig ---
 const pop_geno = population.genotype;
 
@@ -195,7 +189,6 @@ export fn biozig_pop_genotypes_get(g: ?*pop_geno.BitpackedGenotypes, var_idx: us
     }
     return 0;
 }
-
 
 // --- algorithms/population/population.zig ---
 const pop_algo = algorithms.population;
@@ -262,7 +255,6 @@ export fn biozig_alg_haplotypes_freq(h: ?*pop_algo.BitpackedHaplotypes, locus: u
     return 0.0;
 }
 
-
 export fn biozig_alg_genotypes_create(num_indiv: usize, num_loci: usize) callconv(.c) ?*pop_algo.BitpackedGenotypes {
     const arena = c_api.c_arena orelse return null;
     const alloc = arena.allocator();
@@ -284,7 +276,6 @@ export fn biozig_alg_genotypes_freq_alt(g: ?*pop_algo.BitpackedGenotypes, locus:
     if (g) |geno| return geno.alleleFrequencyAlt(locus);
     return 0.0;
 }
-
 
 // --- algorithms/variant/variant.zig ---
 const variant = algorithms.variant;
@@ -320,7 +311,7 @@ pub const CBiozigVariantStats = extern struct {
 export fn biozig_alg_variant_compute_stats(vars: [*c]const CBiozigVariantParams, count: usize) callconv(.c) CBiozigVariantStats {
     const arena = c_api.c_arena orelse return std.mem.zeroes(CBiozigVariantStats);
     const alloc = arena.allocator();
-    
+
     var v_slice = alloc.alloc(variant.VariantParams, count) catch return std.mem.zeroes(CBiozigVariantStats);
     for (0..count) |i| {
         v_slice[i] = variant.VariantParams{
@@ -330,7 +321,7 @@ export fn biozig_alg_variant_compute_stats(vars: [*c]const CBiozigVariantParams,
             .alt = std.mem.span(vars[i].alt),
         };
     }
-    
+
     const stats = variant.computeStatistics(v_slice);
     return .{
         .total_variants = stats.total_variants,

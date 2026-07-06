@@ -46,7 +46,7 @@ pub fn parseSlice(args: []const []const u8) ParsedArgs {
         } else if (is_h) {
             parsed.help = true;
         } else if (!std.mem.startsWith(u8, arg, "-") and parsed.run == null) {
-            parsed.run = arg; 
+            parsed.run = arg;
         }
     }
     return parsed;

@@ -7,7 +7,7 @@ pub fn shannonEntropy(sequence: DNA2View) f64 {
     if (sequence.len == 0) return 0.0;
 
     var counts = [_]usize{0} ** 4; // A, C, G, T
-    
+
     if (sequence.start % 4 == 0) {
         const bytes_len = sequence.len / 4;
         const seq_bytes = sequence.bytes[sequence.start / 4 .. (sequence.start / 4) + bytes_len];
@@ -17,7 +17,7 @@ pub fn shannonEntropy(sequence: DNA2View) f64 {
         while (i + 8 <= seq_bytes.len) : (i += 8) {
             const word = std.mem.readInt(u64, seq_bytes[i .. i + 8][0..8], .little);
             const not_word = ~word;
-            
+
             counts[0] += @popCount(not_word & (not_word >> 1) & 0x5555555555555555);
             counts[1] += @popCount(word & (not_word >> 1) & 0x5555555555555555);
             counts[2] += @popCount(not_word & (word >> 1) & 0x5555555555555555);
@@ -34,7 +34,7 @@ pub fn shannonEntropy(sequence: DNA2View) f64 {
         }
 
         // Remainder
-        for (bytes_len * 4 .. sequence.len) |idx| {
+        for (bytes_len * 4..sequence.len) |idx| {
             counts[@intFromEnum(sequence.get(idx))] += 1;
         }
     } else {
@@ -71,7 +71,7 @@ const DNA2ViewContext = struct {
 /// Calculates linguistic sequence complexity.
 pub fn linguisticComplexity(allocator: std.mem.Allocator, sequence: DNA2View) !f64 {
     if (sequence.len == 0) return 0.0;
-    
+
     var observed: usize = 0;
     var max_possible: usize = 0;
 
@@ -111,7 +111,7 @@ test "Sequence Information - Shannon Entropy" {
 
 test "Sequence Information - Linguistic Complexity" {
     const alloc = std.testing.allocator;
-    
+
     var s1 = try dna_module.DNA2.init("AAAA", alloc);
     defer s1.deinit();
     const c1 = try linguisticComplexity(alloc, s1.view());

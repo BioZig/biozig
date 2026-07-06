@@ -26,9 +26,9 @@ pub const Assembly = struct {
         const r = t.rotation;
         const tr = t.translation;
         return Vec3.init(
-            r[0][0]*pos.x + r[0][1]*pos.y + r[0][2]*pos.z + tr.x,
-            r[1][0]*pos.x + r[1][1]*pos.y + r[1][2]*pos.z + tr.y,
-            r[2][0]*pos.x + r[2][1]*pos.y + r[2][2]*pos.z + tr.z,
+            r[0][0] * pos.x + r[0][1] * pos.y + r[0][2] * pos.z + tr.x,
+            r[1][0] * pos.x + r[1][1] * pos.y + r[1][2] * pos.z + tr.y,
+            r[2][0] * pos.x + r[2][1] * pos.y + r[2][2] * pos.z + tr.z,
         );
     }
 
@@ -68,8 +68,12 @@ pub const Assembly = struct {
                         for (self.transforms) |t| {
                             const p = applyTransform(atom.pos, t);
                             if (min_x == null) {
-                                min_x = p.x; min_y = p.y; min_z = p.z;
-                                max_x = p.x; max_y = p.y; max_z = p.z;
+                                min_x = p.x;
+                                min_y = p.y;
+                                min_z = p.z;
+                                max_x = p.x;
+                                max_y = p.y;
+                                max_z = p.z;
                             } else {
                                 min_x = @min(min_x.?, p.x);
                                 min_y = @min(min_y.?, p.y);

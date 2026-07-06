@@ -5,14 +5,14 @@ pub fn main(init: std.process.Init) !void {
     const allocator = std.heap.page_allocator;
     var args = std.process.Args.Iterator.init(init.minimal.args);
     _ = args.next(); // skip exe
-    
+
     const algo_name = args.next() orelse return error.MissingAlgoName;
-    
+
     // Simulate Large Assembly: 1,000,000 atoms
     const num_atoms = 1000000;
     const atoms = try allocator.alloc([3]f64, num_atoms);
     defer allocator.free(atoms);
-    
+
     for (atoms, 0..) |*a, i| {
         a.* = .{
             @as(f64, @floatFromInt(i % 100)),
@@ -20,7 +20,7 @@ pub fn main(init: std.process.Init) !void {
             @as(f64, @floatFromInt((i * 7) % 100)),
         };
     }
-    
+
     var accuracy_pass = false;
 
     if (std.mem.eql(u8, algo_name, "DISTANCE_MATRIX")) {
@@ -30,7 +30,7 @@ pub fn main(init: std.process.Init) !void {
         const small_atoms = try allocator.alloc([3]f64, small_num);
         defer allocator.free(small_atoms);
         std.mem.copyForwards([3]f64, small_atoms, atoms[0..small_num]);
-        
+
         const dm = try algorithms.structural.computeDistanceMatrix(allocator, small_atoms);
         accuracy_pass = dm.len == small_num * small_num;
         allocator.free(dm);
@@ -57,7 +57,7 @@ pub fn main(init: std.process.Init) !void {
         const small_atoms = try allocator.alloc([3]f64, small_num);
         defer allocator.free(small_atoms);
         std.mem.copyForwards([3]f64, small_atoms, atoms[0..small_num]);
-        
+
         const cmap = try algorithms.structural.computeContactMap(allocator, small_atoms, 8.0);
         accuracy_pass = cmap.len == small_num * small_num;
         allocator.free(cmap);
@@ -77,13 +77,13 @@ pub fn main(init: std.process.Init) !void {
         const block_i_size = 1000;
         const block_j_size = 1000;
         const block_i = atoms[0..block_i_size];
-        const block_j = atoms[1000..1000+block_j_size];
-        
+        const block_j = atoms[1000 .. 1000 + block_j_size];
+
         const dm = try algorithms.structural.computeDistanceMatrixBlock(allocator, block_i, block_j);
         accuracy_pass = dm.len == block_i_size * block_j_size;
         allocator.free(dm);
         std.debug.print("Algorithm: {s}\n", .{algo_name});
-        std.debug.print("Data: {}x{} atoms\n", .{block_i_size, block_j_size});
+        std.debug.print("Data: {}x{} atoms\n", .{ block_i_size, block_j_size });
     } else if (std.mem.eql(u8, algo_name, "POCKET_STATISTICS")) {
         const hydro = try allocator.alloc(f64, num_atoms);
         defer allocator.free(hydro);
@@ -122,12 +122,14 @@ pub fn main(init: std.process.Init) !void {
         defer allocator.free(forces);
 
         @memcpy(pos, atoms[0..small_num]);
-        @memset(vel, .{0, 0, 0});
-        @memset(forces, .{0, 0, 0});
+        @memset(vel, .{ 0, 0, 0 });
+        @memset(forces, .{ 0, 0, 0 });
 
         const S = struct {
             fn f(_: []const [3]f64, fr: [][3]f64) void {
-                for (fr) |*force| { force.* = .{0.1, -0.1, 0.05}; }
+                for (fr) |*force| {
+                    force.* = .{ 0.1, -0.1, 0.05 };
+                }
             }
         };
 
@@ -144,7 +146,7 @@ pub fn main(init: std.process.Init) !void {
         const S = struct {
             fn e(s: []const [3]f64) f64 {
                 var energy: f64 = 0;
-                for (s) |pt| energy += pt[0]*pt[0] + pt[1]*pt[1] + pt[2]*pt[2];
+                for (s) |pt| energy += pt[0] * pt[0] + pt[1] * pt[1] + pt[2] * pt[2];
                 return energy;
             }
             fn p(s: [][3]f64, temp: f64, random: std.Random) void {
@@ -181,7 +183,7 @@ pub fn main(init: std.process.Init) !void {
         const score = try algorithms.structural.threadingDynamicProgramming(allocator, seq_len, tmpl_len, scores, -10.0, -1.0);
         accuracy_pass = score != 0.0;
         std.debug.print("Algorithm: {s}\n", .{algo_name});
-        std.debug.print("Data: {}x{} matrices\n", .{seq_len, tmpl_len});
+        std.debug.print("Data: {}x{} matrices\n", .{ seq_len, tmpl_len });
     } else if (std.mem.eql(u8, algo_name, "ROTAMER_PACKING")) {
         const num_res = 5000;
         const rots = try allocator.alloc([]const algorithms.structural.Rotamer, num_res);
@@ -206,5 +208,5 @@ pub fn main(init: std.process.Init) !void {
         return;
     }
 
-    std.debug.print("Accuracy Check: {s}\n", .{ if (accuracy_pass) "PASS" else "FAIL" });
+    std.debug.print("Accuracy Check: {s}\n", .{if (accuracy_pass) "PASS" else "FAIL"});
 }

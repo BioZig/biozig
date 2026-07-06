@@ -116,15 +116,14 @@ pub fn serialize(writer: anytype, rec: BedRecord) !void {
 }
 
 test "benchmark zero-copy BED iterator" {
-    const test_data = 
+    const test_data =
         "chr1\t1000\t2000\tfeature1\t100\t+\n" ** 10000;
-    
+
     var it = BedIterator.init(test_data);
     var count: usize = 0;
     while (try it.next()) |_| {
         count += 1;
     }
-    
+
     try std.testing.expectEqual(@as(usize, 10000), count);
 }
-

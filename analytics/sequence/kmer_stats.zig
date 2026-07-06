@@ -40,13 +40,13 @@ pub fn computeKmerFrequencies(allocator: std.mem.Allocator, sequence: []const u8
     for (0..num_threads) |i| {
         const start = i * chunk_size;
         const end = if (i == num_threads - 1) sequence.len else @min(sequence.len, (i + 1) * chunk_size + k - 1);
-        
+
         contexts[i] = Context{
             .sequence = sequence[start..end],
             .k = k,
             .map = &thread_maps[i],
         };
-        
+
         thread_pool[i] = try std.Thread.spawn(.{}, threadRunner, .{&contexts[i]});
     }
 
@@ -89,7 +89,7 @@ fn threadRunner(ctx: anytype) void {
 
 fn computeKmerFrequenciesSerial(sequence: []const u8, k: usize, map: *std.StringHashMap(u64)) !void {
     if (sequence.len < k) return;
-    
+
     var i: usize = 0;
     while (i <= sequence.len - k) : (i += 1) {
         const kmer = sequence[i .. i + k];

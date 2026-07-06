@@ -73,20 +73,19 @@ pub fn execute(args: ParsedArgs) !void {
             \\  -f, --file   Input file path
             \\  -o, --output Output file path
             \\
-            , .{}
-        );
+        , .{});
         return;
     }
     if (args.run) |cmd| {
         var out_writer = output.OutputWriter.init(.text);
-        
+
         const file_path = args.file orelse args.input;
         var reader_opt: ?MMapReader = null;
         if (file_path) |p| {
             reader_opt = try MMapReader.init(std.heap.page_allocator, p);
         }
         defer if (reader_opt != null) reader_opt.?.deinit();
-        
+
         if (std.mem.eql(u8, cmd, "align")) {
             if (reader_opt) |*reader| {
                 var it = ingestion.genomics.fasta.fastaIterator(reader.data);
@@ -104,7 +103,9 @@ pub fn execute(args: ParsedArgs) !void {
                     std.debug.print("Error: align requires a FASTA file with at least 2 sequences.\n", .{});
                     std.process.exit(1);
                 }
-            } else { std.process.exit(1); }
+            } else {
+                std.process.exit(1);
+            }
         } else if (std.mem.eql(u8, cmd, "assemble")) {
             if (reader_opt) |*reader| {
                 var graph = algorithms.molecular.assembly.DeBruijnGraph.init(std.heap.page_allocator, 3);
@@ -116,7 +117,9 @@ pub fn execute(args: ParsedArgs) !void {
                     count += 1;
                 }
                 try out_writer.writeText("Assembled graph from {} sequences\n", .{count});
-            } else { std.process.exit(1); }
+            } else {
+                std.process.exit(1);
+            }
         } else if (std.mem.eql(u8, cmd, "code")) {
             if (reader_opt) |*reader| {
                 var it = ingestion.genomics.fasta.fastaIterator(reader.data);
@@ -127,7 +130,9 @@ pub fn execute(args: ParsedArgs) !void {
                     defer std.heap.page_allocator.free(translated);
                     try out_writer.writeText("Translated {} amino acids\n", .{translated.len});
                 }
-            } else { std.process.exit(1); }
+            } else {
+                std.process.exit(1);
+            }
         } else if (std.mem.eql(u8, cmd, "distance")) {
             if (reader_opt) |*reader| {
                 var it = ingestion.genomics.fasta.fastaIterator(reader.data);
@@ -141,7 +146,9 @@ pub fn execute(args: ParsedArgs) !void {
                     const dist = try algorithms.molecular.distance.levenshteinDistance(std.heap.page_allocator, a.?.view(), b.?.view());
                     try out_writer.writeText("Distance: {}\n", .{dist});
                 }
-            } else { std.process.exit(1); }
+            } else {
+                std.process.exit(1);
+            }
         } else if (std.mem.eql(u8, cmd, "gibbs")) {
             if (reader_opt) |*reader| {
                 var list = std.ArrayList([]const u8).empty;
@@ -157,7 +164,9 @@ pub fn execute(args: ParsedArgs) !void {
                     }
                     try out_writer.writeText("Gibbs sampled {} motifs\n", .{motifs.len});
                 }
-            } else { std.process.exit(1); }
+            } else {
+                std.process.exit(1);
+            }
         } else if (std.mem.eql(u8, cmd, "hmm")) {
             var hmm = try algorithms.molecular.hmm.HMM.init(std.heap.page_allocator, 2, 4);
             defer hmm.deinit();
@@ -172,7 +181,9 @@ pub fn execute(args: ParsedArgs) !void {
                     defer fmi.deinit();
                     try out_writer.writeText("Built FM-Index\n", .{});
                 }
-            } else { std.process.exit(1); }
+            } else {
+                std.process.exit(1);
+            }
         } else if (std.mem.eql(u8, cmd, "information")) {
             if (reader_opt) |*reader| {
                 var it = ingestion.genomics.fasta.fastaIterator(reader.data);
@@ -182,7 +193,9 @@ pub fn execute(args: ParsedArgs) !void {
                     const entropy = algorithms.molecular.information.shannonEntropy(dna.view());
                     try out_writer.writeText("Entropy: {d:.4}\n", .{entropy});
                 }
-            } else { std.process.exit(1); }
+            } else {
+                std.process.exit(1);
+            }
         } else if (std.mem.eql(u8, cmd, "kmer")) {
             if (reader_opt) |*reader| {
                 var it = ingestion.genomics.fasta.fastaIterator(reader.data);
@@ -193,7 +206,9 @@ pub fn execute(args: ParsedArgs) !void {
                     defer counts.deinit();
                     try out_writer.writeText("Counted {} distinct kmers\n", .{counts.count()});
                 }
-            } else { std.process.exit(1); }
+            } else {
+                std.process.exit(1);
+            }
         } else if (std.mem.eql(u8, cmd, "motif")) {
             if (reader_opt) |*reader| {
                 var it = ingestion.genomics.fasta.fastaIterator(reader.data);
@@ -208,7 +223,9 @@ pub fn execute(args: ParsedArgs) !void {
                     defer std.heap.page_allocator.free(matches);
                     try out_writer.writeText("Found {} motif matches\n", .{matches.len});
                 }
-            } else { std.process.exit(1); }
+            } else {
+                std.process.exit(1);
+            }
         } else if (std.mem.eql(u8, cmd, "msa")) {
             if (reader_opt) |*reader| {
                 var list = std.ArrayList([]const u8).empty;
@@ -224,7 +241,9 @@ pub fn execute(args: ParsedArgs) !void {
                     }
                     try out_writer.writeText("MSA generated {} aligned sequences\n", .{aligned.len});
                 }
-            } else { std.process.exit(1); }
+            } else {
+                std.process.exit(1);
+            }
         } else if (std.mem.eql(u8, cmd, "search")) {
             if (reader_opt) |*reader| {
                 var it = ingestion.genomics.fasta.fastaIterator(reader.data);
@@ -239,7 +258,9 @@ pub fn execute(args: ParsedArgs) !void {
                     _ = layer;
                     try out_writer.writeText("Search layer initialized\n", .{});
                 }
-            } else { std.process.exit(1); }
+            } else {
+                std.process.exit(1);
+            }
         } else if (std.mem.eql(u8, cmd, "suffix-tree")) {
             if (reader_opt) |*reader| {
                 var it = ingestion.genomics.fasta.fastaIterator(reader.data);
@@ -249,7 +270,9 @@ pub fn execute(args: ParsedArgs) !void {
                     try tree.build();
                     try out_writer.writeText("Built Suffix Tree\n", .{});
                 }
-            } else { std.process.exit(1); }
+            } else {
+                std.process.exit(1);
+            }
         } else if (std.mem.eql(u8, cmd, "organismal")) {
             const hierarchy = algorithms.organismal.Hierarchy{ .nodes = &[_]algorithms.organismal.HierarchyNode{} };
             _ = hierarchy;
@@ -263,7 +286,9 @@ pub fn execute(args: ParsedArgs) !void {
                     count += 1;
                 }
                 try out_writer.writeText("Parsed {} BED records\n", .{count});
-            } else { std.process.exit(1); }
+            } else {
+                std.process.exit(1);
+            }
         } else if (std.mem.eql(u8, cmd, "parse-cram")) {
             if (reader_opt) |*reader| {
                 var fbs = SliceReader{ .buffer = reader.data };
@@ -271,7 +296,9 @@ pub fn execute(args: ParsedArgs) !void {
                 var records = try parser.parseStream(&fbs);
                 defer records.deinit(std.heap.page_allocator);
                 try out_writer.writeText("Parsed {} CRAM records\n", .{records.items.len});
-            } else { std.process.exit(1); }
+            } else {
+                std.process.exit(1);
+            }
         } else if (std.mem.eql(u8, cmd, "parse-fasta")) {
             if (reader_opt) |*reader| {
                 var it = ingestion.genomics.fasta.fastaIterator(reader.data);
@@ -309,7 +336,9 @@ pub fn execute(args: ParsedArgs) !void {
                     count += 1;
                 }
                 try out_writer.writeText("Parsed {} GFF3 records\n", .{count});
-            } else { std.process.exit(1); }
+            } else {
+                std.process.exit(1);
+            }
         } else if (std.mem.eql(u8, cmd, "parse-gtf")) {
             if (reader_opt) |*reader| {
                 var fbs = SliceReader{ .buffer = reader.data };
@@ -321,7 +350,9 @@ pub fn execute(args: ParsedArgs) !void {
                     count += 1;
                 }
                 try out_writer.writeText("Parsed {} GTF records\n", .{count});
-            } else { std.process.exit(1); }
+            } else {
+                std.process.exit(1);
+            }
         } else if (std.mem.eql(u8, cmd, "parse-bam")) {
             if (reader_opt) |*reader| {
                 var fbs = SliceReader{ .buffer = reader.data };
@@ -333,13 +364,17 @@ pub fn execute(args: ParsedArgs) !void {
                     count += 1;
                 }
                 try out_writer.writeText("Parsed {} SAM records\n", .{count});
-            } else { std.process.exit(1); }
+            } else {
+                std.process.exit(1);
+            }
         } else if (std.mem.eql(u8, cmd, "parse-twobit")) {
             if (reader_opt) |*reader| {
                 var parser = try ingestion.genomics.twobit.TwoBitFile.init(std.heap.page_allocator, reader.data);
                 defer parser.deinit();
                 try out_writer.writeText("Parsed TwoBit file with {} sequences\n", .{parser.indices.len});
-            } else { std.process.exit(1); }
+            } else {
+                std.process.exit(1);
+            }
         } else if (std.mem.eql(u8, cmd, "parse-bcf")) {
             if (reader_opt) |*reader| {
                 var fbs = SliceReader{ .buffer = reader.data };
@@ -347,7 +382,9 @@ pub fn execute(args: ParsedArgs) !void {
                 var records = try parser.parseStream(&fbs);
                 defer records.deinit(std.heap.page_allocator);
                 try out_writer.writeText("Parsed {} VCF records\n", .{records.items.len});
-            } else { std.process.exit(1); }
+            } else {
+                std.process.exit(1);
+            }
         } else if (std.mem.eql(u8, cmd, "parse-sam")) {
             if (reader_opt) |*reader| {
                 var fbs = SliceReader{ .buffer = reader.data };
@@ -359,7 +396,9 @@ pub fn execute(args: ParsedArgs) !void {
                     count += 1;
                 }
                 try out_writer.writeText("Parsed {} SAM records\n", .{count});
-            } else { std.process.exit(1); }
+            } else {
+                std.process.exit(1);
+            }
         } else if (std.mem.eql(u8, cmd, "parse-vcf")) {
             if (reader_opt) |*reader| {
                 var it = ingestion.genomics.vcf.vcfIterator(reader.data);
@@ -369,13 +408,17 @@ pub fn execute(args: ParsedArgs) !void {
                     count += 1;
                 }
                 try out_writer.writeText("Parsed {} VCF records\n", .{count});
-            } else { std.process.exit(1); }
+            } else {
+                std.process.exit(1);
+            }
         } else if (std.mem.eql(u8, cmd, "genomic-index")) {
             if (reader_opt) |*reader| {
                 var idx = try ingestion.indices.genomic_index.parseTbi(std.heap.page_allocator, reader.data);
                 defer idx.deinit();
                 try out_writer.writeText("Parsed Genomic Index\n", .{});
-            } else { std.process.exit(1); }
+            } else {
+                std.process.exit(1);
+            }
         } else {
             return error.UnknownSubcommand;
         }

@@ -56,7 +56,7 @@ pub const Pathway = struct {
     pub fn deserialize(reader: anytype, allocator: std.mem.Allocator) !Pathway {
         const id = try serialization.deserialize(reader, []const u8, allocator);
         const name = try serialization.deserialize(reader, []const u8, allocator);
-        
+
         var pathway = try Pathway.init(allocator, id, name);
         allocator.free(id);
         allocator.free(name);

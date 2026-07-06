@@ -133,11 +133,11 @@ pub fn localAlignment(allocator: std.mem.Allocator, a: DNA2View, b: DNA2View, op
 
     for (1..cols) |j| {
         const b_char = @intFromEnum(b.get(j - 1));
-        
+
         var i: usize = 1;
         while (i <= a.len) : (i += V) {
             const offset = b_char * padded_a_len + i - 1;
-            const match_arr: [V]i32 = profiles[offset ..][0..V].*;
+            const match_arr: [V]i32 = profiles[offset..][0..V].*;
             const match_vec: SimdVec = match_arr;
 
             const diag_arr: [V]i32 = dp[(j - 1) * padded_rows + i - 1 ..][0..V].*;
@@ -160,7 +160,7 @@ pub fn localAlignment(allocator: std.mem.Allocator, a: DNA2View, b: DNA2View, op
             const score = @max(current, delete);
             dp[j * padded_rows + row_i] = score;
             top_score = score;
-            
+
             if (score > max_score) {
                 max_score = score;
                 max_i = row_i;

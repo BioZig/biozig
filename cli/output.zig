@@ -16,8 +16,6 @@ pub const OutputWriter = struct {
         };
     }
 
-
-
     pub fn writeText(self: *OutputWriter, comptime fmt: []const u8, args: anytype) !void {
         _ = self;
         std.debug.print(fmt ++ "\n", args);

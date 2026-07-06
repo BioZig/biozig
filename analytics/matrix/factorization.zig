@@ -108,16 +108,16 @@ pub fn nmf(allocator: Allocator, V: Matrix, k: usize, iterations: usize) !NmfRes
 pub fn mds(allocator: Allocator, D: Matrix, k: usize) !Matrix {
     const n = D.rows;
     std.debug.assert(n == D.cols);
-    
+
     var B = try Matrix.init(allocator, n, n);
     defer B.deinit(allocator);
 
     var row_means = try allocator.alloc(f64, n);
     defer allocator.free(row_means);
     @memset(row_means, 0.0);
-    
+
     var grand_mean: f64 = 0.0;
-    
+
     for (0..n) |i| {
         for (0..n) |j| {
             const d2 = D.get(i, j) * D.get(i, j);
@@ -168,7 +168,7 @@ pub fn mds(allocator: Allocator, D: Matrix, k: usize) !Matrix {
         const app = A.get(p, p);
         const aqq = A.get(q, q);
         const apq = A.get(p, q);
-        
+
         var t: f64 = 0.0;
         const theta = (aqq - app) / (2.0 * apq);
         if (theta >= 0) {
@@ -258,14 +258,17 @@ test "MDS functionality" {
     const allocator = std.testing.allocator;
     var D = try Matrix.init(allocator, 3, 3);
     defer D.deinit(allocator);
-    
-    D.set(0, 1, 5.0); D.set(1, 0, 5.0);
-    D.set(0, 2, 3.0); D.set(2, 0, 3.0);
-    D.set(1, 2, 4.0); D.set(2, 1, 4.0);
+
+    D.set(0, 1, 5.0);
+    D.set(1, 0, 5.0);
+    D.set(0, 2, 3.0);
+    D.set(2, 0, 3.0);
+    D.set(1, 2, 4.0);
+    D.set(2, 1, 4.0);
 
     var X = try mds(allocator, D, 2);
     defer X.deinit(allocator);
-    
+
     try std.testing.expectEqual(@as(usize, 3), X.rows);
     try std.testing.expectEqual(@as(usize, 2), X.cols);
 }

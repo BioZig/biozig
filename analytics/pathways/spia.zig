@@ -17,12 +17,12 @@ pub fn performSpia(
     for (expression_changes) |c| {
         total_change += c;
     }
-    
+
     var total_topo: f64 = 0;
     for (topology_matrix) |t| {
         total_topo += t;
     }
-    
+
     return SpiaResult{
         .tA = total_change * total_topo,
         .p_value = 0.05,
@@ -32,7 +32,7 @@ pub fn performSpia(
 test "spia calculation" {
     const expr = [_]f64{ 1.0, -0.5, 2.0 };
     const topo = [_]f64{ 0, 1, 0, 0, 0, 1, 0, 0, 0 };
-    
+
     const result = try performSpia(std.testing.allocator, &expr, &topo, 1);
     try std.testing.expect(result.tA == 5.0);
 }

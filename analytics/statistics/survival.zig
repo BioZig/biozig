@@ -78,10 +78,10 @@ pub fn logRankTest(allocator: std.mem.Allocator, group1: []const Observation, gr
     @memcpy(all_data[0..group1.len], group1);
     for (group2, 0..) |obs, i| {
         var modified_obs = obs;
-        modified_obs.covariate = 1.0; 
+        modified_obs.covariate = 1.0;
         all_data[group1.len + i] = modified_obs;
     }
-    
+
     for (all_data[0..group1.len]) |*obs| {
         obs.covariate = 0.0;
     }
@@ -97,41 +97,41 @@ pub fn logRankTest(allocator: std.mem.Allocator, group1: []const Observation, gr
         const current_time = all_data[i].time;
         var n1: usize = 0;
         var n2: usize = 0;
-        
+
         for (all_data[i..]) |obs| {
             if (obs.covariate == 0.0) n1 += 1 else n2 += 1;
         }
-        
+
         var d1: usize = 0;
         var d2: usize = 0;
-        
+
         while (i < all_data.len and all_data[i].time == current_time) {
             if (all_data[i].event) {
                 if (all_data[i].covariate == 0.0) d1 += 1 else d2 += 1;
             }
             i += 1;
         }
-        
+
         const n_total = n1 + n2;
         const d_total = d1 + d2;
-        
+
         if (d_total > 0 and n_total > 1) {
             o1 += @as(f64, @floatFromInt(d1));
-            
+
             const expected = @as(f64, @floatFromInt(d_total)) * @as(f64, @floatFromInt(n1)) / @as(f64, @floatFromInt(n_total));
             e1 += expected;
-            
+
             const variance = expected * @as(f64, @floatFromInt(n2)) / @as(f64, @floatFromInt(n_total)) * @as(f64, @floatFromInt(n_total - d_total)) / @as(f64, @floatFromInt(n_total - 1));
             v += variance;
         } else if (d_total > 0 and n_total == 1) {
-             o1 += @as(f64, @floatFromInt(d1));
-             const expected = @as(f64, @floatFromInt(d_total)) * @as(f64, @floatFromInt(n1)) / @as(f64, @floatFromInt(n_total));
-             e1 += expected;
+            o1 += @as(f64, @floatFromInt(d1));
+            const expected = @as(f64, @floatFromInt(d_total)) * @as(f64, @floatFromInt(n1)) / @as(f64, @floatFromInt(n_total));
+            e1 += expected;
         }
     }
 
     if (v == 0) return 0.0;
-    
+
     return (o1 - e1) * (o1 - e1) / v;
 }
 

@@ -24,12 +24,12 @@ pub const MockGBReader = struct {
 
 pub fn main(init: std.process.Init) !void {
     const allocator = init.arena.allocator();
-    
+
     var args = std.process.Args.Iterator.init(init.minimal.args);
     _ = args.next(); // skip exe
-    
+
     const format_name = args.next() orelse return error.MissingFormat;
-    
+
     std.debug.print("Benchmarking format {s} for 1GB streaming throughput\n", .{format_name});
 
     if (std.mem.eql(u8, format_name, "VCF")) {

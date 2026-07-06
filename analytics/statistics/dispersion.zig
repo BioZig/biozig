@@ -7,7 +7,7 @@ pub const GlmResult = struct {
     iterations: usize,
 };
 
-/// Fits a simple Negative Binomial GLM (log link) with a single intercept (or covariate) 
+/// Fits a simple Negative Binomial GLM (log link) with a single intercept (or covariate)
 /// using Iteratively Reweighted Least Squares (IRLS).
 /// `alpha` is the known dispersion parameter.
 pub fn fitNbGlm1D(
@@ -39,17 +39,17 @@ pub fn fitNbGlm1D(
             const eta = x_i * beta;
             const safe_eta = if (eta > 50.0) 50.0 else if (eta < -50.0) -50.0 else eta;
             const mu = @exp(safe_eta);
-            
+
             const v = mu + alpha * mu * mu;
-            
-            const w = (mu * mu) / v; 
-            
+
+            const w = (mu * mu) / v;
+
             score += x_i * w * (y_i - mu) / mu;
             information += x_i * x_i * w;
         }
 
         if (information == 0) {
-            break; 
+            break;
         }
 
         const delta = score / information;
@@ -77,12 +77,12 @@ pub fn empiricalBayesShrinkage(
     prior_df: f64,
 ) ![]f64 {
     const shrunk = try allocator.alloc(f64, dispersions.len);
-    const df: f64 = 3.0; 
-    
+    const df: f64 = 3.0;
+
     for (dispersions, 0..) |disp, i| {
         shrunk[i] = (df * disp + prior_df * prior_dispersion) / (df + prior_df);
     }
-    
+
     return shrunk;
 }
 
@@ -94,7 +94,7 @@ test "Negative Binomial GLM IRLS" {
     const result = fitNbGlm1D(&y, &x, alpha, 100, 1e-6);
 
     try std.testing.expect(result.converged);
-    
+
     const expected_mean = (10.0 + 12.0 + 9.0 + 15.0 + 11.0) / 5.0;
     const expected_beta = @log(expected_mean);
     try std.testing.expectApproxEqAbs(expected_beta, result.beta, 1e-4);
@@ -113,7 +113,7 @@ test "Empirical Bayes Shrinkage" {
 
     const expected_0 = (3.0 * 0.1 + 5.0 * 0.15) / (3.0 + 5.0);
     try std.testing.expectApproxEqAbs(expected_0, shrunk[0], 1e-6);
-    
+
     const expected_1 = (3.0 * 0.5 + 5.0 * 0.15) / (3.0 + 5.0);
     try std.testing.expectApproxEqAbs(expected_1, shrunk[1], 1e-6);
 }

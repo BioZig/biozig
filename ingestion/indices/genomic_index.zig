@@ -14,7 +14,7 @@ pub const Bin = struct {
 pub const Reference = struct {
     bins: []Bin,
     intervals: []u64, // Used in TBI, empty in CSI
-    
+
     pub fn deinit(self: *Reference, allocator: std.mem.Allocator) void {
         for (self.bins) |bin| {
             allocator.free(bin.chunks);
@@ -58,21 +58,21 @@ pub const GenomicIndex = struct {
         }
         self.allocator.free(self.refs);
     }
-    
+
     pub fn reg2bins(self: *const GenomicIndex, beg: u32, end: u32, allocator: std.mem.Allocator) ![]u32 {
         var bins = std.ArrayList(u32).empty;
         defer bins.deinit(allocator);
-        
+
         var t: u32 = 0;
         var s: u32 = @intCast(self.min_shift + self.depth * 3);
-        
+
         var end_mod = end;
         if (beg >= end_mod) return allocator.alloc(u32, 0);
-        
+
         const max_val = @as(u32, 1) << @intCast(s);
         if (end_mod >= max_val) end_mod = max_val;
         end_mod -= 1;
-        
+
         var i: i32 = 0;
         while (i <= self.depth) : (i += 1) {
             var b = t + (beg >> @intCast(s));
@@ -116,7 +116,7 @@ pub fn parseTbi(allocator: std.mem.Allocator, data: []const u8) !GenomicIndex {
     if (data.len < 4) return error.UnexpectedEof;
     if (!std.mem.eql(u8, data[0..4], "TBI\x01")) return error.InvalidMagic;
     offset += 4;
-    
+
     const n_ref = try readI32(data, &offset);
     const format = try readI32(data, &offset);
     const col_seq = try readI32(data, &offset);
@@ -125,16 +125,16 @@ pub fn parseTbi(allocator: std.mem.Allocator, data: []const u8) !GenomicIndex {
     const meta = try readI32(data, &offset);
     const skip = try readI32(data, &offset);
     const l_nm = try readI32(data, &offset);
-    
+
     if (data.len < offset + @as(usize, @intCast(l_nm))) return error.UnexpectedEof;
     const names_buf = try allocator.alloc(u8, @intCast(l_nm));
     errdefer allocator.free(names_buf);
     @memcpy(names_buf, data[offset .. offset + @as(usize, @intCast(l_nm))]);
     offset += @intCast(l_nm);
-    
+
     var name_list = std.ArrayList([]const u8).empty;
     errdefer name_list.deinit(allocator);
-    
+
     var start: usize = 0;
     for (names_buf, 0..) |c, i| {
         if (c == 0) {
@@ -144,7 +144,7 @@ pub fn parseTbi(allocator: std.mem.Allocator, data: []const u8) !GenomicIndex {
             start = i + 1;
         }
     }
-    
+
     const th = TabixHeader{
         .format = format,
         .col_seq = col_seq,
@@ -155,7 +155,7 @@ pub fn parseTbi(allocator: std.mem.Allocator, data: []const u8) !GenomicIndex {
         .names = try name_list.toOwnedSlice(allocator),
         .names_buf = names_buf,
     };
-    
+
     var refs = try allocator.alloc(Reference, @intCast(n_ref));
     errdefer {
         for (refs) |*r| r.deinit(allocator);
@@ -164,16 +164,16 @@ pub fn parseTbi(allocator: std.mem.Allocator, data: []const u8) !GenomicIndex {
         mut_th.deinit(allocator);
     }
     @memset(refs, Reference{ .bins = &[_]Bin{}, .intervals = &[_]u64{} });
-    
+
     for (0..@intCast(n_ref)) |r_idx| {
         const n_bin = try readI32(data, &offset);
         var bins = try allocator.alloc(Bin, @intCast(n_bin));
         @memset(bins, Bin{ .bin = 0, .chunks = &[_]Chunk{}, .loffset = null });
-        
+
         for (0..@intCast(n_bin)) |b_idx| {
             const bin_id = try readU32(data, &offset);
             const n_chunk = try readI32(data, &offset);
-            
+
             var chunks = try allocator.alloc(Chunk, @intCast(n_chunk));
             for (0..@intCast(n_chunk)) |c_idx| {
                 const cnk_beg = try readU64(data, &offset);
@@ -182,16 +182,16 @@ pub fn parseTbi(allocator: std.mem.Allocator, data: []const u8) !GenomicIndex {
             }
             bins[b_idx] = Bin{ .bin = bin_id, .chunks = chunks, .loffset = null };
         }
-        
+
         const n_intv = try readI32(data, &offset);
         var intervals = try allocator.alloc(u64, @intCast(n_intv));
         for (0..@intCast(n_intv)) |i_idx| {
             intervals[i_idx] = try readU64(data, &offset);
         }
-        
+
         refs[r_idx] = Reference{ .bins = bins, .intervals = intervals };
     }
-    
+
     return GenomicIndex{
         .allocator = allocator,
         .min_shift = 14,
@@ -206,11 +206,11 @@ pub fn parseCsi(allocator: std.mem.Allocator, data: []const u8) !GenomicIndex {
     if (data.len < 4) return error.UnexpectedEof;
     if (!std.mem.eql(u8, data[0..4], "CSI\x01")) return error.InvalidMagic;
     offset += 4;
-    
+
     const min_shift = try readI32(data, &offset);
     const depth = try readI32(data, &offset);
     const l_aux = try readI32(data, &offset);
-    
+
     var tbi_header: ?TabixHeader = null;
     if (l_aux > 0) {
         if (l_aux >= 28) {
@@ -222,7 +222,7 @@ pub fn parseCsi(allocator: std.mem.Allocator, data: []const u8) !GenomicIndex {
             const meta = try readI32(data, &offset);
             const skip = try readI32(data, &offset);
             const l_nm = try readI32(data, &offset);
-            
+
             const remaining = l_aux - 28;
             if (l_nm != remaining) {
                 // Not a tabix header
@@ -232,7 +232,7 @@ pub fn parseCsi(allocator: std.mem.Allocator, data: []const u8) !GenomicIndex {
                 const names_buf = try allocator.alloc(u8, @intCast(l_nm));
                 @memcpy(names_buf, data[offset .. offset + @as(usize, @intCast(l_nm))]);
                 offset += @intCast(l_nm);
-                
+
                 var name_list = std.ArrayList([]const u8).empty;
                 var start: usize = 0;
                 for (names_buf, 0..) |c, i| {
@@ -258,21 +258,21 @@ pub fn parseCsi(allocator: std.mem.Allocator, data: []const u8) !GenomicIndex {
             offset += @intCast(l_aux);
         }
     }
-    
+
     const n_ref = try readI32(data, &offset);
     var refs = try allocator.alloc(Reference, @intCast(n_ref));
     @memset(refs, Reference{ .bins = &[_]Bin{}, .intervals = &[_]u64{} });
-    
+
     for (0..@intCast(n_ref)) |r_idx| {
         const n_bin = try readI32(data, &offset);
         var bins = try allocator.alloc(Bin, @intCast(n_bin));
         @memset(bins, Bin{ .bin = 0, .chunks = &[_]Chunk{}, .loffset = null });
-        
+
         for (0..@intCast(n_bin)) |b_idx| {
             const bin_id = try readU32(data, &offset);
             const loffset = try readU64(data, &offset);
             const n_chunk = try readI32(data, &offset);
-            
+
             var chunks = try allocator.alloc(Chunk, @intCast(n_chunk));
             for (0..@intCast(n_chunk)) |c_idx| {
                 const cnk_beg = try readU64(data, &offset);
@@ -281,10 +281,10 @@ pub fn parseCsi(allocator: std.mem.Allocator, data: []const u8) !GenomicIndex {
             }
             bins[b_idx] = Bin{ .bin = bin_id, .chunks = chunks, .loffset = loffset };
         }
-        
+
         refs[r_idx] = Reference{ .bins = bins, .intervals = &[_]u64{} };
     }
-    
+
     return GenomicIndex{
         .allocator = allocator,
         .min_shift = min_shift,
@@ -316,7 +316,7 @@ test "tbi parsing with mock data" {
     const allocator = std.testing.allocator;
     var buf = std.ArrayList(u8).empty;
     defer buf.deinit(allocator);
-    
+
     try buf.appendSlice(allocator, "TBI\x01");
     try appendI32(allocator, &buf, 1); // n_ref
     try appendI32(allocator, &buf, 2); // format VCF
@@ -327,7 +327,7 @@ test "tbi parsing with mock data" {
     try appendI32(allocator, &buf, 0); // skip
     try appendI32(allocator, &buf, 5); // l_nm
     try buf.appendSlice(allocator, "chr1\x00"); // names
-    
+
     // 1 ref
     try appendI32(allocator, &buf, 1); // n_bin
     // 1 bin
@@ -336,14 +336,14 @@ test "tbi parsing with mock data" {
     // 1 chunk
     try appendU64(allocator, &buf, 100); // cnk_beg
     try appendU64(allocator, &buf, 200); // cnk_end
-    
+
     try appendI32(allocator, &buf, 2); // n_intv
     try appendU64(allocator, &buf, 50); // ioffset 1
     try appendU64(allocator, &buf, 100); // ioffset 2
-    
+
     var idx = try parseTbi(allocator, buf.items);
     defer idx.deinit();
-    
+
     try std.testing.expectEqual(idx.min_shift, 14);
     try std.testing.expectEqual(idx.depth, 5);
     try std.testing.expectEqual(idx.refs.len, 1);
@@ -360,12 +360,12 @@ test "csi parsing with mock data" {
     const allocator = std.testing.allocator;
     var buf = std.ArrayList(u8).empty;
     defer buf.deinit(allocator);
-    
+
     try buf.appendSlice(allocator, "CSI\x01"); // magic
     try appendI32(allocator, &buf, 14); // min_shift
     try appendI32(allocator, &buf, 5); // depth
     try appendI32(allocator, &buf, 0); // l_aux
-    
+
     // 1 ref
     try appendI32(allocator, &buf, 1); // n_ref
     try appendI32(allocator, &buf, 1); // n_bin
@@ -376,10 +376,10 @@ test "csi parsing with mock data" {
     // 1 chunk
     try appendU64(allocator, &buf, 100); // cnk_beg
     try appendU64(allocator, &buf, 200); // cnk_end
-    
+
     var idx = try parseCsi(allocator, buf.items);
     defer idx.deinit();
-    
+
     try std.testing.expectEqual(idx.min_shift, 14);
     try std.testing.expectEqual(idx.depth, 5);
     try std.testing.expectEqual(idx.refs.len, 1);
@@ -396,9 +396,9 @@ test "GenomicIndex.reg2bins" {
         .depth = 5,
         .refs = &[_]Reference{},
     };
-    
+
     const bins = try idx.reg2bins(10, 20, allocator);
     defer allocator.free(bins);
-    
+
     try std.testing.expect(bins.len > 0);
 }

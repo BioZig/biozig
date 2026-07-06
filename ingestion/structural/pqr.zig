@@ -92,11 +92,11 @@ pub fn parsePqr(allocator: std.mem.Allocator, reader: anytype) ![]const model_mo
 
             const record_name = tokens.items[0];
             _ = record_name; // ATOM or HETATM
-            
+
             const id_str = tokens.items[1];
             const name_str = tokens.items[2];
             const res_name_str = tokens.items[3];
-            
+
             var chain_str: []const u8 = "";
             var res_seq_str: []const u8 = "";
             var x_str: []const u8 = "";
@@ -130,7 +130,7 @@ pub fn parsePqr(allocator: std.mem.Allocator, reader: anytype) ![]const model_mo
             const x = std.fmt.parseFloat(f64, x_str) catch return error.MalformedPqrAtomRecord;
             const y = std.fmt.parseFloat(f64, y_str) catch return error.MalformedPqrAtomRecord;
             const z = std.fmt.parseFloat(f64, z_str) catch return error.MalformedPqrAtomRecord;
-            
+
             const charge = std.fmt.parseFloat(f64, charge_str) catch return error.MalformedPqrAtomRecord;
             const radius = std.fmt.parseFloat(f64, radius_str) catch return error.MalformedPqrAtomRecord;
 
@@ -167,7 +167,7 @@ fn guessElement(name: []const u8) atom_mod.Element {
     if (first_char >= '0' and first_char <= '9' and name.len > 1) {
         first_char = name[1];
     }
-    
+
     switch (first_char) {
         'H' => return .H,
         'C' => return .C,
@@ -176,16 +176,18 @@ fn guessElement(name: []const u8) atom_mod.Element {
         'P' => return .P,
         'S' => return .S,
         else => {
-            const gen = [_]u8{first_char, 0};
+            const gen = [_]u8{ first_char, 0 };
             return .{ .generic = gen };
-        }
+        },
     }
 }
 
 const StringReader = struct {
     buffer: []const u8,
     pos: usize = 0,
-    pub fn init(b: []const u8) StringReader { return .{ .buffer = b }; }
+    pub fn init(b: []const u8) StringReader {
+        return .{ .buffer = b };
+    }
     pub fn readByte(self: *@This()) !u8 {
         if (self.pos >= self.buffer.len) return error.EndOfStream;
         const c = self.buffer[self.pos];
@@ -335,12 +337,12 @@ test "PQR parsing: valid file" {
     const chain = model.chains[0];
     try std.testing.expectEqualStrings("A", chain.id[0..chain.id_len]);
     try std.testing.expectEqual(@as(usize, 1), chain.residues.len);
-    
+
     const residue = chain.residues[0];
     try std.testing.expectEqual(@as(usize, 1), residue.id);
     try std.testing.expectEqualStrings("ALA", residue.name[0..residue.name_len]);
     try std.testing.expectEqual(@as(usize, 5), residue.atoms.len);
-    
+
     const atom1 = residue.atoms[0];
     try std.testing.expectEqual(@as(usize, 1), atom1.id);
     try std.testing.expectEqualStrings("N", atom1.name[0..atom1.name_len]);
@@ -399,7 +401,9 @@ pub fn parsePqrCoords(allocator: std.mem.Allocator, buffer: []const u8) ![]Vec3 
             if (tok_count >= 8) {
                 var tokens = std.mem.tokenizeAny(u8, line, " \t");
                 var i: usize = 0;
-                var x: f64 = 0; var y: f64 = 0; var z: f64 = 0;
+                var x: f64 = 0;
+                var y: f64 = 0;
+                var z: f64 = 0;
                 while (tokens.next()) |tok| : (i += 1) {
                     if (i == tok_count - 5) x = try std.fmt.parseFloat(f64, tok);
                     if (i == tok_count - 4) y = try std.fmt.parseFloat(f64, tok);
@@ -414,20 +418,20 @@ pub fn parsePqrCoords(allocator: std.mem.Allocator, buffer: []const u8) ![]Vec3 
 
 test "pqr zero-copy memory optimization" {
     const allocator = std.testing.allocator;
-    const data = 
+    const data =
         \\ATOM      1  N   ALA A   1      11.104   6.134  -6.504  0.0619 1.8240
         \\ATOM      2  CA  ALA A   1      11.639   6.071  -5.147 -0.0694 1.9080
         \\ATOM      3  C   ALA A   1      10.825   5.052  -4.326  0.5973 1.9080
-        ;
+    ;
     var arena = std.heap.ArenaAllocator.init(allocator);
     defer arena.deinit();
     const arena_allocator = arena.allocator();
     const start_memory = arena.queryCapacity();
-    
+
     const coords = try parsePqrCoords(arena_allocator, data);
     try std.testing.expectEqual(@as(usize, 3), coords.len);
     try std.testing.expectEqual(@as(f64, 11.104), coords[0].x);
-    
+
     const end_memory = arena.queryCapacity();
     try std.testing.expect(end_memory - start_memory < 500);
 }

@@ -211,11 +211,11 @@ pub fn BamIterator(comptime ReaderType: type) type {
             const payload_and_footer_size = (total_block_size + 1) - 12 - xlen;
             self.temp_comp_buf.clearRetainingCapacity();
             try self.temp_comp_buf.resize(self.allocator, 12 + xlen + payload_and_footer_size);
-            
+
             // Reconstruct header
             @memcpy(self.temp_comp_buf.items[0..12], &fixed_buf);
             @memcpy(self.temp_comp_buf.items[12 .. 12 + xlen], extra_buf);
-            
+
             // Read payload and footer
             try self.reader.readNoEof(self.temp_comp_buf.items[12 + xlen ..]);
 
@@ -234,7 +234,7 @@ pub fn bamIterator(allocator: std.mem.Allocator, reader: anytype) BamIterator(@T
 /// Serializes a SAM Record to BAM format
 pub fn serialize(writer: anytype, rec: sam.SamRecord) !void {
     try rec.validate();
-    
+
     // We will write the binary record structure
     var qname_buf: [256]u8 = undefined;
     const qname_len = @min(rec.qname.len, 254);

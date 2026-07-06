@@ -12,7 +12,7 @@ fn parseMtx(allocator: std.mem.Allocator, data: []const u8) !SparseMatrix {
     var rows: usize = 0;
     var cols: usize = 0;
     var nnz: usize = 0;
-    
+
     while (lines.next()) |line| {
         if (line.len == 0 or line[0] == '%') continue;
         var it = std.mem.splitAny(u8, line, " \t");
@@ -21,13 +21,13 @@ fn parseMtx(allocator: std.mem.Allocator, data: []const u8) !SparseMatrix {
         nnz = try std.fmt.parseInt(usize, it.next() orelse return error.InvalidMtx, 10);
         break;
     }
-    
+
     var mat = try SparseMatrix.init(allocator, .csr, rows, cols, nnz);
-    
+
     const Triplet = struct { r: u32, c: u32, v: f64 };
     var triplets = try allocator.alloc(Triplet, nnz);
     defer allocator.free(triplets);
-    
+
     var i: usize = 0;
     while (lines.next()) |line| {
         if (line.len == 0 or line[0] == '%') continue;
@@ -35,7 +35,7 @@ fn parseMtx(allocator: std.mem.Allocator, data: []const u8) !SparseMatrix {
         const r_str = it.next() orelse continue;
         const c_str = it.next() orelse continue;
         const v_str = it.next() orelse continue;
-        
+
         triplets[i] = .{
             .r = (try std.fmt.parseInt(u32, r_str, 10)) - 1,
             .c = (try std.fmt.parseInt(u32, c_str, 10)) - 1,
@@ -44,7 +44,7 @@ fn parseMtx(allocator: std.mem.Allocator, data: []const u8) !SparseMatrix {
         i += 1;
         if (i == nnz) break;
     }
-    
+
     const SortFn = struct {
         fn lessThan(_: void, a: Triplet, b: Triplet) bool {
             if (a.r != b.r) return a.r < b.r;
@@ -52,7 +52,7 @@ fn parseMtx(allocator: std.mem.Allocator, data: []const u8) !SparseMatrix {
         }
     };
     std.mem.sort(Triplet, triplets, {}, SortFn.lessThan);
-    
+
     var current_row: u32 = 0;
     mat.indptr[0] = 0;
     for (triplets, 0..) |t, idx| {
@@ -67,7 +67,7 @@ fn parseMtx(allocator: std.mem.Allocator, data: []const u8) !SparseMatrix {
         current_row += 1;
         mat.indptr[current_row] = @intCast(nnz);
     }
-    
+
     return mat;
 }
 
@@ -112,13 +112,7 @@ pub fn execute(args: args_mod.ParsedArgs) !void {
         return;
     };
 
-    const supported_commands = [_][]const u8{
-        "umap", "tsne", "kmeans", "zinb", "pseudotime", "pca", "incremental_pca", "knn", 
-        "diff_exp", "mean_expression", "variance_expression", "spatial_distance", 
-        "spatial_neighborhood", "neighborhood_expression", "score_cell_cycle", 
-        "sparse_col_sums", "sparse_row_sums", "sparse_multiply",
-        "assign_phase", "get_interactions", "get_ancestry", "find_neighbors"
-    };
+    const supported_commands = [_][]const u8{ "umap", "tsne", "kmeans", "zinb", "pseudotime", "pca", "incremental_pca", "knn", "diff_exp", "mean_expression", "variance_expression", "spatial_distance", "spatial_neighborhood", "neighborhood_expression", "score_cell_cycle", "sparse_col_sums", "sparse_row_sums", "sparse_multiply", "assign_phase", "get_interactions", "get_ancestry", "find_neighbors" };
 
     var is_supported = false;
     for (supported_commands) |supported| {
@@ -132,7 +126,7 @@ pub fn execute(args: args_mod.ParsedArgs) !void {
         var out_writer = output.OutputWriter.init(.text);
         if (args.input) |in_path| {
             var reader = MMapReader.init(std.heap.page_allocator, in_path) catch |err| {
-                std.debug.print("Error opening input file '{s}': {}\n", .{in_path, err});
+                std.debug.print("Error opening input file '{s}': {}\n", .{ in_path, err });
                 return err;
             };
             defer reader.deinit();
@@ -215,7 +209,7 @@ pub fn execute(args: args_mod.ParsedArgs) !void {
                 try out_writer.writeText("Spatial Neighborhood: {} neighbors\n", .{res.len});
             } else if (std.mem.eql(u8, cmd, "neighborhood_expression")) {
                 var n = [_]algorithms.cellular.SpatialNeighbor{.{ .index = 0, .distance = 0.0 }};
-                var expr = [_]f64{ 1.5 };
+                var expr = [_]f64{1.5};
                 const res = algorithms.cellular.neighborhoodExpressionStats(&n, &expr);
                 try out_writer.writeText("Neighborhood expr: {d:.4}\n", .{res});
             } else if (std.mem.eql(u8, cmd, "score_cell_cycle")) {
@@ -223,7 +217,7 @@ pub fn execute(args: args_mod.ParsedArgs) !void {
                 var m1 = [_]bool{ true, false };
                 var m2 = [_]bool{ false, true };
                 const res = try algorithms.cellular.scoreCellCycle(&expr, &m1, &m2);
-                try out_writer.writeText("G1/S: {d:.4}, G2/M: {d:.4}\n", .{res.g1_s, res.g2_m});
+                try out_writer.writeText("G1/S: {d:.4}, G2/M: {d:.4}\n", .{ res.g1_s, res.g2_m });
             } else if (std.mem.eql(u8, cmd, "assign_phase")) {
                 const res = cellular.cellcycle.Utils.assignPhase(1.0, 0.5, 0.2);
                 try out_writer.writeText("Phase: {s}\n", .{res.toString()});

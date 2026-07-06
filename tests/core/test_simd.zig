@@ -10,7 +10,7 @@ test "simd edge cases" {
     try std.testing.expectEqual(core.simd.sumInt(int_empty), 0);
 
     // length not a multiple of vec_len (16)
-    const float_odd = [_]f32{1.0, 2.0, 3.0};
+    const float_odd = [_]f32{ 1.0, 2.0, 3.0 };
     try std.testing.expectEqual(core.simd.sumFloat(&float_odd), 6.0);
 
     const text_empty: []const u8 = "";

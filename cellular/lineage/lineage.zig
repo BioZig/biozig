@@ -45,7 +45,7 @@ pub const LineageNode = struct {
         const cell_id = try core.serialization.deserialize(reader, []const u8, allocator);
         const node = try LineageNode.init(allocator, cell_id);
         allocator.free(cell_id); // init dupes it
-        
+
         const child_count = try core.serialization.deserialize(reader, u64, allocator);
         var i: u64 = 0;
         while (i < child_count) : (i += 1) {
@@ -125,20 +125,20 @@ test "LineageTree traversal and ancestry" {
     const alloc = std.testing.allocator;
     var tree = LineageTree.init(alloc);
     defer tree.deinit();
-    
+
     const root = try LineageNode.init(alloc, "Zygote");
     tree.root = root;
-    
+
     const c1 = try LineageNode.init(alloc, "Cell_1");
     try root.addChild(c1);
-    
+
     const c2 = try LineageNode.init(alloc, "Cell_2");
     try c1.addChild(c2);
-    
+
     const found = tree.findNode("Cell_2");
     try std.testing.expect(found != null);
     try std.testing.expectEqualStrings("Cell_2", found.?.cell_id);
-    
+
     const ancestry = try tree.getAncestry(c2, alloc);
     defer alloc.free(ancestry);
     try std.testing.expectEqual(@as(usize, 2), ancestry.len);

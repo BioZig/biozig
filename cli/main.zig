@@ -20,7 +20,7 @@ pub fn main(init: std.process.Init) !void {
     }
 
     const domain = process_args[1];
-    
+
     if (std.mem.eql(u8, domain, "-h") or std.mem.eql(u8, domain, "--help")) {
         printHelp();
         return;

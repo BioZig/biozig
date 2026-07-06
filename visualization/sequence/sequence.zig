@@ -42,12 +42,12 @@ pub const GcContentPlot = struct {
             \\<text x="{d}" y="{d}" font-family="sans-serif" font-size="12" text-anchor="middle" fill="#666666">{s}</text>
             \\<text x="{d}" y="{d}" font-family="sans-serif" font-size="12" text-anchor="middle" fill="#666666" transform="rotate(-90 {d} {d})">{s}</text>
         , .{
-            width, height, width, height,
+            width,       height,            width,      height,
             width / 2.0, margin_top - 20.0, self.title,
             margin_left, height - margin_bottom, width - margin_right, height - margin_bottom, // X-axis
-            margin_left, margin_top, margin_left, height - margin_bottom, // Y-axis
-            width / 2.0, height - 15.0, self.x_label,
-            20.0, height / 2.0, 20.0, height / 2.0, self.y_label,
+            margin_left,  margin_top,    margin_left,  height - margin_bottom, // Y-axis
+            width / 2.0,  height - 15.0, self.x_label, 20.0,
+            height / 2.0, 20.0,          height / 2.0, self.y_label,
         });
 
         if (self.gc_fractions.len > 1) {
@@ -125,10 +125,10 @@ pub const KmerFrequencyPlot = struct {
             \\<line x1="{d}" y1="{d}" x2="{d}" y2="{d}" stroke="#cccccc" stroke-width="1"/>
             \\<line x1="{d}" y1="{d}" x2="{d}" y2="{d}" stroke="#cccccc" stroke-width="1"/>
         , .{
-            width, height, width, height,
-            width / 2.0, margin_top - 20.0, self.title,
-            margin_left, height - margin_bottom, width - margin_right, height - margin_bottom,
-            margin_left, margin_top, margin_left, height - margin_bottom,
+            width,                  height,               width,                  height,
+            width / 2.0,            margin_top - 20.0,    self.title,             margin_left,
+            height - margin_bottom, width - margin_right, height - margin_bottom, margin_left,
+            margin_top,             margin_left,          height - margin_bottom,
         });
 
         if (self.counts.len > 0) {
@@ -156,9 +156,9 @@ pub const KmerFrequencyPlot = struct {
                     \\<text x="{d:.2}" y="{d:.2}" font-family="sans-serif" font-size="10" text-anchor="middle" fill="#333333" transform="rotate(45 {d:.2} {d:.2})">{s}</text>
                     \\<text x="{d:.2}" y="{d:.2}" font-family="sans-serif" font-size="9" text-anchor="middle" fill="#666666">{d}</text>
                 , .{
-                    x, y, bar_w, bar_h,
-                    x + bar_w / 2.0, height - margin_bottom + 15.0, x + bar_w / 2.0, height - margin_bottom + 15.0, self.kmers[i],
-                    x + bar_w / 2.0, y - 5.0, c,
+                    x,               y,                             bar_w,           bar_h,
+                    x + bar_w / 2.0, height - margin_bottom + 15.0, x + bar_w / 2.0, height - margin_bottom + 15.0,
+                    self.kmers[i],   x + bar_w / 2.0,               y - 5.0,         c,
                 });
             }
         }
@@ -209,10 +209,10 @@ pub const CoveragePlot = struct {
             \\<line x1="{d}" y1="{d}" x2="{d}" y2="{d}" stroke="#cccccc" stroke-width="1"/>
             \\<line x1="{d}" y1="{d}" x2="{d}" y2="{d}" stroke="#cccccc" stroke-width="1"/>
         , .{
-            width, height, width, height,
-            width / 2.0, margin_top - 20.0, self.title,
-            margin_left, height - margin_bottom, width - margin_right, height - margin_bottom,
-            margin_left, margin_top, margin_left, height - margin_bottom,
+            width,                  height,               width,                  height,
+            width / 2.0,            margin_top - 20.0,    self.title,             margin_left,
+            height - margin_bottom, width - margin_right, height - margin_bottom, margin_left,
+            margin_top,             margin_left,          height - margin_bottom,
         });
 
         if (self.positions.len > 1) {

@@ -118,7 +118,7 @@ pub const VolcanoPlot = struct {
     labels: []const []const u8,
     title: []const u8,
     fc_threshold: f64, // e.g. 1.0
-    p_threshold: f64,  // e.g. 1.3 (equivalent to p-value 0.05)
+    p_threshold: f64, // e.g. 1.3 (equivalent to p-value 0.05)
 
     pub fn init(
         log2_fc: []const f64,
@@ -157,12 +157,12 @@ pub const VolcanoPlot = struct {
             \\<text x="{d}" y="{d}" font-family="sans-serif" font-size="12" text-anchor="middle" fill="#666666">log2 Fold Change</text>
             \\<text x="{d}" y="{d}" font-family="sans-serif" font-size="12" text-anchor="middle" fill="#666666" transform="rotate(-90 {d} {d})">-log10 p-value</text>
         , .{
-            width, height, width, height,
-            width / 2.0, margin_top - 20.0, self.title,
-            margin_left, height - margin_bottom, width - margin_right, height - margin_bottom,
-            margin_left, margin_top, margin_left, height - margin_bottom,
-            width / 2.0, height - 15.0,
-            20.0, height / 2.0, 20.0, height / 2.0,
+            width,                  height,               width,                  height,
+            width / 2.0,            margin_top - 20.0,    self.title,             margin_left,
+            height - margin_bottom, width - margin_right, height - margin_bottom, margin_left,
+            margin_top,             margin_left,          height - margin_bottom, width / 2.0,
+            height - 15.0,          20.0,                 height / 2.0,           20.0,
+            height / 2.0,
         });
 
         if (self.log2_fc.len > 0) {
@@ -256,12 +256,12 @@ pub const PcaPlotContainer = struct {
             \\<text x="{d}" y="{d}" font-family="sans-serif" font-size="12" text-anchor="middle" fill="#666666">PC1</text>
             \\<text x="{d}" y="{d}" font-family="sans-serif" font-size="12" text-anchor="middle" fill="#666666" transform="rotate(-90 {d} {d})">PC2</text>
         , .{
-            width, height, width, height,
-            width / 2.0, margin_top - 20.0, self.title,
-            margin_left, height - margin_bottom, width - margin_right, height - margin_bottom,
-            margin_left, margin_top, margin_left, height - margin_bottom,
-            width / 2.0, height - 15.0,
-            20.0, height / 2.0, 20.0, height / 2.0,
+            width,                  height,               width,                  height,
+            width / 2.0,            margin_top - 20.0,    self.title,             margin_left,
+            height - margin_bottom, width - margin_right, height - margin_bottom, margin_left,
+            margin_top,             margin_left,          height - margin_bottom, width / 2.0,
+            height - 15.0,          20.0,                 height / 2.0,           20.0,
+            height / 2.0,
         });
 
         if (self.pc1.len > 0) {

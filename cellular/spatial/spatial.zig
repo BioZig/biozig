@@ -48,7 +48,7 @@ pub const SpatialIndex = struct {
     pub fn findNeighbors(self: SpatialIndex, target_idx: usize, radius: f64, allocator: std.mem.Allocator) ![]usize {
         var neighbors = std.ArrayList(usize).empty;
         const target = self.cells[target_idx];
-        
+
         for (self.cells, 0..) |cell, i| {
             if (i == target_idx) continue;
             if (target.distanceTo(cell) <= radius) {
@@ -72,7 +72,7 @@ test "SpatialCell distance and neighborhood" {
     const index = SpatialIndex.init(std.testing.allocator, @constCast(&cells), 1.0);
     const neighbors = try index.findNeighbors(0, 2.0, std.testing.allocator);
     defer std.testing.allocator.free(neighbors);
-    
+
     try std.testing.expectEqual(@as(usize, 1), neighbors.len);
     try std.testing.expectEqual(@as(usize, 1), neighbors[0]);
 }
