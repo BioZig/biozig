@@ -1,6 +1,7 @@
 # Zig build artifacts
 zig-out/
 zig-cache/
+.zig-cache/
 
 # OS generated files
 .DS_Store
@@ -28,6 +29,12 @@ bin/
 .idea/
 .vscode/
 
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+
 # Internal design documents
 context.md
 BioZig.md
+website/
