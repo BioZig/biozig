@@ -1,89 +1,72 @@
 # BioZig
 
-**Biological computation built on first-principles representations.**
+Biological computation framework built in Zig.
 
----
+## Overview
 
-## Mission
+BioZig provides data structures and algorithms for bioinformatics, prioritizing domain-specific representations over string manipulation. It utilizes explicit memory management to process biological data with exact reproducibility.
 
-**BioZig** is a high-performance, deterministic, and interoperable computational biology framework built in [Zig](https://ziglang.org/). It provides a foundational engine for modern bioinformatics, prioritizing biological-first data structures over generic text-based representations.
+## Features
 
-By adhering to a "Biology Is Not Text" philosophy, BioZig achieves extreme memory efficiency and computational throughput while maintaining bit-exact reproducibility and cross-language interoperability.
-
-## Core Philosophy: "Biology Is Not Text"
-
-Most bioinformatics software treats biological entities as strings (e.g., "ATCG" for DNA). BioZig rejects this abstraction in favor of compact, domain-specific representations:
-
-*   **Packed Nucleotides:** 2-bit and 4-bit (ambiguity-aware) encodings.
-*   **Compact Amino Acids:** Optimized encodings for protein primary and secondary structures.
-*   **Biological Graphs:** Domain-specific graph structures for pathways, regulatory networks, and knowledge graphs.
-*   **Structural Primitives:** Memory-aligned representations for atomic and residue-level structural data.
-
-## Key Features
-
-*   **Extreme Performance:** Leverages Zig's manual memory management and SIMD optimizations.
-*   **Deterministic Execution:** Ensures reproducible results by tracking seeds, compiler versions, and hardware targets.
-*   **Interoperability:** A stable C ABI allows seamless integration with Python, R, C++, Swift, Julia, and MATLAB.
-*   **Layered Architecture:** Organized by biological abstraction levels (Molecular → Cellular → Organismal).
-*   **Publication-Ready:** Built-in support for generating high-quality visualizations and structured reports (PDF, HTML, LaTeX).
-
----
+*   **Memory Efficiency:** 2-bit and 4-bit ambiguity-aware nucleotide encodings.
+*   **Determinism:** Seed-tracked algorithms and fixed allocator boundaries.
+*   **Command-Line Interface:** Native standalone executable `biozig` for direct Unix pipeline integration via standard streams.
+*   **Modular Architecture:** Components are separated by biological abstraction level.
 
 ## Project Structure
 
-BioZig is organized into logical layers reflecting the hierarchy of biological systems:
-
 ```text
 biozig/
-├── core/             # Allocators, SIMD, Threading, Serialization
-├── molecular/        # DNA, RNA, Protein, Variants, Transcripts
-├── structural/       # Atoms, Residues, Chains, PDB/mmCIF support
-├── systems/          # Networks, Pathways, Ontologies, Regulation
-├── cellular/         # Single-cell, Spatial, Expression Matrices
-├── organismal/       # Anatomy, Development, Phenotypes
-├── population/       # GWAS, Haplotypes, Ancestry
-├── evolutionary/     # Phylogeny, Comparative Genomics, Selection
-├── analytics/        # Statistics, Clustering, Graph Analysis
-├── visualization/    # Publication-quality figures (SVG, PDF, PNG)
-├── reporting/        # Manuscript and supplementary report generation
-├── interoperability/ # Bindings for Python, R, C++, Swift, etc.
-└── utility/          # Benchmarking, Logging, Testing, Validation
+├── core/             # Allocators, standard math, generic collections
+├── molecular/        # DNA, RNA, Protein data structures
+├── structural/       # Atomic and residue-level geometry
+├── systems/          # Pathway and network abstractions
+├── cellular/         # Single-cell and spatial matrix structures
+├── organismal/       # Phenotypic and developmental mapping
+├── population/       # Genomic variation and population statistics
+├── evolutionary/     # Phylogenetics and substitution models
+├── analytics/        # Dimensionality reduction and clustering
+├── algorithms/       # Core molecular algorithms (MSA, MCMC, Suffix Trees)
+├── ingestion/        # Zero-copy parsers for FASTA, FASTQ, PDB, SAM, VCF
+├── visualization/    # SVG generators for structural and omics data
+├── reporting/        # Markdown, HTML, and LaTeX export generation
+└── cli/              # Command-line interface subcommands
 ```
 
----
+## Setup and Usage
 
-## Interoperability Strategy
+BioZig operates as a standalone CLI executable.
 
-BioZig is designed to be a "computation engine." While the core is written in Zig, users can interact with it through their preferred high-level languages:
+1.  **Build the Executable**
+    Compile the project using the Zig build system (requires Zig `0.14.0` or later):
+    ```bash
+    zig build
+    ```
+    This produces the executable at `zig-out/bin/biozig`.
 
-1.  **BioZig Core (Zig)** — High-performance implementation.
-2.  **C ABI** — Stable interface layer.
-3.  **Language Bindings** — Native-feeling wrappers for:
-    *   **Python:** `import biozig`
-    *   **R:** `library(biozig)`
-    *   **Swift:** `import BioZig`
-    *   **Julia, MATLAB, C++**
+2.  **Run the CLI**
+    The CLI is structured by biological domain:
+    ```bash
+    ./zig-out/bin/biozig <domain> <subcommand> [options]
+    ```
 
----
+    Example usage:
+    ```bash
+    ./zig-out/bin/biozig genomics align -i input.fasta
+    ```
 
-## Non-Goals
-
-*   Creating a new programming language.
-*   Replacing general-purpose data science environments (e.g., Pandas/R).
-*   Building a generic machine learning framework.
-
-BioZig focuses exclusively on the **computational infrastructure of biology.**
-
----
+3.  **Run Tests**
+    Execute the exhaustive unit test suite to verify internal integrity:
+    ```bash
+    zig build test
+    ```
+    For detailed information on the 440+ exhaustive edge-case test suites, the `tests/` directory structure, and the custom `run_tests.sh` module mapping wrapper, please refer to the [Testing Documentation](docs/TESTING.md).
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details (coming soon).
+This project is licensed under the MIT License.
 
 ## Author
 
-**MD. Arshad**
-*Department of Computer Science, Jamia Millia Islamia*
-
----
-*Governed, Not Generated. Reference-as-Truth.*
+MD. Arshad
+Department of Computer Science, Jamia Millia Islamia
