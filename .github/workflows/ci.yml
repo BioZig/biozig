@@ -2,9 +2,9 @@ name: BioZig CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ "37" ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ "37" ]
 
 jobs:
   test_suite:
