@@ -33,15 +33,12 @@ pub const ReproducibilityRecord = struct {
         const cpu_name = builtinCpuName();
         const os_name = builtinOsName();
 
-        var ts: std.posix.system.timespec = undefined;
-        _ = std.posix.system.clock_gettime(.REALTIME, &ts);
-
         self.* = .{
             .allocator = allocator,
             .compiler_version = try allocator.dupe(u8, compiler_ver),
             .target_cpu = try allocator.dupe(u8, cpu_name),
             .target_os = try allocator.dupe(u8, os_name),
-            .timestamp = ts.sec,
+            .timestamp = 0,
             .random_seed = random_seed,
             .inputs = .empty,
             .outputs = .empty,
