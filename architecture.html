@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Architecture - BioZig</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700;900&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/global.css" />
+  <script src="js/main.js"></script>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true, theme: 'dark', fontFamily: 'monospace' });
+  </script>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <a href="index.html" class="bz-logo-sm">
+        <div class="bz-chr">
+          <div class="bz-chr-band3">3</div>
+          <div class="bz-chr-band7">7</div>
+        </div>
+        <div class="bz-wordmark"><span class="w-bio">BIO</span><span class="w-zig">ZIG</span></div>
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html" class="">Overview</a></li>
+        <li><a href="philosophy.html" class="">Philosophy</a></li>
+        <li><a href="architecture.html" class="active">Architecture</a></li>
+        <li><a href="docs.html" class="">Docs</a></li>
+        <li><a href="tutorials.html" class="">Tutorials</a></li>
+        <li><a href="libbiozig.html" class="">libbiozig</a></li>
+        <li><a href="cli.html" class="">CLI</a></li>
+        <li><a href="foundation.html" class="">BZSF</a></li>
+        <li>
+          <button class="theme-toggle" onclick="openSearch()" aria-label="Search">[ / ] SEARCH</button>
+        </li>
+        <li>
+          <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light/dark mode">
+            <span id="themeIcon">☀</span> <span id="themeLabel">Light</span>
+          </button>
+        </li>
+      </ul>
+    </header>
+
+    <div style="padding: 80px 0;">
+      <div class="nb-head">
+        <span class="nb-title">System Architecture</span>
+        <span class="op">DATA PIPELINE</span>
+      </div>
+      <p class="body-text">BioZig (BZ) does not act as a monolithic God object. Instead, it enforces strict separation of concerns, broken down into four distinct phases of execution. This prevents cyclic dependencies and ensures hardware-level performance.</p>
+      
+      <div class="code" style="margin-bottom: 40px;">
+        <pre><code class="mermaid">
+graph TD
+    classDef core fill:#111,stroke:#27272a,stroke-width:2px,color:#a1a1aa,font-family:monospace
+    classDef parser fill:#111,stroke:#27272a,stroke-width:2px,color:#f7a41d,font-family:monospace
+    classDef domain fill:#111,stroke:#27272a,stroke-width:2px,color:#4ade80,font-family:monospace
+    classDef algo fill:#111,stroke:#27272a,stroke-width:2px,color:#60a5fa,font-family:monospace
+
+    subgraph BZ Architecture Pipeline
+        A[CORE<br>Arena, ThreadPool, SIMD]:::core -->|I/O Config| B(PARSER<br>MMap Bit-Sieve):::parser
+        B -->|Raw Memory View| C{DOMAIN<br>SoA Layouts, DNA2}:::domain
+        C -->|Type-Safe Structs| D[ALGORITHM<br>Compute Kernels]:::algo
+        D -.->|Hardware Intrinsics| A
+    end
+        </code></pre>
+      </div>
+      
+      <div class="api-block">
+        <div class="api-name">1. CORE</div>
+        <div class="api-desc">Memory & Execution (Arena Allocators, SIMD, Thread Pools, and I/O handlers).</div>
+      </div>
+      <div class="api-block">
+        <div class="api-name">2. PARSER</div>
+        <div class="api-desc">Zero-Copy Ingestion (64-bit Bit-Sieve MMap parsers transforming raw bytes directly into struct slices).</div>
+      </div>
+      <div class="api-block">
+        <div class="api-name">3. DOMAIN</div>
+        <div class="api-desc">Data Representation (SoA layouts, e.g., DNA2 encoded bits, XYZ coordinate sets). Pure state, no logic.</div>
+      </div>
+      <div class="api-block">
+        <div class="api-name">4. ALGORITHM</div>
+        <div class="api-desc">Compute Kernels (Functions that take Domain structs, process via Core SIMD, and output results).</div>
+      </div>
+
+      <div class="nb-head">
+        <span class="nb-title">Zero-Copy Bit-Sieve Parsing</span>
+        <span class="op">ingestion/transcriptomics/mtx.zig</span>
+      </div>
+      <p class="body-text">BZ does not parse files byte-by-byte. It reads 64 bits at a time from the memory map and uses bit-twiddling to find delimiters in O(1) cycles.</p>
+      <div class="code"><pre><code>
+pub fn next(self: *MtxMmapIterator) ?[]const u8 {
+    if (self.cursor >= self.buffer.len) return null;
+    const start = self.cursor;
+    while (self.cursor + 8 <= self.buffer.len) {
+        // Load 64 bits directly from the mmap
+        const block = std.mem.readInt(u64, self.buffer[self.cursor..self.cursor+8][0..8], .little);
+        // XOR with 0x0A0A0A0A0A0A0A0A to find newlines
+        const xor_mask = block ^ 0x0A0A0A0A0A0A0A0A;
+        // Bit-twiddling magic: (x - 0x01...) & ~x & 0x80...
+        const match_mask = (xor_mask - 0x0101010101010101) & ~xor_mask & 0x8080808080808080;
+        if (match_mask != 0) {
+            const offset = @ctz(match_mask) / 8;
+            self.cursor += offset + 1;
+            return self.buffer[start .. self.cursor - 1];
+        }
+        self.cursor += 8;
+    }
+}
+      </code></pre></div>
+
+      <div class="api-block">
+        <div class="api-name">MMapReader (Zero-Copy)</div>
+        <div class="api-sig"><span class="kw">pub const</span> MMapReader = <span class="kw">struct</span> { file: std.Io.File, mmap: std.Io.File.MemoryMap, ... }</div>
+        <div class="api-desc">Opens a file in read_only mode with protection <code>.{ .read = true, .write = false }</code>. Grants zero-copy access to data via <code>mm.memory[0..size]</code>.</div>
+      </div>
+
+      <div class="nb-head">
+        <span class="nb-title">SIMD Vectorization</span>
+        <span class="op">core/simd/simd.zig</span>
+      </div>
+      <div class="api-block">
+        <div class="api-name">Hardware Accelerated Primitives</div>
+        <div class="api-sig"><span class="kw">pub fn</span> countChar(slice: []const u8, char: u8) usize</div>
+        <div class="api-desc">Vectorized char counting using <code>@Vector(32, u8)</code> and <code>@select</code> instead of byte-by-byte loops.</div>
+        <div class="code"><pre><code>
+pub fn countChar(slice: []const u8, char: u8) usize {
+    const VLen = 32;
+    const V = @Vector(VLen, u8);
+    const char_vec: V = @splat(char);
+    // Compares chunks (vec == char_vec)
+    // Converts bools to ints with @select
+    // Reduces with @reduce(.Add, match_ints)
+}
+        </code></pre></div>
+      </div>
+
+      <div class="nb-head">
+        <span class="nb-title">Molecular Domain: 2-Bit Compression</span>
+        <span class="op">molecular/dna/dna.zig</span>
+      </div>
+      <div class="api-block">
+        <div class="api-name">Nucleotide & DNA2</div>
+        <div class="api-sig"><span class="kw">pub const</span> Nucleotide = <span class="kw">enum</span>(u2) { A = 0b00, C = 0b01, G = 0b10, T = 0b11 };</div>
+        <div class="api-desc"><code>DNA2</code> owns the memory, packing 4 bases per byte.</div>
+        <div class="code"><pre><code>
+pub const DNA2 = struct {
+    bytes: []u8,
+    len: usize,
+    allocator: std.mem.Allocator,
+    
+    pub fn get(self: DNA2, index: usize) Nucleotide {
+        const byte_idx = index / 4;
+        const shift = @as(u3, @truncate((index % 4) * 2));
+        const bits = (self.bytes[byte_idx] >> shift) & 0b11;
+        return @enumFromInt(bits);
+    }
+};
+        </code></pre></div>
+      </div>
+
+      <div class="nb-head">
+        <span class="nb-title">Structural Geometry</span>
+        <span class="op">structural/geometry.zig</span>
+      </div>
+      <div class="api-block">
+        <div class="api-name">Structure of Arrays (SoA)</div>
+        <div class="api-sig"><span class="kw">pub const</span> CoordinateSet = <span class="kw">struct</span> { x: []f64, y: []f64, z: []f64 };</div>
+        <div class="api-desc">By decoupling coordinates into SoA, SIMD vectors can load 8 <code>f64</code> elements linearly without cache-misses from gather instructions.</div>
+      </div>
+
+      <div class="nb-head">
+        <span class="nb-title">Thread Pooling & Work Stealing</span>
+        <span class="op">core/concurrency/pool.zig</span>
+      </div>
+      <div class="api-block">
+        <div class="api-name">Lock-Free Atomics</div>
+        <div class="api-sig">@atomicRmw(<span class="kw">.Add</span>, &target, value, <span class="kw">.SeqCst</span>)</div>
+        <div class="api-desc">Instead of using <code>std.Thread.Mutex</code>, BZ aggregates concurrent results using hardware atomic instructions to eliminate lock contention on 50M+ element operations.</div>
+      </div>
+    </div>
+    
+  <div id="searchModal" class="search-modal" onclick="closeSearch(event)">
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="Search documentation..." onkeyup="handleSearch(event)">
+      <div id="searchResults" class="search-results"></div>
+    </div>
+  </div>
+  </div>
+  <script>
+    window.__BZ_SEARCH_INDEX__ = [{"url":"index.html","title":"Welcome","content":"\n     \n       \n         ZIG 0.16 · v0.1.0-DEV · 3-Clause BSD \n         Biology computed  exactly.  \n         \n           BioZig (BZ): Biology first principles programming.   \n           DNA is not a string.  \n          Protein is not a string. \n          BZ encodes biological reality \n          at the bit level — where it belongs.  \n          Deterministic. Reproducible. \n          On every machine. Every time.\n         \n         Read Documentation \n       \n       \n         \n           \n        "},{"url":"philosophy.html","title":"Philosophy","content":"\n     \n       \n         The Fundamental Problem \n         BIOINFORMATICS IN CRISIS \n       \n       Modern biology generates data at a petabyte scale, yet the foundational libraries we use to analyze it were built in an era of megabytes. Biological data is discrete, deterministic, and mathematical. Yet, legacy frameworks treat DNA as UTF-8 text strings, protein coordinates as deeply nested objects, and graphs as fragmented pointers.  This abstraction is mathematically and computationally incorrec"},{"url":"architecture.html","title":"Architecture","content":"\n     \n       \n         System Architecture \n         DATA PIPELINE \n       \n       BioZig (BZ) does not act as a monolithic God object. Instead, it enforces strict separation of concerns, broken down into four distinct phases of execution. This prevents cyclic dependencies and ensures hardware-level performance. \n      \n       \n          \ngraph TD\n    classDef core fill:#111,stroke:#27272a,stroke-width:2px,color:#a1a1aa,font-family:monospace\n    classDef parser fill:#111,stroke:#27272a,stroke-w"},{"url":"tutorials.html","title":"Tutorials","content":"\n     \n       \n         Cross-Domain Interaction \n         PIPELINE DESIGN \n       \n       In standard bioinformatics, you read a file (Parser), parse it into an object (Domain), and run a method on the object (Algorithm). In BioZig (BZ), data is orthogonal to behavior. The parser generates  raw Domain structs , and the Algorithms consume them. No objects own methods. \n\n       \n       \n         1. Pure Zig (Native) \n         STRUCTURAL PROTEIN PIPELINE \n       \n       Parse a PDB file using zero"},{"url":"cli.html","title":"Command Line Interface","content":"\n     \n       \n         BioZig (BZ) CLI \n         COMMAND LINE INTERFACE \n       \n       \n        The BZ Command Line Interface ( biozig ) provides a lightning-fast, zero-dependency binary for executing biological algorithms directly from the terminal. \n       \n      \n       \n         BZ does not guess. BZ does not approximate. If a graph traversal cannot prove its cycle resolution, it fails. If a structural parser drops precision in coordinate translation, it fails. BZ is built on the premise t"},{"url":"foundation.html","title":"BZSF","content":"\n     \n       \n         BZ Software Foundation \n         BZSF \n       \n      \n       The BZ Software Foundation (BZSF) exists to safeguard the integrity, performance, and philosophical rigor of the BZ ecosystem. We are committed to maintaining a zero-copy, mathematically provable, and brutalist standard for bioinformatics infrastructure. \n\n       \n         Leadership \n         STEERING \n       \n      \n       \n         MD. Arshad \n         Creator and Curator \n         Principal architect of the "}];
+    (function(){
+      const stored = localStorage.getItem('bz-theme');
+      const sys = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+      const theme = stored || sys;
+      document.documentElement.setAttribute('data-theme', theme);
+      const icon = document.getElementById('themeIcon');
+      const label = document.getElementById('themeLabel');
+      if(icon) icon.textContent = theme === 'light' ? '☾' : '☀';
+      if(label) label.textContent = theme === 'light' ? 'Dark' : 'Light';
+    })();
+    
+    // Keyboard shortcuts for surfing
+    document.addEventListener('keydown', (e) => {
+      if (e.key.toLowerCase() === 'escape') {
+        const modal = document.getElementById('searchModal');
+        if (modal) modal.classList.remove('active');
+        return;
+      }
+      
+      // Ignore if typing in an input or textarea
+      if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
+      
+      switch (e.key.toLowerCase()) {
+        case '1': case 'o': window.location.href = 'index.html'; break;
+        case '2': case 'p': window.location.href = 'philosophy.html'; break;
+        case '3': case 'a': window.location.href = 'architecture.html'; break;
+        case '4': case 'd': window.location.href = 'docs.html'; break;
+        case '5': case 't': window.location.href = 'tutorials.html'; break;
+        case '6': case 'l': window.location.href = 'libbiozig.html'; break;
+        case '7': case 'c': window.location.href = 'cli.html'; break;
+        case '8': case 'f': window.location.href = 'foundation.html'; break;
+        case 's': case '/': 
+          e.preventDefault();
+          openSearch(); 
+          break;
+      }
+    });
+  </script>
+</body>
+</html>

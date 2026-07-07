@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Command Line Interface - BioZig</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700;900&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/global.css" />
+  <script src="js/main.js"></script>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true, theme: 'dark', fontFamily: 'monospace' });
+  </script>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <a href="index.html" class="bz-logo-sm">
+        <div class="bz-chr">
+          <div class="bz-chr-band3">3</div>
+          <div class="bz-chr-band7">7</div>
+        </div>
+        <div class="bz-wordmark"><span class="w-bio">BIO</span><span class="w-zig">ZIG</span></div>
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html" class="">Overview</a></li>
+        <li><a href="philosophy.html" class="">Philosophy</a></li>
+        <li><a href="architecture.html" class="">Architecture</a></li>
+        <li><a href="docs.html" class="">Docs</a></li>
+        <li><a href="tutorials.html" class="">Tutorials</a></li>
+        <li><a href="libbiozig.html" class="">libbiozig</a></li>
+        <li><a href="cli.html" class="active">CLI</a></li>
+        <li><a href="foundation.html" class="">BZSF</a></li>
+        <li>
+          <button class="theme-toggle" onclick="openSearch()" aria-label="Search">[ / ] SEARCH</button>
+        </li>
+        <li>
+          <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light/dark mode">
+            <span id="themeIcon">☀</span> <span id="themeLabel">Light</span>
+          </button>
+        </li>
+      </ul>
+    </header>
+
+    <div style="padding: 80px 0;">
+      <div class="nb-head">
+        <span class="nb-title">BioZig (BZ) CLI</span>
+        <span class="op">COMMAND LINE INTERFACE</span>
+      </div>
+      <p class="body-text">
+        The BZ Command Line Interface (<code>biozig</code>) provides a lightning-fast, zero-dependency binary for executing biological algorithms directly from the terminal. 
+      </p>
+      
+      <p class="body-text philosophy-quote">
+        <em>BZ does not guess. BZ does not approximate. If a graph traversal cannot prove its cycle resolution, it fails. If a structural parser drops precision in coordinate translation, it fails. BZ is built on the premise that biological data must be exactly represented and deterministically verified before any complex algorithm is allowed to run.</em>
+      </p>
+
+      <div class="api-block">
+        <div class="api-name">Global Options</div>
+        <div class="api-sig">Standard POSIX-style flags across all commands</div>
+        <div class="api-desc">
+          <ul style="list-style-type: none; padding-left: 0;">
+            <li><code>-i, --input &lt;path&gt;</code> The absolute or relative path to the input file. You can also specify <code>-</code> to pipe data into BZ from stdin.</li>
+            <li><code>-o, --output &lt;path&gt;</code> The file destination for the analysis results. If omitted, BZ outputs directly to stdout.</li>
+            <li><code>-f, --format &lt;type&gt;</code> The output format for standard streams (<code>text</code> or <code>json</code>).</li>
+            <li><code>-t, --threads &lt;num&gt;</code> Set the number of CPU threads used for multi-threading heavily parallelizable computations.</li>
+            <li><code>-r, --report &lt;path&gt;</code> Generates a human-readable compiled report combining graphs, statistics, and runtimes.</li>
+            <li><code>-p, --plot</code> Generates an inline ANSI/ASCII visualization plot directly in your terminal output.</li>
+            <li><code>-h, --help</code> Show the detailed help message for any domain or subcommand.</li>
+          </ul>
+        </div>
+      </div>
+
+      <h2 style="margin-top: 40px; margin-bottom: 20px;">Domains & Commands</h2>
+
+      <div class="api-block">
+        <div class="api-name">biozig genomics</div>
+        <div class="api-sig">Sequence alignment, mapping, and analysis</div>
+        <div class="api-desc">
+          Commands: <code>align</code>, <code>index</code>, <code>parse</code>, <code>kmer</code>, <code>hmm</code>, <code>gibbs</code>, <code>suffix-tree</code>, <code>assembly</code>, <code>msa</code>.
+        </div>
+      </div>
+
+      <div class="api-block">
+        <div class="api-name">biozig analytics</div>
+        <div class="api-sig">Statistical models, matrix decompositions, and clustering</div>
+        <div class="api-desc">
+          Commands: <code>pca</code>, <code>nmf</code>, <code>mds</code>, <code>descriptive</code>, <code>correlation</code>, <code>hypothesis</code>, <code>distributions</code>, <code>multiple_testing</code>, <code>regression</code>, <code>survival</code>, <code>dispersion</code>, <code>biology</code>, <code>enrichment</code>, <code>metrics</code>, <code>umap</code>, <code>tsne</code>, <code>kmeans</code>, <code>dbscan</code>, <code>hierarchical</code>, <code>node2vec</code>, <code>spectral</code>, <code>sparse</code>, <code>svd</code>, <code>spia</code>, <code>markov</code>, <code>kmer_stats</code>.
+        </div>
+      </div>
+
+      <div class="api-block">
+        <div class="api-name">biozig structural</div>
+        <div class="api-sig">3D protein structures and interactions</div>
+        <div class="api-desc">
+          Commands: <code>atom</code>, <code>residue</code>, <code>chain</code>, <code>model</code>, <code>assembly</code>, <code>geometry</code>, <code>contacts</code>, <code>surfaces</code>, <code>pockets</code>, <code>dock</code>, <code>dynamics</code>, <code>anm</code>, <code>threading</code>, <code>rotamers</code>, <code>ingestion</code>.
+        </div>
+      </div>
+
+      <div class="api-block">
+        <div class="api-name">biozig cellular</div>
+        <div class="api-sig">Single-cell tools for dimensionality reduction and clustering</div>
+        <div class="api-desc">
+          Commands: <code>umap</code>, <code>tsne</code>, <code>kmeans</code>, <code>zinb</code>, <code>pseudotime</code>.
+        </div>
+      </div>
+
+      <div class="api-block">
+        <div class="api-name">biozig systems</div>
+        <div class="api-sig">Systems biology and network analysis</div>
+        <div class="api-desc">
+          Commands: <code>maxflow</code>, <code>motif</code>, <code>layout</code>, <code>centrality</code>, <code>community</code>, <code>network</code>, <code>metabolism</code>, <code>signaling</code>, <code>pathway</code>, <code>regulation</code>, <code>ontology</code>, <code>knowledgegraph</code>, <code>sbml</code>, <code>biopax</code>, <code>gpml</code>.
+        </div>
+      </div>
+
+      <div class="api-block">
+        <div class="api-name">biozig population</div>
+        <div class="api-sig">Population genetics analysis</div>
+        <div class="api-desc">
+          Commands: <code>gwas</code>, <code>admixture</code>, <code>ibd</code>, <code>hwe</code>, <code>ld</code>, <code>selection</code>, <code>epi</code>, <code>impute</code>, <code>fstats</code>, <code>vstats</code>, <code>vmatch</code>, <code>vfilter</code>.
+        </div>
+      </div>
+
+      <div class="api-block">
+        <div class="api-name">biozig evolutionary</div>
+        <div class="api-sig">Phylogenetics and evolutionary models</div>
+        <div class="api-desc">
+          Commands: <code>nj</code>, <code>upgma</code>, <code>mle</code>, <code>parsimony</code>, <code>mcmc</code>, <code>bootstrap</code>, <code>nni</code>, <code>spr</code>, <code>stats</code>, <code>rf-distance</code>, <code>parse-newick</code>, <code>parse-nexus</code>, <code>parse-phyloxml</code>.
+        </div>
+      </div>
+
+      <div class="api-block">
+        <div class="api-name">biozig reporting</div>
+        <div class="api-sig">Automated reporting and publication exports</div>
+        <div class="api-desc">
+          Commands: <code>html</code>, <code>latex</code>, <code>manuscript</code>, <code>markdown</code>, <code>pdf</code>, <code>supplement</code>.
+        </div>
+      </div>
+
+      <div class="api-block">
+        <div class="api-name">biozig visualize</div>
+        <div class="api-sig">Render beautiful biological data and plots</div>
+        <div class="api-desc">
+          Commands: <code>dashboards</code>, <code>network</code>, <code>omics</code>, <code>phylogeny</code>, <code>publication</code>, <code>sequence</code>, <code>structure</code>.
+        </div>
+      </div>
+
+      <h2 style="margin-top: 40px; margin-bottom: 20px;">Unix Pipeline Integration Examples</h2>
+      
+      <div class="api-block">
+        <div class="api-name">Streaming JSON to JQ</div>
+        <div class="api-sig">$ biozig analytics pca -i 1M_cells.mtx -f json | jq '.eigenvalues[] | select(.variance > 0.05)'</div>
+      </div>
+
+      <div class="api-block">
+        <div class="api-name">Compressing Aligned Output on the Fly</div>
+        <div class="api-sig">$ biozig genomics align -i reads.fastq --ref genome.fa | gzip > output.bam</div>
+      </div>
+
+      <div class="api-block">
+        <div class="api-name">Visualizing Terminal Outputs Instantly</div>
+        <div class="api-sig">$ biozig structural contacts -i viral_envelope.mmcif -p</div>
+        <div class="api-desc">*(Prints an ASCII topological map of the viral envelope contacts before exiting)*</div>
+      </div>
+
+    </div>
+
+  <div id="searchModal" class="search-modal" onclick="closeSearch(event)">
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="Search documentation..." onkeyup="handleSearch(event)">
+      <div id="searchResults" class="search-results"></div>
+    </div>
+  </div>
+  </div>
+  <script>
+    window.__BZ_SEARCH_INDEX__ = [{"url":"index.html","title":"Welcome","content":"\n     \n       \n         ZIG 0.16 · v0.1.0-DEV · 3-Clause BSD \n         Biology computed  exactly.  \n         \n           BioZig (BZ): Biology first principles programming.   \n           DNA is not a string.  \n          Protein is not a string. \n          BZ encodes biological reality \n          at the bit level — where it belongs.  \n          Deterministic. Reproducible. \n          On every machine. Every time.\n         \n         Read Documentation \n       \n       \n         \n           \n        "},{"url":"philosophy.html","title":"Philosophy","content":"\n     \n       \n         The Fundamental Problem \n         BIOINFORMATICS IN CRISIS \n       \n       Modern biology generates data at a petabyte scale, yet the foundational libraries we use to analyze it were built in an era of megabytes. Biological data is discrete, deterministic, and mathematical. Yet, legacy frameworks treat DNA as UTF-8 text strings, protein coordinates as deeply nested objects, and graphs as fragmented pointers.  This abstraction is mathematically and computationally incorrec"},{"url":"architecture.html","title":"Architecture","content":"\n     \n       \n         System Architecture \n         DATA PIPELINE \n       \n       BioZig (BZ) does not act as a monolithic God object. Instead, it enforces strict separation of concerns, broken down into four distinct phases of execution. This prevents cyclic dependencies and ensures hardware-level performance. \n      \n       \n          \ngraph TD\n    classDef core fill:#111,stroke:#27272a,stroke-width:2px,color:#a1a1aa,font-family:monospace\n    classDef parser fill:#111,stroke:#27272a,stroke-w"},{"url":"tutorials.html","title":"Tutorials","content":"\n     \n       \n         Cross-Domain Interaction \n         PIPELINE DESIGN \n       \n       In standard bioinformatics, you read a file (Parser), parse it into an object (Domain), and run a method on the object (Algorithm). In BioZig (BZ), data is orthogonal to behavior. The parser generates  raw Domain structs , and the Algorithms consume them. No objects own methods. \n\n       \n       \n         1. Pure Zig (Native) \n         STRUCTURAL PROTEIN PIPELINE \n       \n       Parse a PDB file using zero"},{"url":"cli.html","title":"Command Line Interface","content":"\n     \n       \n         BioZig (BZ) CLI \n         COMMAND LINE INTERFACE \n       \n       \n        The BZ Command Line Interface ( biozig ) provides a lightning-fast, zero-dependency binary for executing biological algorithms directly from the terminal. \n       \n      \n       \n         BZ does not guess. BZ does not approximate. If a graph traversal cannot prove its cycle resolution, it fails. If a structural parser drops precision in coordinate translation, it fails. BZ is built on the premise t"},{"url":"foundation.html","title":"BZSF","content":"\n     \n       \n         BZ Software Foundation \n         BZSF \n       \n      \n       The BZ Software Foundation (BZSF) exists to safeguard the integrity, performance, and philosophical rigor of the BZ ecosystem. We are committed to maintaining a zero-copy, mathematically provable, and brutalist standard for bioinformatics infrastructure. \n\n       \n         Leadership \n         STEERING \n       \n      \n       \n         MD. Arshad \n         Creator and Curator \n         Principal architect of the "}];
+    (function(){
+      const stored = localStorage.getItem('bz-theme');
+      const sys = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+      const theme = stored || sys;
+      document.documentElement.setAttribute('data-theme', theme);
+      const icon = document.getElementById('themeIcon');
+      const label = document.getElementById('themeLabel');
+      if(icon) icon.textContent = theme === 'light' ? '☾' : '☀';
+      if(label) label.textContent = theme === 'light' ? 'Dark' : 'Light';
+    })();
+    
+    // Keyboard shortcuts for surfing
+    document.addEventListener('keydown', (e) => {
+      if (e.key.toLowerCase() === 'escape') {
+        const modal = document.getElementById('searchModal');
+        if (modal) modal.classList.remove('active');
+        return;
+      }
+      
+      // Ignore if typing in an input or textarea
+      if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
+      
+      switch (e.key.toLowerCase()) {
+        case '1': case 'o': window.location.href = 'index.html'; break;
+        case '2': case 'p': window.location.href = 'philosophy.html'; break;
+        case '3': case 'a': window.location.href = 'architecture.html'; break;
+        case '4': case 'd': window.location.href = 'docs.html'; break;
+        case '5': case 't': window.location.href = 'tutorials.html'; break;
+        case '6': case 'l': window.location.href = 'libbiozig.html'; break;
+        case '7': case 'c': window.location.href = 'cli.html'; break;
+        case '8': case 'f': window.location.href = 'foundation.html'; break;
+        case 's': case '/': 
+          e.preventDefault();
+          openSearch(); 
+          break;
+      }
+    });
+  </script>
+</body>
+</html>

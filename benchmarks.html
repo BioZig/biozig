@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Benchmarks — BioZig</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700;900&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/global.css" />
+  <script src="js/main.js"></script>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <a href="index.html" class="bz-logo-sm">
+        <div class="bz-chr">
+          <div class="bz-chr-band3">3</div>
+          <div class="bz-chr-band7">7</div>
+        </div>
+        <div class="bz-wordmark"><span class="w-bio">BIO</span><span class="w-zig">ZIG</span></div>
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html" class="">Overview</a></li>
+        <li><a href="philosophy.html" class="">Philosophy</a></li>
+        <li><a href="docs.html" class="">Docs</a></li>
+        <li><a href="cli.html" class="">CLI</a></li>
+        <li><a href="libbiozig.html" class="">C-ABI</a></li>
+        <li><a href="benchmarks.html" class="active">Benchmarks</a></li>
+        <li>
+          <button class="theme-btn" onclick="toggleTheme()" aria-label="Toggle light/dark mode">
+            <span class="icon" id="themeIcon">☀</span>
+            <span id="themeLabel">Light</span>
+          </button>
+        </li>
+      </ul>
+    </header>
+
+    <div style="padding: 80px 0;">
+      <div class="nb-head">
+        <span class="nb-title">Performance Metrics</span>
+        <span class="op">ZIG VS PYTHON/R</span>
+      </div>
+
+      <h2>Algorithmic Throughput</h2>
+      <p class="body-text">Evaluated on Apple Silicon M3 Max. BioZig utilizes multi-threading via <span style="font-family:var(--mono)">std.Thread.Pool</span> and explicit hardware SIMD for maximum throughput.</p>
+
+      <table class="data">
+        <thead>
+          <tr>
+            <td>Operation</td>
+            <td class="desc">Conditions</td>
+            <td style="text-align:right">Time (s)</td>
+            <td style="text-align:right">Peak RAM</td>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>K-mer Frequency</td>
+            <td class="desc">100M bases, k=7, streaming</td>
+            <td class="val">4.73</td>
+            <td class="val">127 MB</td>
+          </tr>
+          <tr>
+            <td>Shannon Entropy</td>
+            <td class="desc">100M bases, single-pass</td>
+            <td class="val">0.92</td>
+            <td class="val">25 MB</td>
+          </tr>
+          <tr>
+            <td>FM-Index Build</td>
+            <td class="desc">1M bases, BWT + Suffix Array</td>
+            <td class="val">0.27</td>
+            <td class="val">4 MB</td>
+          </tr>
+          <tr>
+            <td>Structural RMSD</td>
+            <td class="desc">1,000,000 atoms, Vectorized</td>
+            <td class="val">0.01</td>
+            <td class="val">24 MB</td>
+          </tr>
+          <tr>
+            <td>Contact Map (Euclidean)</td>
+            <td class="desc">5,000 atoms, pairwise computation</td>
+            <td class="val">0.04</td>
+            <td class="val">1 MB</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>The Oscilloscope Trace</h2>
+      <p class="body-text">Signal processing interpretation of genomic data. By representing sequences numerically rather than textually, we can apply Fast Fourier Transforms (FFT) directly over the sequence bit-plane.</p>
+      
+      <div style="margin-top: 48px; border: 1px solid var(--rule); padding: 24px; background: rgba(0,0,0,0.5);">
+        <span style="font-family:var(--mono); font-size:10px; color:var(--acc); letter-spacing:1px; display:block; margin-bottom:12px;">CH1 · DNA SIGNAL · SCALE: 1V/div</span>
+        <svg viewBox="0 0 1000 120" style="width:100%; height:120px;" preserveAspectRatio="none">
+          <line x1="0" y1="30" x2="1000" y2="30" stroke="rgba(247,164,29,0.1)" stroke-width="1"/>
+          <line x1="0" y1="60" x2="1000" y2="60" stroke="rgba(247,164,29,0.1)" stroke-width="1"/>
+          <line x1="0" y1="90" x2="1000" y2="90" stroke="rgba(247,164,29,0.1)" stroke-width="1"/>
+          <polyline fill="none" stroke="#f7a41d" stroke-width="2" stroke-linejoin="round"
+                    points="0,60 50,60 50,90 100,90 100,30 150,30 150,60 200,60 200,110 250,110 250,30 300,30 300,60 400,60 400,90 500,90 500,110 600,110 600,30 700,30 700,90 800,90 800,60 900,60 900,110 1000,110" />
+        </svg>
+      </div>
+
+    </div>
+    
+    <footer class="foot">
+      <span>MD. Arshad · Jamia Millia Islamia · MIT License</span>
+      <span>Open Source · Built in Zig 0.14.0</span>
+    </footer>
+  </div>
+</body>
+</html>

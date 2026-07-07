@@ -1,0 +1,216 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tutorials — BioZig</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #09090b; --fg: #fafafa; --dim: #a1a1aa;
+      --rule: #27272a; --accent: #fafafa; --accent-dim: #3f3f46;
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Inter', sans-serif; --display: 'Space Grotesk', sans-serif;
+    }
+    [data-theme="light"] {
+      --bg: #fafafa; --fg: #09090b; --dim: #52525b;
+      --rule: #e4e4e7; --accent: #09090b; --accent-dim: #d4d4d8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg); color: var(--fg);
+      font-family: var(--sans); font-size: 17px; line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+      background-image: linear-gradient(var(--rule) 1px, transparent 1px), linear-gradient(90deg, var(--rule) 1px, transparent 1px);
+      background-size: 40px 40px; background-position: -1px -1px; background-attachment: fixed;
+    }
+    .container { max-width: 1000px; margin: 0 auto; padding: 0 40px; background: var(--bg); min-height: 100vh; border-left: 1px solid var(--rule); border-right: 1px solid var(--rule); box-shadow: 0 0 40px rgba(0,0,0,0.5); }
+    [data-theme="light"] .container { box-shadow: 0 0 40px rgba(0,0,0,0.05); }
+    
+    header { display: flex; justify-content: space-between; align-items: baseline; padding: 40px 0; border-bottom: 1px solid var(--rule); }
+    .bz-wordmark { font-family: var(--display); font-size: 32px; font-weight: 900; letter-spacing: -0.05em; text-decoration: none; color: var(--fg); }
+    .w-bio { opacity: 0.5; }
+    .w-zig { color: var(--fg); }
+    
+    .nav-links { display: flex; gap: 24px; list-style: none; font-family: var(--mono); font-size: 13px; text-transform: uppercase; align-items: center; }
+    .nav-links a { color: var(--dim); text-decoration: none; transition: color 0.15s; }
+    .nav-links a:hover, .nav-links a.active { color: var(--fg); border-bottom: 1px solid var(--fg); }
+    
+    h1 { font-family: var(--display); font-size: 80px; font-weight: 700; line-height: 0.9; letter-spacing: -0.04em; margin-bottom: 40px; text-transform: uppercase; }
+    h2 { font-family: var(--display); font-size: 32px; font-weight: 600; margin: 60px 0 20px; letter-spacing: -0.02em; text-transform: uppercase; border-bottom: 1px solid var(--rule); padding-bottom: 10px; }
+    h3 { font-family: var(--mono); font-size: 16px; margin: 40px 0 16px; color: var(--fg); text-transform: uppercase; }
+    p.body-text { margin-bottom: 24px; color: var(--dim); max-width: 700px; }
+    p.body-text b { color: var(--fg); }
+    
+    .nb-head { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid var(--fg); padding-bottom: 10px; margin: 80px 0 40px; }
+    .nb-title { font-family: var(--display); font-size: 32px; font-weight: 600; letter-spacing: -0.02em; text-transform: uppercase; }
+    .op { font-family: var(--mono); font-size: 12px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.05em; }
+    
+    .code { background: #111113; border: 1px solid var(--rule); padding: 20px 24px; font-family: var(--mono); font-size: 14px; line-height: 1.6; color: #a1a1aa; overflow-x: auto; margin-bottom: 24px; border-radius: 4px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); }
+    [data-theme="light"] .code { background: #f4f4f5; border: 1px solid #e4e4e7; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05); }
+    .code pre { margin: 0; }
+    .code pre code { background: transparent; padding: 0; color: inherit; font-size: inherit; border-radius: 0; border: none; }
+    
+    .code .kw { color: #f472b6; font-weight: 500; } /* Pink for keywords */
+    .code .cm { color: #71717a; font-style: italic; } /* Gray for comments */
+    .code .str { color: #a3e635; } /* Green for strings */
+    .code .typ { color: #38bdf8; } /* Blue for types */
+    .code .fn { color: #60a5fa; } /* Blue for functions */
+    [data-theme="light"] .code .kw { color: #db2777; }
+    [data-theme="light"] .code .str { color: #65a30d; }
+    [data-theme="light"] .code .typ { color: #0284c7; }
+    [data-theme="light"] .code .fn { color: #2563eb; }
+    
+    .api-block { border-left: 3px solid #3b82f6; padding-left: 20px; margin-bottom: 40px; padding-top: 5px; padding-bottom: 5px; background: linear-gradient(90deg, rgba(59,130,246,0.05) 0%, transparent 100%); }
+    [data-theme="light"] .api-block { background: linear-gradient(90deg, rgba(59,130,246,0.03) 0%, transparent 100%); }
+    .api-name { font-family: var(--display); font-weight: 700; font-size: 22px; margin-bottom: 8px; color: var(--fg); letter-spacing: -0.01em; }
+    .api-sig { font-family: var(--mono); font-size: 14px; color: var(--fg); margin-bottom: 12px; background: #18181b; padding: 10px 16px; border: 1px solid var(--rule); display: inline-block; border-radius: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    [data-theme="light"] .api-sig { background: #ffffff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    .api-desc { font-size: 16px; color: var(--dim); max-width: 750px; line-height: 1.6; }
+    
+    code { font-family: var(--mono); font-size: 0.85em; padding: 3px 6px; background: rgba(128,128,128,0.15); border: 1px solid rgba(128,128,128,0.2); border-radius: 4px; color: var(--fg); }
+    
+    .search-btn { background: none; border: 1px solid var(--rule); color: var(--dim); font-family: var(--mono); font-size: 12px; padding: 4px 12px; cursor: pointer; text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
+    .search-btn:hover { color: var(--fg); border-color: var(--fg); }
+    
+    .search-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(9, 9, 11, 0.9); z-index: 100; align-items: flex-start; justify-content: center; padding-top: 100px; backdrop-filter: blur(4px); }
+    [data-theme="light"] .search-modal { background: rgba(250, 250, 250, 0.9); }
+    .search-modal.active { display: flex; }
+    .search-box { width: 100%; max-width: 600px; background: var(--bg); border: 1px solid var(--rule); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+    .search-input { width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--rule); padding: 20px; font-family: var(--mono); font-size: 16px; color: var(--fg); outline: none; }
+    .search-results { max-height: 400px; overflow-y: auto; }
+    .search-result-item { display: block; padding: 15px 20px; border-bottom: 1px solid var(--rule); text-decoration: none; color: var(--dim); }
+    .search-result-item:hover { background: rgba(128,128,128,0.05); }
+    .search-result-title { font-family: var(--display); color: var(--fg); font-weight: 600; margin-bottom: 4px; }
+    .search-result-snippet { font-size: 13px; font-family: var(--sans); }
+    
+    .theme-toggle { background: none; border: none; color: var(--dim); cursor: pointer; font-family: var(--mono); font-size: 12px; display: flex; align-items: center; gap: 6px; text-transform: uppercase; }
+    .theme-toggle:hover { color: var(--fg); }
+  </style>
+  <script>
+    function openSearch() {
+      document.getElementById('searchModal').classList.add('active');
+      document.getElementById('searchInput').focus();
+    }
+    function closeSearch(e) {
+      if (e.target.id === 'searchModal') document.getElementById('searchModal').classList.remove('active');
+    }
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') document.getElementById('searchModal').classList.remove('active');
+      if (e.key === 'k' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); openSearch(); }
+    });
+    
+    function toggleTheme() {
+      const el = document.documentElement;
+      const current = el.getAttribute('data-theme');
+      const next = current === 'light' ? 'dark' : 'light';
+      el.setAttribute('data-theme', next);
+      localStorage.setItem('bz-theme', next);
+      document.getElementById('themeIcon').textContent = next === 'light' ? '☾' : '☀';
+      document.getElementById('themeLabel').textContent = next === 'light' ? 'Dark' : 'Light';
+    }
+    
+    function handleSearch(e) {
+      const query = e.target.value.toLowerCase();
+      const resultsContainer = document.getElementById('searchResults');
+      resultsContainer.innerHTML = '';
+      if (query.length < 2) return;
+      
+      const searchIndex = window.__BZ_SEARCH_INDEX__ || [];
+      const matches = searchIndex.filter(item => 
+        item.title.toLowerCase().includes(query) || 
+        item.content.toLowerCase().includes(query)
+      ).slice(0, 8);
+      
+      matches.forEach(m => {
+        const el = document.createElement('a');
+        el.href = m.url;
+        el.className = 'search-result-item';
+        const idx = m.content.toLowerCase().indexOf(query);
+        let snippet = m.content.substring(Math.max(0, idx - 60), idx + 100);
+        if (idx > 0) snippet = '...' + snippet;
+        
+        el.innerHTML = '<div class="search-result-title">' + m.title + '</div><div class="search-result-snippet">' + snippet + '</div>';
+        resultsContainer.appendChild(el);
+      });
+    }
+  </script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <a href="index.html" style="text-decoration:none;">
+        <div class="bz-wordmark"><span class="w-bio">BIO</span><span class="w-zig">ZIG</span></div>
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html" class="">Overview</a></li>
+        <li><a href="philosophy.html" class="">Philosophy</a></li>
+        <li><a href="architecture.html" class="">Architecture</a></li>
+        <li><a href="docs.html" class="">Docs</a></li>
+        <li><a href="tutorials.html" class="active">Tutorials</a></li>
+        <li><a href="libbiozig.html" class="">libbiozig</a></li>
+        <li><a href="cli.html" class="">CLI</a></li>
+        <li>
+          <button class="search-btn" onclick="openSearch()" aria-label="Search Documentation">
+            <span class="icon">⌕</span> Search
+          </button>
+        </li>
+        <li>
+          <button class="theme-toggle" onclick="toggleTheme()">
+            <span id="themeIcon">☀</span> <span id="themeLabel">Light</span>
+          </button>
+        </li>
+      </ul>
+    </header>
+    
+    <div id="searchModal" class="search-modal" onclick="closeSearch(event)">
+      <div class="search-box">
+        <input type="text" id="searchInput" class="search-input" placeholder="Search documentation, structs, CLI..." onkeyup="handleSearch(event)">
+        <div id="searchResults" class="search-results"></div>
+      </div>
+    </div>
+
+    <div style="padding: 80px 0;">
+      <div class="nb-head">
+        <span class="nb-title">Cross-Domain Interaction</span>
+        <span class="op">PIPELINE DESIGN</span>
+      </div>
+      <p class="body-text">In standard bioinformatics, you read a file (Parser), parse it into an object (Domain), and run a method on the object (Algorithm). In BioZig, data is orthogonal to behavior. The parser generates <i>raw Domain structs</i>, and the Algorithms consume them. No objects own methods.</p>
+
+      <h3>Example: Bridging Zig and Python</h3>
+      <div class="code">
+# The Python wrapper calls the C-ABI. 
+# No Python objects are created during parsing.
+import biozig as bz
+
+vcf_iter = bz.VcfIterator("data.vcf")
+pop_data = vcf_iter.parse_all()
+
+# Computes LD over the raw C-pointers
+ld_scores = bz.population.compute_ld(pop_data)
+      </div>
+    </div>
+    
+    <footer class="foot" style="border-top: 1px solid var(--rule); margin-top: 80px; padding: 40px 0; display:flex; justify-content:space-between; font-family:var(--mono); font-size:12px; color:var(--dim);">
+      <span>MD. Arshad · Jamia Millia Islamia · MIT License</span>
+      <span>Open Source · Built in Zig 0.14.0</span>
+    </footer>
+  </div>
+  <script>
+    window.__BZ_SEARCH_INDEX__ = [{"title":"Welcome","url":"index.html","content":"FIG. 01 — ZIG 0.14.0 · v0.1.0-DEV · MIT Biology computed exactly. DNA is not a string. Protein is not a string. BioZig encodes biological reality at the bit level — where it belongs. Deterministic. Reproducible. On every machine. Every time."},{"title":"Philosophy","url":"philosophy.html","content":"The Fundamental Problem BIOZIG · CORE TENETS Every major biological computation framework treats DNA as text. BioPython: str. Biopython SeqRecord: str wrapper. R: character vector. This is wrong. DNA is a sequence of discrete symbols from an alphabet of four. It has no case, no encoding, no Unicode complexity. It has exactly 2 bits per symbol."},{"title":"Architecture","url":"architecture.html","content":"System Architecture DATA PIPELINE BioZig does not act as a monolithic God object. Instead, it enforces strict separation of concerns, broken down into four distinct phases of execution. This prevents cyclic dependencies and ensures hardware-level performance. 1. CORE Memory & Execution (Arena Allocators, SIMD, Thread Pools, and I/O handlers). 2. PARSER Zero-Copy Ingestion (64-bit Bit-Sieve MMap parsers transforming raw bytes directly into struct slices). 3. DOMAIN Data Representation (SoA layouts, e.g., DNA2 encoded bits, XYZ coordinate sets). Pure state, no logic. 4. ALGORITHM Compute Kernels (Functions that take Domain structs, process via Core SIMD, and output results). Zero-Copy Bit-Sieve Parsing ingestion/transcriptomics/mtx.zig BioZig does not parse files byte-by-byte. It reads 64 bits at a time from the memory map and uses bit-twiddling to find delimiters in O(1) cycles. pub fn next(self: *MtxMmapIterator) ?[]const u8 { if (self.cursor >= self.buffer.len) return null; const start = self.cursor; while (self.cursor + 8 MMapReader (Zero-Copy) pub const MMapReader = struct { file: std.Io.File, mmap: std.Io.File.MemoryMap, ... } Opens a file in read_only mode with protection .{ .read = true, .write = false } . Grants zero-copy access to data via mm.memory[0..size] . SIMD Vectorization core/simd/simd.zig Hardware Accelerated Primitives pub fn countChar(slice: []const u8, char: u8) usize Vectorized char counting using @Vector(32, u8) and @select instead of byte-by-byte loops. pub fn countChar(slice: []const u8, char: u8) usize { const VLen = 32; const V = @Vector(VLen, u8); const char_vec: V = @splat(char); // Compares chunks (vec == char_vec) // Converts bools to ints with @select // Reduces with @reduce(.Add, match_ints) } Molecular Domain: 2-Bit Compression molecular/dna/dna.zig Nucleotide & DNA2 pub const Nucleotide = enum (u2) { A = 0b00, C = 0b01, G = 0b10, T = 0b11 }; DNA2 owns the memory, packing 4 bases per byte. pub const DNA2 = struct { bytes: []u8, len: usize, allocator: std.mem.Allocator, pub fn get(self: DNA2, index: usize) Nucleotide { const byte_idx = index / 4; const shift = @as(u3, @truncate((index % 4) * 2)); const bits = (self.bytes[byte_idx] >> shift) & 0b11; return @enumFromInt(bits); } }; Structural Geometry structural/geometry.zig Structure of Arrays (SoA) pub const CoordinateSet = struct { x: []f64, y: []f64, z: []f64 }; By decoupling coordinates into SoA, SIMD vectors can load 8 f64 elements linearly without cache-misses from gather instructions. Thread Pooling & Work Stealing core/concurrency/pool.zig Lock-Free Atomics @atomicRmw( .Add , &target, value, .SeqCst ) Instead of using std.Thread.Mutex , BioZig aggregates concurrent results using hardware atomic instructions to eliminate lock contention on 50M+ element operations."},{"title":"Tutorials","url":"tutorials.html","content":"Cross-Domain Interaction PIPELINE DESIGN In standard bioinformatics, you read a file (Parser), parse it into an object (Domain), and run a method on the object (Algorithm). In BioZig, data is orthogonal to behavior. The parser generates raw Domain structs , and the Algorithms consume them. No objects own methods. Example: Bridging Zig and Python # The Python wrapper calls the C-ABI. # No Python objects are created during parsing. import biozig as bz vcf_iter = bz.VcfIterator(\"data.vcf\") pop_data = vcf_iter.parse_all() # Computes LD over the raw C-pointers ld_scores = bz.population.compute_ld(pop_data)"},{"title":"Command Line Interface","url":"cli.html","content":"BioZig CLI COMMAND LINE INTERFACE The BioZig Command Line Interface ( biozig ) provides a lightning-fast, zero-dependency binary for executing biological algorithms directly from the terminal. biozig genomics code $ biozig genomics code --input reads.fa Invokes the internal translateDNA() function. Reads the input via mmap, wraps it in a DNA2 bit-view, and outputs the translated amino acids. biozig structural rmsd $ biozig structural rmsd --target ref.pdb --mobile state.pdb Loads XYZ coordinates into SoA layouts and executes the vectorized Kabsch alignment to compute the Optimal RMSD. biozig cellular umap $ biozig cellular umap --matrix expr.mtx --dims 2 Reads a sparse matrix using SparseMatrixOps and computes a 2D UMAP projection via algorithms.cellular.UMAP.transform() ."},{"title":"libbiozig C-ABI","url":"libbiozig.html","content":"libbiozig THE C-ABI DYNAMIC LIBRARY libbiozig is the core artifact of the BioZig project. It is a highly optimized library that exposes the entire BioZig pipeline through a stable C Application Binary Interface. Support exists for bindings in cpp , java , julia , matlab , python , r , swift , and wasm via exact header mappings. Context & Memory Management Because BioZig relies on Arena Allocators instead of scattered mallocs, the C-ABI requires an explicit context lifecycle to manage the global arena ( c_arena ). biozig_context_create export fn biozig_context_create() callconv(.c) c_int Initializes the global BioZig engine and its memory arena. Must be called before any other C-ABI functions. Returns 0 on success. biozig_context_destroy export fn biozig_context_destroy() callconv(.c) c_int Instantly deallocates the entire engine memory arena. Guarantees no memory leaks when bridging with Python/R."},{"title":"Docs","url":"docs.html","content":"BioZig API Reference OFFICIAL DOCUMENTATION Welcome to the official documentation for BioZig. This manual covers the core concepts, memory architecture, and domain-specific APIs (Molecular, Structural, Cellular, Population, Genomics, Systems, and Evolutionary). BioZig prioritizes Zero-Copy I/O , Structure of Arrays (SoA) layouts, and Explicit SIMD Vectorization . Table of Contents 1. Core: Memory & I/O 2. Core: SIMD Vectorization 3. Domain: Molecular (DNA & Codons) 4. Domain: Structural Geometry (SoA) 5. Algorithms: Cellular (UMAP, PCA) 6. Domain: Population 7. Domain: Systems Biology 8. Algorithms: Evolutionary 9. Algorithms: Genomics 1. Core: Memory & I/O Standard bioinformatics tools read files line-by-line into garbage-collected string objects. BioZig uses Memory Mapped ( mmap ) files to expose the entire file as a contiguous []const u8 byte slice, allowing zero-copy parsing. MMapReader pub const MMapReader = struct { file: std.Io.File, mmap: std.Io.File.MemoryMap, data: []const u8 } The foundational I/O reader. Maps a file into memory with .{ .read = true, .write = false } . pub fn init(allocator: std.mem.Allocator, path: []const u8) !MMapReader { const file = try std.fs.cwd().openFile(path, .{ .mode = .read_only }); const stat = try file.stat(); // Creates a memory map of the entire file. No data is copied to RAM. const memory = try std.os.mmap( null, stat.size, std.os.PROT.READ, std.os.MAP.PRIVATE, file.handle, 0 ); return MMapReader{ .file = file, .mmap = memory, .data = memory }; } pub fn deinit(self: *MMapReader) void { std.os.munmap(self.mmap); self.file.close(); } 2. Core: SIMD Vectorization BioZig leverages Zig's @Vector primitive to execute Single Instruction, Multiple Data (SIMD) operations. Instead of looping byte-by-byte, operations are chunked into vector lengths matching the CPU architecture (e.g., AVX2 or NEON). Vectorized Character Counting pub fn countChar(slice: []const u8, char: u8) usize Counts occurrences of a character in a sequence. Uses a 32-lane vector to process 32 bytes simultaneously. pub fn countChar(slice: []const u8, char: u8) usize { const VLen = 32; const V = @Vector(VLen, u8); const char_vec: V = @splat(char); var count: usize = 0; var i: usize = 0; while (i + VLen Vectorized Hamming Distance pub fn countMismatches(a: []const u8, b: []const u8) usize Computes the Hamming distance between two sequences by comparing chunks of 32 bytes at a time. 3. Domain: Molecular Strings are the enemy of performance. BioZig's molecular domain strictly encodes nucleotides into a 2-bit representation, packing 4 bases into a single byte. Nucleotide & DNA2 pub const Nucleotide = enum (u2) { A = 0b00, C = 0b01, G = 0b10, T = 0b11 }; DNA2 manages memory for 2-bit compressed DNA. 6. Domain: Population BioZig implements scalable population genetics data structures. Unlike traditional pipelines that load immense VCF files into RAM, BioZig leverages zero-copy mmaps to stream genotype chunks directly into LD and GWAS kernels. Population Modules Modules: ancestry , epidemiology , genotype , gwas , haplotype , ld , selection Each module implements tightly packed structs to represent alleles and phenotypes, relying on core/simd for fast matrix multiplications during Linkage Disequilibrium (LD) and Genome-Wide Association Studies (GWAS). 7. Domain: Systems Biology Systems biology requires graph representations that do not thrash the CPU cache. BioZig utilizes SoA-backed adjacency lists and sparse matrices to represent biological networks. Systems Modules Modules: network , metabolism , ontology , knowledgegraph , pathway , signaling , regulation Representations of complex biological graphs. metabolism.zig supports Flux Balance Analysis structures, while ontology.zig maps GO terms efficiently. 8. Algorithms: Evolutionary Implements phylogenetic tree construction and distance matrix computations. evolutionary.zig pub fn constructTree(dist_matrix: []f64) !Tree Vectorized implementations of phylogenetic distances (Neighbor-Joining, UPGMA) operating directly on packed distance matrices. 9. Algorithms: Genomics Hardware-accelerated sequence analysis algorithms. Sequence Alignment & Content pub fn computeGCContent(dna: DNA2View) f64 Leverages @popCount hardware instructions over 64-bit integer chunks to calculate GC content and Shannon entropy in zero-branching logic. pub const DNA2 = struct { bytes: []u8, len: usize, allocator: std.mem.Allocator, pub fn get(self: DNA2, index: usize) Nucleotide { const byte_idx = index / 4; const shift = @as(u3, @truncate((index % 4) * 2)); const bits = (self.bytes[byte_idx] >> shift) & 0b11; return @enumFromInt(bits); } }; 4. Domain: Structural Geometry To prevent cache-misses during vectorized Kabsch alignments or RMSD calculations, coordinates are decoupled from Array of Structures (AoS) into Structure of Arrays (SoA) layouts. CoordinateSet (SoA) pub const CoordinateSet = struct { x: []f64, y: []f64, z: []f64 }; Loads linear chunks of x coordinates directly into SIMD vectors. 5. Algorithms: Cellular Cellular processing pipelines focus on dimensionality reduction and transcriptomics matrices. Sparse matrices are handled using SparseMatrixOps . Dimensionality Reduction pub const PCA = struct { pub fn topComponent(...) ![]f64 }; pub const UMAP = struct { pub fn transform(...) ![]f64 }; Computes low-dimensional embeddings directly on sparse data streams, utilizing thread-pooled lock-free atomics to prevent bottlenecks during nearest-neighbor descent."}];
+    (function(){
+      const stored = localStorage.getItem('bz-theme');
+      const sys = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+      const theme = stored || sys;
+      document.documentElement.setAttribute('data-theme', theme);
+      const icon = document.getElementById('themeIcon');
+      const label = document.getElementById('themeLabel');
+      if(icon) icon.textContent = theme === 'light' ? '☾' : '☀';
+      if(label) label.textContent = theme === 'light' ? 'Dark' : 'Light';
+    })();
+  </script>
+</body>
+</html>

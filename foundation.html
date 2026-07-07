@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BZSF - BioZig</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700;900&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/global.css" />
+  <script src="js/main.js"></script>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true, theme: 'dark', fontFamily: 'monospace' });
+  </script>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <a href="index.html" class="bz-logo-sm">
+        <div class="bz-chr">
+          <div class="bz-chr-band3">3</div>
+          <div class="bz-chr-band7">7</div>
+        </div>
+        <div class="bz-wordmark"><span class="w-bio">BIO</span><span class="w-zig">ZIG</span></div>
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html" class="">Overview</a></li>
+        <li><a href="philosophy.html" class="">Philosophy</a></li>
+        <li><a href="architecture.html" class="">Architecture</a></li>
+        <li><a href="docs.html" class="">Docs</a></li>
+        <li><a href="tutorials.html" class="">Tutorials</a></li>
+        <li><a href="libbiozig.html" class="">libbiozig</a></li>
+        <li><a href="cli.html" class="">CLI</a></li>
+        <li><a href="foundation.html" class="active">BZSF</a></li>
+        <li>
+          <button class="theme-toggle" onclick="openSearch()" aria-label="Search">[ / ] SEARCH</button>
+        </li>
+        <li>
+          <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light/dark mode">
+            <span id="themeIcon">☀</span> <span id="themeLabel">Light</span>
+          </button>
+        </li>
+      </ul>
+    </header>
+
+    <div style="padding: 80px 0;">
+      <div class="nb-head">
+        <span class="nb-title">BZ Software Foundation</span>
+        <span class="op">BZSF</span>
+      </div>
+      
+      <p class="body-text">The BZ Software Foundation (BZSF) exists to safeguard the integrity, performance, and philosophical rigor of the BZ ecosystem. We are committed to maintaining a zero-copy, mathematically provable, and brutalist standard for bioinformatics infrastructure.</p>
+
+      <div class="nb-head" style="margin-top: 60px;">
+        <span class="nb-title">Leadership</span>
+        <span class="op">STEERING</span>
+      </div>
+      
+      <div class="api-block">
+        <div class="api-name">MD. Arshad</div>
+        <div class="api-sig">Creator and Curator</div>
+        <div class="api-desc">Principal architect of the BZ framework and guardian of the core philosophy.</div>
+      </div>
+
+      <div class="nb-head" style="margin-top: 60px;">
+        <span class="nb-title">The Future</span>
+        <span class="op">EXPANSION</span>
+      </div>
+      
+      <p class="body-text">The codebase is currently undergoing rigorous validation of its core axioms. In the forthcoming future, the BZSF will actively accept contributors, researchers, and systems engineers who align with our uncompromising standards. A formal governance model and contributor guidelines will be established as the foundation matures.</p>
+    
+    
+  <div id="searchModal" class="search-modal" onclick="closeSearch(event)">
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="Search documentation..." onkeyup="handleSearch(event)">
+      <div id="searchResults" class="search-results"></div>
+    </div>
+  </div>
+  </div>
+  <script>
+    window.__BZ_SEARCH_INDEX__ = [{"url":"index.html","title":"Welcome","content":"\n     \n       \n         ZIG 0.16 · v0.1.0-DEV · 3-Clause BSD \n         Biology computed  exactly.  \n         \n           BioZig (BZ): Biology first principles programming.   \n           DNA is not a string.  \n          Protein is not a string. \n          BZ encodes biological reality \n          at the bit level — where it belongs.  \n          Deterministic. Reproducible. \n          On every machine. Every time.\n         \n         Read Documentation \n       \n       \n         \n           \n        "},{"url":"philosophy.html","title":"Philosophy","content":"\n     \n       \n         The Fundamental Problem \n         BIOINFORMATICS IN CRISIS \n       \n       Modern biology generates data at a petabyte scale, yet the foundational libraries we use to analyze it were built in an era of megabytes. Biological data is discrete, deterministic, and mathematical. Yet, legacy frameworks treat DNA as UTF-8 text strings, protein coordinates as deeply nested objects, and graphs as fragmented pointers.  This abstraction is mathematically and computationally incorrec"},{"url":"architecture.html","title":"Architecture","content":"\n     \n       \n         System Architecture \n         DATA PIPELINE \n       \n       BioZig (BZ) does not act as a monolithic God object. Instead, it enforces strict separation of concerns, broken down into four distinct phases of execution. This prevents cyclic dependencies and ensures hardware-level performance. \n      \n       \n          \ngraph TD\n    classDef core fill:#111,stroke:#27272a,stroke-width:2px,color:#a1a1aa,font-family:monospace\n    classDef parser fill:#111,stroke:#27272a,stroke-w"},{"url":"tutorials.html","title":"Tutorials","content":"\n     \n       \n         Cross-Domain Interaction \n         PIPELINE DESIGN \n       \n       In standard bioinformatics, you read a file (Parser), parse it into an object (Domain), and run a method on the object (Algorithm). In BioZig (BZ), data is orthogonal to behavior. The parser generates  raw Domain structs , and the Algorithms consume them. No objects own methods. \n\n       \n       \n         1. Pure Zig (Native) \n         STRUCTURAL PROTEIN PIPELINE \n       \n       Parse a PDB file using zero"},{"url":"cli.html","title":"Command Line Interface","content":"\n     \n       \n         BioZig (BZ) CLI \n         COMMAND LINE INTERFACE \n       \n       \n        The BZ Command Line Interface ( biozig ) provides a lightning-fast, zero-dependency binary for executing biological algorithms directly from the terminal. \n       \n      \n       \n         BZ does not guess. BZ does not approximate. If a graph traversal cannot prove its cycle resolution, it fails. If a structural parser drops precision in coordinate translation, it fails. BZ is built on the premise t"},{"url":"foundation.html","title":"BZSF","content":"\n     \n       \n         BZ Software Foundation \n         BZSF \n       \n      \n       The BZ Software Foundation (BZSF) exists to safeguard the integrity, performance, and philosophical rigor of the BZ ecosystem. We are committed to maintaining a zero-copy, mathematically provable, and brutalist standard for bioinformatics infrastructure. \n\n       \n         Leadership \n         STEERING \n       \n      \n       \n         MD. Arshad \n         Creator and Curator \n         Principal architect of the "}];
+    (function(){
+      const stored = localStorage.getItem('bz-theme');
+      const sys = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+      const theme = stored || sys;
+      document.documentElement.setAttribute('data-theme', theme);
+      const icon = document.getElementById('themeIcon');
+      const label = document.getElementById('themeLabel');
+      if(icon) icon.textContent = theme === 'light' ? '☾' : '☀';
+      if(label) label.textContent = theme === 'light' ? 'Dark' : 'Light';
+    })();
+    
+    // Keyboard shortcuts for surfing
+    document.addEventListener('keydown', (e) => {
+      if (e.key.toLowerCase() === 'escape') {
+        const modal = document.getElementById('searchModal');
+        if (modal) modal.classList.remove('active');
+        return;
+      }
+      
+      // Ignore if typing in an input or textarea
+      if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
+      
+      switch (e.key.toLowerCase()) {
+        case '1': case 'o': window.location.href = 'index.html'; break;
+        case '2': case 'p': window.location.href = 'philosophy.html'; break;
+        case '3': case 'a': window.location.href = 'architecture.html'; break;
+        case '4': case 'd': window.location.href = 'docs.html'; break;
+        case '5': case 't': window.location.href = 'tutorials.html'; break;
+        case '6': case 'l': window.location.href = 'libbiozig.html'; break;
+        case '7': case 'c': window.location.href = 'cli.html'; break;
+        case '8': case 'f': window.location.href = 'foundation.html'; break;
+        case 's': case '/': 
+          e.preventDefault();
+          openSearch(); 
+          break;
+      }
+    });
+  </script>
+</body>
+</html>

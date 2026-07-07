@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Docs — BioZig Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700;900&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/global.css" />
+  <script src="js/main.js"></script>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true, theme: 'dark', fontFamily: 'monospace' });
+  </script>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <a href="index.html" class="bz-logo-sm">
+        <div class="bz-chr">
+          <div class="bz-chr-band3">3</div>
+          <div class="bz-chr-band7">7</div>
+        </div>
+        <div class="bz-wordmark"><span class="w-bio">BIO</span><span class="w-zig">ZIG</span></div>
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html" class="">Overview</a></li>
+        <li><a href="philosophy.html" class="">Philosophy</a></li>
+        <li><a href="architecture.html" class="">Architecture</a></li>
+        <li><a href="docs.html" class="active">Docs</a></li>
+        <li><a href="tutorials.html" class="">Tutorials</a></li>
+        <li><a href="libbiozig.html" class="">libbiozig</a></li>
+        <li><a href="cli.html" class="">CLI</a></li>
+        <li><a href="foundation.html" class="">BZSF</a></li>
+        <li>
+          <button class="theme-toggle" onclick="openSearch()" aria-label="Search">[ / ] SEARCH</button>
+        </li>
+        <li>
+          <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light/dark mode">
+            <span id="themeIcon">☀</span> <span id="themeLabel">Light</span>
+          </button>
+        </li>
+      </ul>
+    </header>
+
+<div style="padding: 80px 0;">
+  <div class="nb-head">
+    <span class="nb-title">BZ API Reference</span>
+    <span class="op">OFFICIAL DOCUMENTATION</span>
+  </div>
+  
+  <p class="body-text">
+    Welcome to the official documentation for BZ. This manual covers the core concepts, memory architecture, and domain-specific APIs (Molecular, Structural, Cellular, Population, Genomics, Systems, and Evolutionary). BZ prioritizes <strong>Zero-Copy I/O</strong>, <strong>Structure of Arrays (SoA)</strong> layouts, and <strong>Explicit SIMD Vectorization</strong>.
+  </p>
+
+  <div style="margin: 40px 0; padding: 20px; border-left: 4px solid var(--accent); background: var(--bg-hover);">
+    <h3 style="margin-top:0;">Table of Contents</h3>
+    <ul style="list-style:none; padding:0; margin:0;">
+      <li><a href="#core-io" style="color:var(--accent); text-decoration:none;">1. Core: Memory & I/O</a></li>
+      <li><a href="#ingestion" style="color:var(--accent); text-decoration:none;">2. Ingestion: File Parsers</a></li>
+      <li><a href="#analytics" style="color:var(--accent); text-decoration:none;">3. Analytics: Statistical & Matrix Operations</a></li>
+      <li><a href="#domain-molecular" style="color:var(--accent); text-decoration:none;">4. Domain & Algorithms: Molecular & Genomics</a></li>
+      <li><a href="#domain-structural" style="color:var(--accent); text-decoration:none;">5. Domain & Algorithms: Structural</a></li>
+      <li><a href="#domain-cellular" style="color:var(--accent); text-decoration:none;">6. Domain & Algorithms: Cellular & Transcriptomics</a></li>
+      <li><a href="#domain-systems" style="color:var(--accent); text-decoration:none;">7. Domain & Algorithms: Systems & Pathways</a></li>
+      <li><a href="#domain-population" style="color:var(--accent); text-decoration:none;">8. Domain & Algorithms: Population & Evolutionary</a></li>
+    </ul>
+  </div>
+
+  <!-- CORE I/O -->
+  <h2 id="core-io" style="border-bottom: 2px solid var(--border); padding-bottom: 10px; margin-top: 60px;">1. Core: Memory & I/O</h2>
+  <p class="body-text">
+    BZ leverages Memory Mapped (<code>mmap</code>) files and <code>@Vector</code> primitives for Single Instruction, Multiple Data (SIMD) operations. Operations are chunked into vector lengths matching CPU architectures to eliminate byte-by-byte bottlenecks.
+  </p>
+  <div class="api-block">
+    <div class="api-name">MMapReader</div>
+    <div class="api-sig"><span class="kw">pub const</span> MMapReader = <span class="kw">struct</span> { file: std.Io.File, mmap: std.Io.File.MemoryMap, data: []const u8 }</div>
+    <div class="api-desc">Maps files into memory without allocating strings. O(1) ingestion cost.</div>
+  </div>
+
+  <!-- INGESTION -->
+  <h2 id="ingestion" style="border-bottom: 2px solid var(--border); padding-bottom: 10px; margin-top: 60px;">2. Ingestion: File Parsers</h2>
+  <p class="body-text">
+    BZ implements 64-bit Bit-Sieve parsers for zero-copy file ingestion across a massive array of bioinformatics formats. 
+  </p>
+  <div class="api-block">
+    <div class="api-name">Supported Formats</div>
+    <div class="api-sig">Zero-copy parsing support via <code>ingestion/</code></div>
+    <div class="api-desc">
+      <ul style="margin: 0; padding-left: 20px;">
+        <li><strong>Genomics:</strong> FASTA, FASTQ, SAM, BAM, CRAM, VCF, BCF, BED, GFF3, GTF, 2bit, Genomic Indices</li>
+        <li><strong>Structural:</strong> PDB, MMCIF, MOL2, PQR, SDF</li>
+        <li><strong>Systems:</strong> SBML, BioPAX, GPML</li>
+        <li><strong>Transcriptomics:</strong> MTX (Matrix Market), Sparse Matrices</li>
+        <li><strong>Evolutionary:</strong> Newick, Nexus, PhyloXML</li>
+        <li><strong>Compression:</strong> BGZF streaming</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ANALYTICS -->
+  <h2 id="analytics" style="border-bottom: 2px solid var(--border); padding-bottom: 10px; margin-top: 60px;">3. Analytics: Statistical & Matrix Operations</h2>
+  <p class="body-text">
+    The <code>analytics</code> module sits between domains and algorithms, providing highly-optimized mathematical primitives, factorization, and machine-learning fundamentals.
+  </p>
+  <div class="api-block">
+    <div class="api-name">Analytics Module Capabilities</div>
+    <div class="api-sig"><span class="kw">pub const</span> analytics = @import("analytics/analytics.zig");</div>
+    <div class="api-desc">
+      <ul style="margin: 0; padding-left: 20px;">
+        <li><strong>Dimensionality Reduction:</strong> PCA, t-SNE, UMAP</li>
+        <li><strong>Matrix Factorization:</strong> MDS, NMF, SVD, Sparse Matrices</li>
+        <li><strong>Clustering:</strong> K-Means, DBSCAN, Hierarchical Clustering</li>
+        <li><strong>Graph ML:</strong> Node2Vec, Spectral embeddings</li>
+        <li><strong>Sequence Modeling:</strong> Markov Chains, K-mer Statistics</li>
+        <li><strong>Pathways:</strong> Enrichment Analysis, SPIA (Signaling Pathway Impact Analysis)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- MOLECULAR / GENOMICS -->
+  <h2 id="domain-molecular" style="border-bottom: 2px solid var(--border); padding-bottom: 10px; margin-top: 60px;">4. Domain & Algorithms: Molecular & Genomics</h2>
+  <p class="body-text">Strict 2-bit packing for DNA strings, replacing garbage-collected characters with bitwise arithmetic.</p>
+  <div class="api-block">
+    <div class="api-name">Genomic Algorithms</div>
+    <div class="api-sig">Hardware accelerated counting and metrics</div>
+    <div class="api-desc">
+      Algorithms supported:
+      <strong>GC Content</strong>, <strong>Shannon Entropy</strong>, <strong>Hamming Distance</strong>, and vectorized mismatch detection using <code>@popCount</code> hardware instructions.
+    </div>
+  </div>
+
+  <!-- STRUCTURAL -->
+  <h2 id="domain-structural" style="border-bottom: 2px solid var(--border); padding-bottom: 10px; margin-top: 60px;">5. Domain & Algorithms: Structural</h2>
+  <p class="body-text">Structure of Arrays (SoA) memory layouts for 3D coordinate geometry to prevent cache misses during heavy floating-point operations.</p>
+  <div class="api-block">
+    <div class="api-name">Structural Algorithms</div>
+    <div class="api-sig"><span class="kw">pub const</span> CoordinateSet = <span class="kw">struct</span> { x: []f64, y: []f64, z: []f64 };</div>
+    <div class="api-desc">
+      Algorithms supported: <strong>Kabsch Rotation</strong>, <strong>Optimal RMSD</strong>, <strong>Distance Matrices</strong>, <strong>Contact Maps</strong>, <strong>Hydrogen Bond Detection</strong>, <strong>Pocket Statistics</strong>, <strong>Radius of Gyration</strong>, <strong>Verlet Molecular Dynamics</strong>, <strong>Simulated Annealing</strong>, <strong>ANM Hessian Generation</strong>, <strong>Threading DP</strong>, and <strong>Greedy Sidechain Packing</strong>.
+    </div>
+  </div>
+
+  <!-- CELLULAR -->
+  <h2 id="domain-cellular" style="border-bottom: 2px solid var(--border); padding-bottom: 10px; margin-top: 60px;">6. Domain & Algorithms: Cellular & Transcriptomics</h2>
+  <p class="body-text">Pipelines for single-cell transcriptomics matrices.</p>
+  <div class="api-block">
+    <div class="api-name">Cellular Algorithms</div>
+    <div class="api-sig">Sparse Matrix transforms</div>
+    <div class="api-desc">
+      Algorithms supported: <strong>Pseudotime Inference</strong>, <strong>K-NN Graph Building</strong>, and seamless integration with UMAP/PCA analytics.
+    </div>
+  </div>
+
+  <!-- SYSTEMS -->
+  <h2 id="domain-systems" style="border-bottom: 2px solid var(--border); padding-bottom: 10px; margin-top: 60px;">7. Domain & Algorithms: Systems & Pathways</h2>
+  <p class="body-text">Network and graph topologies built using high-performance adjacency lists and sparse matrices.</p>
+  <div class="api-block">
+    <div class="api-name">Systems Algorithms</div>
+    <div class="api-sig">Graph theory and traversals</div>
+    <div class="api-desc">
+      Algorithms supported: <strong>BFS/DFS</strong>, <strong>Shortest Path</strong>, <strong>Dijkstra</strong>, <strong>Connected Components</strong>, <strong>Topological Sort</strong>, <strong>Closeness & Betweenness Centrality</strong>, <strong>PageRank</strong>, <strong>Louvain Community Detection</strong>, <strong>Edmonds-Karp Max Flow</strong>, <strong>Triangle Counting</strong>, and <strong>Fruchterman-Reingold Force-Directed Layouts</strong>.
+    </div>
+  </div>
+
+  <!-- POPULATION & EVOLUTIONARY -->
+  <h2 id="domain-population" style="border-bottom: 2px solid var(--border); padding-bottom: 10px; margin-top: 60px;">8. Domain & Algorithms: Population & Evolutionary</h2>
+  <p class="body-text">From allele frequencies to phylogenetic trees, optimizing matrix multiplications and recursive tree structures.</p>
+  <div class="api-block">
+    <div class="api-name">Population & Evolutionary Algorithms</div>
+    <div class="api-sig">Phylogenetics and Associations</div>
+    <div class="api-desc">
+      Algorithms supported: <strong>Linkage Disequilibrium (LD)</strong>, <strong>GWAS Matrix Math</strong>.
+      Phylogenetics: <strong>Robinson-Foulds Distance</strong>, <strong>Parsimony Fitch</strong>, <strong>UPGMA</strong>, <strong>Neighbor-Joining</strong>, <strong>Felsenstein Pruning</strong>, <strong>Nearest Neighbor Interchange (NNI)</strong>, <strong>Subtree Pruning Regrafting (SPR)</strong>, <strong>Felsenstein Bootstrapping</strong>, and <strong>Bayesian MCMC Inference</strong>.
+    </div>
+  </div>
+</div>
+
+  
+  <div id="searchModal" class="search-modal" onclick="closeSearch(event)">
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="Search documentation..." onkeyup="handleSearch(event)">
+      <div id="searchResults" class="search-results"></div>
+    </div>
+  </div>
+  </div>
+  <script>
+    window.__BZ_SEARCH_INDEX__ = [{"title":"Welcome","url":"index.html","content":"ZIG 0.16 · v0.1.0-DEV · MIT Biology computed exactly. BioZig: Biology first principles programming. DNA is not a string. Protein is not a string. BZ encodes biological reality at the bit level — where it belongs. Deterministic. Reproducible. On every machine. Every time. Read Documentation ARENA ALLOCATORS Zero-copy MMap & Arena State 100 % SIMD VECTORIZATION Hardware @Vector intrinsics 32 BYTES/CYCLE ZERO DEPENDENCIES Pure Zig Native Compiler 0 EXTERNAL LIBS C-ABI COMPATIBILITY FFI ready for Python/R/C++ O(1) BINDING COST"},{"title":"Philosophy","url":"philosophy.html","content":"The Fundamental Problem BIOINFORMATICS IN CRISIS Modern biology generates data at a petabyte scale, yet the foundational libraries we use to analyze it were built in an era of megabytes. Biological data is discrete, deterministic, and mathematical. Yet, legacy frameworks treat DNA as UTF-8 text strings, protein coordinates as deeply nested objects, and graphs as fragmented pointers. This abstraction is mathematically and computationally incorrect. It leads to bloated memory, cache misses, and massive bottlenecks. We are computing biology with tools designed for parsing web text. The Failures of the Past LEGACY FRAMEWORKS BioPython: The OOP Fallacy The Problem: Python treats every nucleotide as a Unicode string, wrapping it in heavy PyObject overhead. Object-Oriented Programming (OOP) creates millions of scattered objects across the heap, destroying CPU cache locality. The Global Interpreter Lock (GIL) prevents true multi-threading, meaning a 64-core server is reduced to a single core when parsing a VCF. BioPython trades hardware efficiency for syntactic sugar. R & Bioconductor: The Copy-on-Modify Trap The Problem: R excels at statistical modeling but fails at systems engineering. R's pass-by-value and \"copy-on-modify\" semantics mean that filtering a 50GB sparse matrix often requires 150GB of RAM just to hold intermediate states. Furthermore, unpredictable garbage collection (GC) pauses ruin real-time throughput. R is a fantastic calculator, but a terrible infrastructure layer. C++: The Undefined Behavior Minefield The Problem: C++ (e.g., SeqAn) provides the speed Python lacks, but at the cost of immense complexity. Decades of legacy cruft, arcane CMake build scripts, and the ever-present threat of Undefined Behavior (UB), buffer overflows, and segmentation faults make C++ codebases brittle. Biology requires absolute determinism; a silent memory corruption in a genome assembler ruins the science. BioJava & BioPerl: The Relics The Problem: BioJava suffers from massive JVM warmup times, aggressive heap allocations, and garbage collection stalls. It abstracts hardware away precisely when bioinformatics needs hardware control most. BioPerl treated biology as a regular expression string-parsing problem, an outdated paradigm that simply cannot scale to modern geometric and tensor-based single-cell biology. Validation First. Depth Second. THE BIOZIG SOLUTION BioZig (BZ) does not guess. BZ does not approximate. If a graph traversal cannot prove its cycle resolution, it fails. If a structural parser drops precision in coordinate translation, it fails. BZ is built on the premise that biological data must be exactly represented and deterministically verified before any complex algorithm is allowed to run. Zero-Copy & Memory Safety HARDWARE EFFICIENCY Memory allocation is the enemy of performance. By strictly utilizing Arena Allocators and Memory-Mapped (MMap) file parsing, BZ guarantees O(1) ingestion without string duplication. We read 64 bits at a time, relying on @Vector(32, u8) SIMD intrinsics to parse delimiters at hardware speeds. DNA is packed into 2 bits. Coordinates are laid out in Structure of Arrays (SoA). We compute at the metal."},{"title":"Architecture","url":"architecture.html","content":"System Architecture DATA PIPELINE BioZig does not act as a monolithic God object. Instead, it enforces strict separation of concerns, broken down into four distinct phases of execution. This prevents cyclic dependencies and ensures hardware-level performance. graph TD classDef core fill:#111,stroke:#27272a,stroke-width:2px,color:#a1a1aa,font-family:monospace classDef parser fill:#111,stroke:#27272a,stroke-width:2px,color:#f7a41d,font-family:monospace classDef domain fill:#111,stroke:#27272a,stroke-width:2px,color:#4ade80,font-family:monospace classDef algo fill:#111,stroke:#27272a,stroke-width:2px,color:#60a5fa,font-family:monospace subgraph BZ Architecture Pipeline A[CORE Arena, ThreadPool, SIMD]:::core -->|I/O Config| B(PARSER MMap Bit-Sieve):::parser B -->|Raw Memory View| C{DOMAIN SoA Layouts, DNA2}:::domain C -->|Type-Safe Structs| D[ALGORITHM Compute Kernels]:::algo D -.->|Hardware Intrinsics| A end 1. CORE Memory & Execution (Arena Allocators, SIMD, Thread Pools, and I/O handlers). 2. PARSER Zero-Copy Ingestion (64-bit Bit-Sieve MMap parsers transforming raw bytes directly into struct slices). 3. DOMAIN Data Representation (SoA layouts, e.g., DNA2 encoded bits, XYZ coordinate sets). Pure state, no logic. 4. ALGORITHM Compute Kernels (Functions that take Domain structs, process via Core SIMD, and output results). Zero-Copy Bit-Sieve Parsing ingestion/transcriptomics/mtx.zig BZ does not parse files byte-by-byte. It reads 64 bits at a time from the memory map and uses bit-twiddling to find delimiters in O(1) cycles. pub fn next(self: *MtxMmapIterator) ?[]const u8 { if (self.cursor >= self.buffer.len) return null; const start = self.cursor; while (self.cursor + 8 MMapReader (Zero-Copy) pub const MMapReader = struct { file: std.Io.File, mmap: std.Io.File.MemoryMap, ... } Opens a file in read_only mode with protection .{ .read = true, .write = false } . Grants zero-copy access to data via mm.memory[0..size] . SIMD Vectorization core/simd/simd.zig Hardware Accelerated Primitives pub fn countChar(slice: []const u8, char: u8) usize Vectorized char counting using @Vector(32, u8) and @select instead of byte-by-byte loops. pub fn countChar(slice: []const u8, char: u8) usize { const VLen = 32; const V = @Vector(VLen, u8); const char_vec: V = @splat(char); // Compares chunks (vec == char_vec) // Converts bools to ints with @select // Reduces with @reduce(.Add, match_ints) } Molecular Domain: 2-Bit Compression molecular/dna/dna.zig Nucleotide & DNA2 pub const Nucleotide = enum (u2) { A = 0b00, C = 0b01, G = 0b10, T = 0b11 }; DNA2 owns the memory, packing 4 bases per byte. pub const DNA2 = struct { bytes: []u8, len: usize, allocator: std.mem.Allocator, pub fn get(self: DNA2, index: usize) Nucleotide { const byte_idx = index / 4; const shift = @as(u3, @truncate((index % 4) * 2)); const bits = (self.bytes[byte_idx] >> shift) & 0b11; return @enumFromInt(bits); } }; Structural Geometry structural/geometry.zig Structure of Arrays (SoA) pub const CoordinateSet = struct { x: []f64, y: []f64, z: []f64 }; By decoupling coordinates into SoA, SIMD vectors can load 8 f64 elements linearly without cache-misses from gather instructions. Thread Pooling & Work Stealing core/concurrency/pool.zig Lock-Free Atomics @atomicRmw( .Add , &target, value, .SeqCst ) Instead of using std.Thread.Mutex , BZ aggregates concurrent results using hardware atomic instructions to eliminate lock contention on 50M+ element operations."},{"title":"Tutorials","url":"tutorials.html","content":"Cross-Domain Interaction PIPELINE DESIGN In standard bioinformatics, you read a file (Parser), parse it into an object (Domain), and run a method on the object (Algorithm). In BioZig, data is orthogonal to behavior. The parser generates raw Domain structs , and the Algorithms consume them. No objects own methods. 1. Pure Zig (Native) STRUCTURAL PROTEIN PIPELINE Parse a PDB file using zero-copy MMap, generate a Structure of Arrays (SoA) coordinate set, and compute its geometric centroid. const std = @import(\"std\"); const biozig = @import(\"biozig\"); const structural = biozig.algorithms.structural; const pdb = biozig.ingestion.structural.pdb; pub fn main() !void { var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator); defer arena.deinit(); const allocator = arena.allocator(); // 1. Zero-copy ingest PDB using 64-bit Bit-Sieve const coords = try pdb.parseCoordinateSet(allocator, \"protein.pdb\"); // 2. Compute centroid via SIMD vectorized loop const centroid = structural.computeCentroid(coords); std.debug.print(\"Centroid: X={d:.3}, Y={d:.3}, Z={d:.3} \", .{centroid.x, centroid.y, centroid.z}); } 2. Python Wrapper SINGLE-CELL TRANSCRIPTOMICS (PCA) BZ's Python bindings expose C-ABI pointers. We can ingest a massive Matrix Market (.mtx) file and run a fast PCA directly in hardware memory without instantiating millions of Python objects. import biozig as bz # 1. Parse sparse single-cell expression data via zero-copy MTX reader mtx_data = bz.transcriptomics.parse_mtx(\"cells.mtx\") # 2. Calculate top 10 principal components using the Analytics module pca_results = bz.analytics.dimensionality.pca(mtx_data, n_components=10) print(f\"Explained Variance: {pca_results.explained_variance}\") print(f\"Transform: {pca_results.transform}\") 3. R Wrapper SYSTEMS BIOLOGY (COMMUNITY DETECTION) In R, loading large network graphs often causes RAM exhaustion. BZ handles the graph traversal outside of the R garbage collector. library(biozig) # 1. Load systems network (e.g., from an edge list or BioPAX) graph 4. Command Line Interface (CLI) GENOMICS (FASTA METRICS) The BZ CLI provides direct access to these pipelines from bash. Because the CLI is purely compiled Zig, execution is instantaneous. # Compute GC Content and Shannon Entropy for a large genome FASTA $ biozig genomics metrics --input human_genome.fasta --metrics gc_content,entropy > GC Content: 41.2% > Shannon Entropy: 1.98 bits"},{"title":"Command Line Interface","url":"cli.html","content":"BioZig CLI COMMAND LINE INTERFACE The BZ Command Line Interface ( biozig ) provides a lightning-fast, zero-dependency binary for executing biological algorithms directly from the terminal. biozig genomics code $ biozig genomics code --input reads.fa Invokes the internal translateDNA() function. Reads the input via mmap, wraps it in a DNA2 bit-view, and outputs the translated amino acids. biozig structural rmsd $ biozig structural rmsd --target ref.pdb --mobile state.pdb Loads XYZ coordinates into SoA layouts and executes the vectorized Kabsch alignment to compute the Optimal RMSD. biozig cellular umap $ biozig cellular umap --matrix expr.mtx --dims 2 Reads a sparse matrix using SparseMatrixOps and computes a 2D UMAP projection via algorithms.cellular.UMAP.transform() ."},{"title":"libbiozig C-ABI","url":"libbiozig.html","content":"libbiozig THE C-ABI DYNAMIC LIBRARY libbiozig is the core artifact of the BioZig project. It is a highly optimized library that exposes the entire BZ pipeline through a stable C Application Binary Interface. Support exists for bindings in cpp , java , julia , matlab , python , r , swift , and wasm via exact header mappings. Context & Memory Management Because BZ relies on Arena Allocators instead of scattered mallocs, the C-ABI requires an explicit context lifecycle to manage the global arena ( c_arena ). biozig_context_create export fn biozig_context_create() callconv(.c) c_int Initializes the global BZ engine and its memory arena. Must be called before any other C-ABI functions. Returns 0 on success. biozig_context_destroy export fn biozig_context_destroy() callconv(.c) c_int Instantly deallocates the entire engine memory arena. Guarantees no memory leaks when bridging with Python/R."},{"title":"Docs","url":"docs.html","content":"BZ API Reference OFFICIAL DOCUMENTATION Welcome to the official documentation for BZ. This manual covers the core concepts, memory architecture, and domain-specific APIs (Molecular, Structural, Cellular, Population, Genomics, Systems, and Evolutionary). BZ prioritizes Zero-Copy I/O , Structure of Arrays (SoA) layouts, and Explicit SIMD Vectorization . Table of Contents 1. Core: Memory & I/O 2. Ingestion: File Parsers 3. Analytics: Statistical & Matrix Operations 4. Domain & Algorithms: Molecular & Genomics 5. Domain & Algorithms: Structural 6. Domain & Algorithms: Cellular & Transcriptomics 7. Domain & Algorithms: Systems & Pathways 8. Domain & Algorithms: Population & Evolutionary 1. Core: Memory & I/O BZ leverages Memory Mapped ( mmap ) files and @Vector primitives for Single Instruction, Multiple Data (SIMD) operations. Operations are chunked into vector lengths matching CPU architectures to eliminate byte-by-byte bottlenecks. MMapReader pub const MMapReader = struct { file: std.Io.File, mmap: std.Io.File.MemoryMap, data: []const u8 } Maps files into memory without allocating strings. O(1) ingestion cost. 2. Ingestion: File Parsers BZ implements 64-bit Bit-Sieve parsers for zero-copy file ingestion across a massive array of bioinformatics formats. Supported Formats Zero-copy parsing support via ingestion/ Genomics: FASTA, FASTQ, SAM, BAM, CRAM, VCF, BCF, BED, GFF3, GTF, 2bit, Genomic Indices Structural: PDB, MMCIF, MOL2, PQR, SDF Systems: SBML, BioPAX, GPML Transcriptomics: MTX (Matrix Market), Sparse Matrices Evolutionary: Newick, Nexus, PhyloXML Compression: BGZF streaming 3. Analytics: Statistical & Matrix Operations The analytics module sits between domains and algorithms, providing highly-optimized mathematical primitives, factorization, and machine-learning fundamentals. Analytics Module Capabilities pub const analytics = @import(\"analytics/analytics.zig\"); Dimensionality Reduction: PCA, t-SNE, UMAP Matrix Factorization: MDS, NMF, SVD, Sparse Matrices Clustering: K-Means, DBSCAN, Hierarchical Clustering Graph ML: Node2Vec, Spectral embeddings Sequence Modeling: Markov Chains, K-mer Statistics Pathways: Enrichment Analysis, SPIA (Signaling Pathway Impact Analysis) 4. Domain & Algorithms: Molecular & Genomics Strict 2-bit packing for DNA strings, replacing garbage-collected characters with bitwise arithmetic. Genomic Algorithms Hardware accelerated counting and metrics Algorithms supported: GC Content , Shannon Entropy , Hamming Distance , and vectorized mismatch detection using @popCount hardware instructions. 5. Domain & Algorithms: Structural Structure of Arrays (SoA) memory layouts for 3D coordinate geometry to prevent cache misses during heavy floating-point operations. Structural Algorithms pub const CoordinateSet = struct { x: []f64, y: []f64, z: []f64 }; Algorithms supported: Kabsch Rotation , Optimal RMSD , Distance Matrices , Contact Maps , Hydrogen Bond Detection , Pocket Statistics , Radius of Gyration , Verlet Molecular Dynamics , Simulated Annealing , ANM Hessian Generation , Threading DP , and Greedy Sidechain Packing . 6. Domain & Algorithms: Cellular & Transcriptomics Pipelines for single-cell transcriptomics matrices. Cellular Algorithms Sparse Matrix transforms Algorithms supported: Pseudotime Inference , K-NN Graph Building , and seamless integration with UMAP/PCA analytics. 7. Domain & Algorithms: Systems & Pathways Network and graph topologies built using high-performance adjacency lists and sparse matrices. Systems Algorithms Graph theory and traversals Algorithms supported: BFS/DFS , Shortest Path , Dijkstra , Connected Components , Topological Sort , Closeness & Betweenness Centrality , PageRank , Louvain Community Detection , Edmonds-Karp Max Flow , Triangle Counting , and Fruchterman-Reingold Force-Directed Layouts . 8. Domain & Algorithms: Population & Evolutionary From allele frequencies to phylogenetic trees, optimizing matrix multiplications and recursive tree structures. Population & Evolutionary Algorithms Phylogenetics and Associations Algorithms supported: Linkage Disequilibrium (LD) , GWAS Matrix Math . Phylogenetics: Robinson-Foulds Distance , Parsimony Fitch , UPGMA , Neighbor-Joining , Felsenstein Pruning , Nearest Neighbor Interchange (NNI) , Subtree Pruning Regrafting (SPR) , Felsenstein Bootstrapping , and Bayesian MCMC Inference ."},{"title":"BZSF","url":"foundation.html","content":"BZ Software Foundation BZSF The BZ Software Foundation (BZSF) exists to safeguard the integrity, performance, and philosophical rigor of the BZ ecosystem. We are committed to maintaining a zero-copy, mathematically provable, and brutalist standard for bioinformatics infrastructure. Leadership STEERING MD. Arshad Creator and Curator Principal architect of the BZ framework and guardian of the core philosophy. The Future EXPANSION The codebase is currently undergoing rigorous validation of its core axioms. In the forthcoming future, the BZSF will actively accept contributors, researchers, and systems engineers who align with our uncompromising standards. A formal governance model and contributor guidelines will be established as the foundation matures."}];
+    (function(){
+      const stored = localStorage.getItem('bz-theme');
+      const sys = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+      const theme = stored || sys;
+      document.documentElement.setAttribute('data-theme', theme);
+      const icon = document.getElementById('themeIcon');
+      const label = document.getElementById('themeLabel');
+      if(icon) icon.textContent = theme === 'light' ? '☾' : '☀';
+      if(label) label.textContent = theme === 'light' ? 'Dark' : 'Light';
+    })();
+    
+    // Keyboard shortcuts for surfing
+    document.addEventListener('keydown', (e) => {
+      if (e.key.toLowerCase() === 'escape') {
+        const modal = document.getElementById('searchModal');
+        if (modal) modal.classList.remove('active');
+        return;
+      }
+      
+      // Ignore if typing in an input or textarea
+      if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
+      
+      switch (e.key.toLowerCase()) {
+        case '1': case 'o': window.location.href = 'index.html'; break;
+        case '2': case 'p': window.location.href = 'philosophy.html'; break;
+        case '3': case 'a': window.location.href = 'architecture.html'; break;
+        case '4': case 'd': window.location.href = 'docs.html'; break;
+        case '5': case 't': window.location.href = 'tutorials.html'; break;
+        case '6': case 'l': window.location.href = 'libbiozig.html'; break;
+        case '7': case 'c': window.location.href = 'cli.html'; break;
+        case '8': case 'f': window.location.href = 'foundation.html'; break;
+        case 's': case '/': 
+          e.preventDefault();
+          openSearch(); 
+          break;
+      }
+    });
+  </script>
+</body>
+</html>
