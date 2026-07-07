@@ -69,4 +69,7 @@ This project is licensed under the 3-Clause BSD License.
 ## Author
 
 MD. Arshad
+
 BioZig Software Foundation
+
+sulkysubject@biozig.org
