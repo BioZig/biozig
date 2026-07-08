@@ -92,5 +92,22 @@ function handleSearch(e) {
     if (window.__BZ_SEARCH_INDEX__) {
       searchIndex = window.__BZ_SEARCH_INDEX__;
     }
+
+    // Global Navigation Shortcuts
+    window.addEventListener('keydown', (e) => {
+      // Ignore if user is typing in the search bar or any other input
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      
+      const inDocs = window.location.pathname.includes('/docs/');
+      const prefix = inDocs ? '' : 'docs/';
+      
+      switch(e.key.toLowerCase()) {
+        case 'n': window.location.href = prefix + 'net.html'; break;
+        case 'p': window.location.href = prefix + 'parsers.html'; break;
+        case 'a': window.location.href = prefix + 'algorithms.html'; break;
+        case 'd': window.location.href = prefix + 'domains.html'; break;
+        case 'i': window.location.href = prefix + 'interaction.html'; break;
+      }
+    });
   });
 })();
