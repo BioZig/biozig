@@ -69,3 +69,76 @@ test "pdb zero-copy memory optimization" {
     // It should definitely be small.
     try std.testing.expect(end_memory - start_memory < 500);
 }
+
+pub fn pdbStreamIterator(reader: anytype, buffer: []u8) PdbStreamIterator(@TypeOf(reader)) {
+    return PdbStreamIterator(@TypeOf(reader)).init(reader, buffer);
+}
+
+pub fn PdbStreamIterator(comptime ReaderType: type) type {
+    return struct {
+        reader: ReaderType,
+        buffer: []u8,
+        pos: usize = 0,
+        valid_len: usize = 0,
+        eof: bool = false,
+
+        const Self = @This();
+
+        pub fn init(reader: ReaderType, buffer: []u8) Self {
+            return .{
+                .reader = reader,
+                .buffer = buffer,
+            };
+        }
+
+        fn fill(self: *Self) !void {
+            if (self.eof) return;
+            if (self.pos > 0 and self.valid_len > self.pos) {
+                std.mem.copyForwards(u8, self.buffer[0 .. self.valid_len - self.pos], self.buffer[self.pos .. self.valid_len]);
+                self.valid_len -= self.pos;
+            } else if (self.pos == self.valid_len) {
+                self.valid_len = 0;
+            }
+            self.pos = 0;
+            var data: [1][]u8 = .{ self.buffer[self.valid_len..] };
+            const read_len = self.reader.readVec(&data) catch |err| switch (err) {
+                error.EndOfStream => @as(usize, 0),
+                else => return err,
+            };
+            if (read_len == 0) {
+                self.eof = true;
+            }
+            self.valid_len += read_len;
+        }
+
+        pub fn nextLine(self: *Self) !?[]const u8 {
+            while (true) {
+                if (self.pos == self.valid_len) {
+                    if (self.eof) return null;
+                    try self.fill();
+                    if (self.pos == self.valid_len) return null;
+                }
+
+                const nl = std.mem.indexOfScalarPos(u8, self.buffer[0..self.valid_len], self.pos, '\n');
+                if (nl) |idx| {
+                    const line = self.buffer[self.pos..idx];
+                    self.pos = idx + 1;
+                    return std.mem.trimEnd(u8, line, "\r");
+                } else {
+                    if (self.eof) {
+                        const line = self.buffer[self.pos..self.valid_len];
+                        self.pos = self.valid_len;
+                        if (line.len == 0) return null;
+                        return std.mem.trimEnd(u8, line, "\r");
+                    }
+                    if (self.pos == 0 and self.valid_len == self.buffer.len) {
+                        const line = self.buffer[0..self.valid_len];
+                        self.pos = self.valid_len;
+                        return line;
+                    }
+                    try self.fill();
+                }
+            }
+        }
+    };
+}

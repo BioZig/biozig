@@ -215,3 +215,15 @@ for file in tests/c_abi/*.zig; do
             "--dep" "core" "--dep" "molecular" "--dep" "algorithms" "--dep" "ingestion" "--dep" "analytics" "--dep" "structural" "--dep" "cellular" "--dep" "systems" "--dep" "visualization" "--dep" "population" "-Mc_api=interoperability/c_api.zig"
     fi
 done
+
+echo "=== Testing NET ==="
+for file in tests/net/*.zig; do
+    if [ -f "$file" ]; then
+        echo "Running $file"
+        zig test \
+            "--dep" "core" "--dep" "net" \
+            "-Mroot=$file" \
+            "-Mcore=core/core.zig" \
+            "--dep" "core" "-Mnet=net/net.zig"
+    fi
+done

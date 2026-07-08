@@ -2,7 +2,7 @@
 
 BioZig is deeply committed to extreme robustness, hardware-level stability, and completely native execution. As a result, the testing architecture is designed to be exhaustive and highly structured. 
 
-There are currently **447 dedicated tests** validating edge cases, boundary limits, missing datasets, and memory leaks across the entire framework.
+There are currently **452 dedicated tests** validating edge cases, boundary limits, missing datasets, and memory leaks across the entire framework.
 
 ## 1. Testing Philosophy
 BioZig adheres to a strict native-only testing approach. 
@@ -20,6 +20,7 @@ The `tests/` directory mirrors the source architecture:
 - `tests/ingestion/`: Validates MMap parsers, bit-sieves, and file readers.
 - `tests/algorithms/`: Exhaustive testing for all computational engines (molecular, structural, systems, etc.).
 - `tests/c_abi/`: Simulates external C/C++/Python/R calling patterns, enforcing strict memory bounds for the interoperability layer.
+- `tests/net/`: A specialized chaos engineering suite testing the `BitSieve` engine against network instability (slow drips, HTTP 429/502 avalanches, truncated chunk poisoning).
 - *(And dedicated suites for all base domain representations).*
 
 ## 3. How to Run the Tests

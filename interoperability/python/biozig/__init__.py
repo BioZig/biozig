@@ -1,4 +1,4 @@
-from .core import BioZigContext, ping, align_global, shannon_entropy, translate_dna
+from .core import BioZigContext, ping, align_global, shannon_entropy, translate_dna, stream_genome
 from .molecular import (
     hamming_distance,
     levenshtein_distance,
@@ -15,6 +15,7 @@ __all__ = [
     "align_global",
     "shannon_entropy",
     "translate_dna",
+    "stream_genome",
     "hamming_distance",
     "levenshtein_distance",
     "DeBruijnGraph",

@@ -217,20 +217,22 @@ pub fn build(b: *std.Build) void {
     interoperability_module.addImport("cellular", cellular_module);
     interoperability_module.addImport("systems", systems_module);
     interoperability_module.addImport("visualization", visualization_module);
-
-    const libbiozig_shared = b.addLibrary(.{
-        .name = "biozig",
-        .root_module = interoperability_module,
-        .linkage = .dynamic,
+    const net_module = b.createModule(.{
+        .root_source_file = b.path("net/net.zig"),
+        .target = target,
+        .optimize = optimize,
     });
-    b.installArtifact(libbiozig_shared);
+    b.modules.put(b.graph.arena, "net", net_module) catch @panic("OOM");
 
-    const libbiozig_static = b.addLibrary(.{
-        .name = "biozig",
-        .root_module = interoperability_module,
+    const net_lib = b.addLibrary(.{
+        .name = "biozig-net",
+        .root_module = net_module,
         .linkage = .static,
     });
-    b.installArtifact(libbiozig_static);
+    b.installArtifact(net_lib);
+
+    interoperability_module.addImport("net", net_module);
+
 
     // 9. Register unit tests
     const core_tests = b.addTest(.{
@@ -371,6 +373,20 @@ pub fn build(b: *std.Build) void {
     b.modules.put(b.graph.arena, "population", population_module) catch @panic("OOM");
     interoperability_module.addImport("population", population_module);
 
+    const libbiozig_shared = b.addLibrary(.{
+        .name = "biozig",
+        .root_module = interoperability_module,
+        .linkage = .dynamic,
+    });
+    b.installArtifact(libbiozig_shared);
+
+    const libbiozig_static = b.addLibrary(.{
+        .name = "biozig",
+        .root_module = interoperability_module,
+        .linkage = .static,
+    });
+    b.installArtifact(libbiozig_static);
+
     const population_lib = b.addLibrary(.{
         .name = "biozig-population",
         .root_module = population_module,
@@ -378,8 +394,10 @@ pub fn build(b: *std.Build) void {
     });
     b.installArtifact(population_lib);
 
+
     cli_module.addImport("population", population_module);
     cli_module.addImport("reporting", reporting_module);
+    cli_module.addImport("net", net_module);
 
     const cli_exe = b.addExecutable(.{
         .name = "biozig",
@@ -422,6 +440,7 @@ pub fn build(b: *std.Build) void {
     lib.root_module.addImport("systems", systems_module);
     lib.root_module.addImport("visualization", visualization_module);
     lib.root_module.addImport("population", population_module);
+    lib.root_module.addImport("net", net_module);
     b.installArtifact(lib);
 
     test_step.dependOn(&run_cli_main_tests.step);

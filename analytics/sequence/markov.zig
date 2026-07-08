@@ -90,3 +90,21 @@ test "markov computeTransitions parallel" {
     try std.testing.expectEqual(@as(u64, 2501), matrix['G']['T']);
     try std.testing.expectEqual(@as(u64, 2501), matrix['T']['A']);
 }
+
+pub fn streamingTransitions(allocator: std.mem.Allocator, iterator: anytype) !*[256][256]u64 {
+    const matrix = try allocator.create([256][256]u64);
+    for (matrix) |*row| {
+        @memset(row, 0);
+    }
+    
+    var last_char: ?u8 = null;
+    while (try iterator.nextSequenceChunk()) |chunk| {
+        for (chunk) |c| {
+            if (last_char) |prev| {
+                matrix[prev][c] += 1;
+            }
+            last_char = c;
+        }
+    }
+    return matrix;
+}

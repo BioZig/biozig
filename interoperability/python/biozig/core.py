@@ -55,6 +55,17 @@ lib.biozig_shannon_entropy.restype = ctypes.c_double
 lib.biozig_translate_dna.argtypes = [ctypes.c_char_p]
 lib.biozig_translate_dna.restype = ctypes.c_char_p
 
+# Network streaming endpoints
+lib.biozig_net_start.argtypes = [ctypes.c_char_p, ctypes.c_char_p]
+lib.biozig_net_start.restype = ctypes.c_void_p
+
+lib.biozig_net_read_chunk.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_size_t]
+lib.biozig_net_read_chunk.restype = ctypes.c_size_t
+
+lib.biozig_net_stop.argtypes = [ctypes.c_void_p]
+lib.biozig_net_stop.restype = None
+
+
 
 class BioZigContext:
     def __init__(self):
@@ -93,3 +104,25 @@ def translate_dna(seq: str) -> str:
     if res is None:
         raise ValueError("Translation failed or context not initialized.")
     return res.decode('utf-8')
+
+def stream_genome(db: str, query: str):
+    """
+    Generator that streams a genome dynamically from a database over the network.
+    The background Zig thread handles network I/O, while Python consumes the O(1) buffer.
+    """
+    handle = lib.biozig_net_start(db.encode('utf-8'), query.encode('utf-8'))
+    if not handle:
+        raise RuntimeError(f"Failed to start network stream for {db} : {query}. (Ensure context is created)")
+    
+    buf_size = 8192
+    buffer = ctypes.create_string_buffer(buf_size)
+    
+    try:
+        while True:
+            # We explicitly allow other Python threads to run while Zig blocks on network condition variables
+            bytes_read = lib.biozig_net_read_chunk(handle, buffer, buf_size)
+            if bytes_read == 0:
+                break
+            yield buffer.raw[:bytes_read]
+    finally:
+        lib.biozig_net_stop(handle)

@@ -9,6 +9,7 @@ const cmd_evolutionary = @import("cmd_evolutionary.zig");
 const cmd_population = @import("cmd_population.zig");
 const cmd_reporting = @import("cmd_reporting.zig");
 const cmd_visualize = @import("cmd_visualize.zig");
+const cmd_fetch = @import("fetch.zig");
 
 pub fn main(init: std.process.Init) !void {
     const allocator = init.arena.allocator();
@@ -46,6 +47,8 @@ pub fn main(init: std.process.Init) !void {
         try cmd_reporting.execute(parsed);
     } else if (std.mem.eql(u8, domain, "visualize")) {
         try cmd_visualize.execute(parsed);
+    } else if (std.mem.eql(u8, domain, "fetch") or std.mem.eql(u8, domain, "stream")) {
+        try cmd_fetch.execute(allocator, process_args);
     } else {
         std.debug.print("Error: Unknown domain '{s}'.\n\n", .{domain});
         printHelp();

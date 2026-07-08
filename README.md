@@ -28,6 +28,7 @@ biozig/
 ├── analytics/        # Dimensionality reduction and clustering
 ├── algorithms/       # Core molecular algorithms (MSA, MCMC, Suffix Trees)
 ├── ingestion/        # Zero-copy parsers for FASTA, FASTQ, PDB, SAM, VCF
+├── net/              # O(1) Streaming Engine (NCBI, UniProt, PDB, ChEMBL, Ensembl)
 ├── visualization/    # SVG generators for structural and omics data
 ├── reporting/        # Markdown, HTML, and LaTeX export generation
 └── cli/              # Command-line interface subcommands
@@ -60,7 +61,7 @@ BioZig operates as a standalone CLI executable.
     ```bash
     zig build test
     ```
-    For detailed information on the 440+ exhaustive edge-case test suites, the `tests/` directory structure, and the custom `run_tests.sh` module mapping wrapper, please refer to the [Testing Documentation](docs/TESTING.md).
+    For detailed information on the 445+ exhaustive edge-case test suites (including the 5 newly added chaos engineering network tests), the `tests/` directory structure, and the custom `run_tests.sh` module mapping wrapper, please refer to the [Testing Documentation](docs/TESTING.md).
 
 ## License
 

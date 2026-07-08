@@ -136,3 +136,118 @@ test "slidingWindowMetrics" {
     try testing.expectApproxEqAbs(@as(f64, 1.0), metrics2[1].gc_content, 0.001);
     try testing.expectApproxEqAbs(@as(f64, -1.0), metrics2[1].gc_skew, 0.001);
 }
+
+pub fn streamingSlidingWindowMetrics(allocator: std.mem.Allocator, iterator: anytype, window_size: usize, step_size: usize) ![]WindowMetrics {
+    if (window_size == 0 or step_size == 0) return error.InvalidWindowParameters;
+
+    var metrics = std.ArrayList(WindowMetrics).empty;
+    errdefer metrics.deinit(allocator);
+
+    var window_buf = try allocator.alloc(u8, window_size);
+    defer allocator.free(window_buf);
+
+    var window_len: usize = 0;
+    var step_skip: usize = 0;
+
+    while (try iterator.nextSequenceChunk()) |chunk| {
+        var i: usize = 0;
+        while (i < chunk.len) {
+            if (step_skip > 0) {
+                const to_skip = @min(step_skip, chunk.len - i);
+                step_skip -= to_skip;
+                i += to_skip;
+                continue;
+            }
+
+            const space = window_size - window_len;
+            const to_copy = @min(space, chunk.len - i);
+            std.mem.copyForwards(u8, window_buf[window_len .. window_len + to_copy], chunk[i .. i + to_copy]);
+            window_len += to_copy;
+            i += to_copy;
+
+            if (window_len == window_size) {
+                var g: f64 = 0;
+                var c: f64 = 0;
+                var a: f64 = 0;
+                var t: f64 = 0;
+                for (window_buf) |char| {
+                    const base = std.ascii.toUpper(char);
+                    switch (base) {
+                        'G' => g += 1,
+                        'C' => c += 1,
+                        'A' => a += 1,
+                        'T' => t += 1,
+                        else => {},
+                    }
+                }
+                const gc_total = g + c;
+                const all_total = gc_total + a + t;
+                const gc_content = if (all_total > 0) gc_total / all_total else 0.0;
+                const gc_skew = if (gc_total > 0) (g - c) / gc_total else 0.0;
+                try metrics.append(allocator, .{ .gc_content = gc_content, .gc_skew = gc_skew });
+
+                if (step_size < window_size) {
+                    const overlap = window_size - step_size;
+                    std.mem.copyForwards(u8, window_buf[0..overlap], window_buf[step_size..window_size]);
+                    window_len = overlap;
+                } else {
+                    window_len = 0;
+                    step_skip = step_size - window_size;
+                }
+            }
+        }
+    }
+
+    if (window_len > 0) {
+        var g: f64 = 0;
+        var c: f64 = 0;
+        var a: f64 = 0;
+        var t: f64 = 0;
+        for (window_buf[0..window_len]) |char| {
+            const base = std.ascii.toUpper(char);
+            switch (base) {
+                'G' => g += 1,
+                'C' => c += 1,
+                'A' => a += 1,
+                'T' => t += 1,
+                else => {},
+            }
+        }
+        const gc_total = g + c;
+        const all_total = gc_total + a + t;
+        const gc_content = if (all_total > 0) gc_total / all_total else 0.0;
+        const gc_skew = if (gc_total > 0) (g - c) / gc_total else 0.0;
+        try metrics.append(allocator, .{ .gc_content = gc_content, .gc_skew = gc_skew });
+    }
+
+    return metrics.toOwnedSlice(allocator);
+}
+
+/// Calculates Shannon Entropy over an O(1) streaming fasta iterator.
+pub fn streamingShannonEntropy(allocator: std.mem.Allocator, iterator: anytype) !f64 {
+    _ = allocator;
+    var counts = [_]f64{0} ** 256;
+    var total_bases: f64 = 0;
+
+    while (try iterator.nextSequenceChunk()) |chunk| {
+        for (chunk) |char| {
+            const base = std.ascii.toUpper(char);
+            if (base == 'A' or base == 'C' or base == 'G' or base == 'T') {
+                counts[base] += 1;
+                total_bases += 1;
+            }
+        }
+    }
+
+    if (total_bases == 0) return 0.0;
+
+    var entropy: f64 = 0.0;
+    for (counts) |count| {
+        if (count > 0) {
+            const p = count / total_bases;
+            entropy -= p * @log2(p);
+        }
+    }
+
+    return entropy;
+}

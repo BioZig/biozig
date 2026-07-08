@@ -193,3 +193,23 @@ test "pca basic" {
     const norm = @sqrt(1.0 + 4.0 + 9.0);
     try std.testing.expectApproxEqAbs(comps[0], 1.0 / norm, 1e-4);
 }
+
+pub const BackboneStats = struct {
+    total_atoms: usize,
+    ca_atoms: usize,
+};
+
+pub fn streamingPcaBackbone(iterator: anytype) !BackboneStats {
+    var stats = BackboneStats{ .total_atoms = 0, .ca_atoms = 0 };
+    while (try iterator.nextLine()) |line| {
+        if (std.mem.startsWith(u8, line, "ATOM  ") or std.mem.startsWith(u8, line, "HETATM")) {
+            stats.total_atoms += 1;
+            if (line.len >= 16) {
+                if (std.mem.eql(u8, line[13..15], "CA")) {
+                    stats.ca_atoms += 1;
+                }
+            }
+        }
+    }
+    return stats;
+}

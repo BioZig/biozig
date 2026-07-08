@@ -15,3 +15,4 @@ test "ingestion tests" {
     std.testing.refAllDecls(systems);
     std.testing.refAllDecls(evolutionary);
 }
+pub const cheminformatics = @import("cheminformatics/cheminformatics.zig");

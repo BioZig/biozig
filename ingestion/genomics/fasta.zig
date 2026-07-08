@@ -128,3 +128,156 @@ test "benchmark zero-copy FASTA iterator" {
 
     try std.testing.expectEqual(@as(usize, 5000), count);
 }
+
+pub const FastaStreamState = enum {
+    init,
+    header,
+    sequence,
+    eof,
+};
+
+pub fn FastaStreamIterator(comptime ReaderType: type) type {
+    return struct {
+        reader: ReaderType,
+        buffer: []u8,
+        pos: usize = 0,
+        valid_len: usize = 0,
+        eof: bool = false,
+        state: FastaStreamState = .init,
+        
+        const Self = @This();
+
+        pub fn init(reader: ReaderType, buffer: []u8) Self {
+            return .{
+                .reader = reader,
+                .buffer = buffer,
+            };
+        }
+
+        fn fill(self: *Self) !void {
+            if (self.eof) return;
+            if (self.pos > 0 and self.valid_len > self.pos) {
+                std.mem.copyForwards(u8, self.buffer[0 .. self.valid_len - self.pos], self.buffer[self.pos .. self.valid_len]);
+                self.valid_len -= self.pos;
+            } else if (self.pos == self.valid_len) {
+                self.valid_len = 0;
+            }
+            self.pos = 0;
+            var data: [1][]u8 = .{ self.buffer[self.valid_len..] };
+            const read_len = self.reader.readVec(&data) catch |err| switch (err) {
+                error.EndOfStream => @as(usize, 0),
+                else => return err,
+            };
+            if (read_len == 0) {
+                self.eof = true;
+            }
+            self.valid_len += read_len;
+        }
+
+        pub fn nextHeader(self: *Self, header_buf: []u8) !?[]const u8 {
+            while (true) {
+                if (self.pos == self.valid_len) {
+                    if (self.eof) return null;
+                    try self.fill();
+                    if (self.pos == self.valid_len) return null;
+                }
+
+                if (self.state != .header) {
+                    const next_gt = std.mem.indexOfScalarPos(u8, self.buffer[0..self.valid_len], self.pos, '>');
+                    if (next_gt) |idx| {
+                        self.pos = idx;
+                        self.state = .header;
+                    } else {
+                        self.pos = self.valid_len;
+                        continue;
+                    }
+                }
+
+                const nl = std.mem.indexOfScalarPos(u8, self.buffer[0..self.valid_len], self.pos, '\n');
+                if (nl) |idx| {
+                    const line = self.buffer[self.pos + 1 .. idx];
+                    const trimmed = std.mem.trimEnd(u8, line, "\r");
+                    const len_to_copy = @min(trimmed.len, header_buf.len);
+                    std.mem.copyForwards(u8, header_buf[0..len_to_copy], trimmed[0..len_to_copy]);
+                    self.pos = idx + 1;
+                    self.state = .sequence;
+                    return header_buf[0..len_to_copy];
+                } else {
+                    if (self.eof) {
+                        const line = self.buffer[self.pos + 1 .. self.valid_len];
+                        const trimmed = std.mem.trimEnd(u8, line, "\r");
+                        const len_to_copy = @min(trimmed.len, header_buf.len);
+                        std.mem.copyForwards(u8, header_buf[0..len_to_copy], trimmed[0..len_to_copy]);
+                        self.pos = self.valid_len;
+                        self.state = .eof;
+                        return header_buf[0..len_to_copy];
+                    }
+                    if (self.pos == 0 and self.valid_len == self.buffer.len) {
+                        return error.BufferTooSmallForHeader;
+                    }
+                    try self.fill();
+                }
+            }
+        }
+
+        pub fn nextSequenceChunk(self: *Self) !?[]const u8 {
+            if (self.state != .sequence) return null;
+
+            while (true) {
+                if (self.pos == self.valid_len) {
+                    if (self.eof) {
+                        self.state = .eof;
+                        return null;
+                    }
+                    try self.fill();
+                    if (self.pos == self.valid_len) {
+                        self.state = .eof;
+                        return null;
+                    }
+                }
+
+                if (self.buffer[self.pos] == '>') {
+                    self.state = .header;
+                    return null;
+                }
+
+                const next_nl = std.mem.indexOfScalarPos(u8, self.buffer[0..self.valid_len], self.pos, '\n');
+                const next_gt = std.mem.indexOfScalarPos(u8, self.buffer[0..self.valid_len], self.pos, '>');
+
+                const end_idx = if (next_nl) |nl| 
+                    (if (next_gt) |gt| @min(nl, gt) else nl)
+                else 
+                    (if (next_gt) |gt| gt else self.valid_len);
+
+                if (end_idx > self.pos) {
+                    const chunk = self.buffer[self.pos..end_idx];
+                    const trimmed = std.mem.trimEnd(u8, chunk, "\r");
+                    self.pos = end_idx;
+                    
+                    for (trimmed) |c| {
+                        if (!std.ascii.isAlphabetic(c) and c != '*' and c != '-') {
+                            return error.InvalidSequenceCharacter;
+                        }
+                    }
+
+                    if (trimmed.len > 0) return trimmed;
+                    continue;
+                } else if (next_nl) |nl| {
+                    if (nl == self.pos) {
+                        self.pos += 1;
+                        continue;
+                    }
+                }
+                
+                if (end_idx == self.pos and next_gt != null and next_gt.? == self.pos) {
+                    self.state = .header;
+                    return null;
+                }
+            }
+        }
+    };
+}
+
+pub fn fastaStreamIterator(reader: anytype, buffer: []u8) FastaStreamIterator(@TypeOf(reader)) {
+    return FastaStreamIterator(@TypeOf(reader)).init(reader, buffer);
+}

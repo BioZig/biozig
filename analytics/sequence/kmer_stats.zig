@@ -130,3 +130,21 @@ test "kmer_stats computeKmerFrequencies parallel" {
     try std.testing.expectEqual(@as(u64, 2500), freqs.get("GTAC").?);
     try std.testing.expectEqual(@as(u64, 2500), freqs.get("TACG").?);
 }
+
+pub fn streamingDipeptideFrequencies(allocator: std.mem.Allocator, iterator: anytype) !*[256][256]u64 {
+    const dipeptides = try allocator.create([256][256]u64);
+    for (dipeptides) |*row| {
+        @memset(row, 0);
+    }
+    
+    var last_char: ?u8 = null;
+    while (try iterator.nextSequenceChunk()) |chunk| {
+        for (chunk) |c| {
+            if (last_char) |prev| {
+                dipeptides[prev][c] += 1;
+            }
+            last_char = c;
+        }
+    }
+    return dipeptides;
+}

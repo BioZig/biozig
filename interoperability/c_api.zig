@@ -115,6 +115,11 @@ export fn biozig_translate_dna(seq_c: [*c]const u8) callconv(.c) [*c]const u8 {
     return c_protein.ptr;
 }
 
+// Incorporate the Network C ABI endpoints
+comptime {
+    _ = @import("c_api_net.zig");
+}
+
 test "C-ABI Context" {
     try std.testing.expect(biozig_context_create() == 0);
     try std.testing.expect(biozig_context_create() == -1); // Duplicate fails

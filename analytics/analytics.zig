@@ -36,6 +36,10 @@ pub const graphml = struct {
     pub const spectral = @import("graphml/spectral.zig");
 };
 
+pub const cheminformatics = struct {
+    pub const features = @import("cheminformatics/features.zig");
+};
+
 test {
     _ = statistics;
     _ = pathways;
@@ -44,4 +48,5 @@ test {
     _ = dimensionality;
     _ = clustering;
     _ = graphml;
+    _ = cheminformatics;
 }
