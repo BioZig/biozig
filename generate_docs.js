@@ -66,6 +66,7 @@ const makeHead = (title, activeTab, activeDoc) => `<!DOCTYPE html>
         <h4>Data Ingestion</h4>
         <ul class="docs-nav">
           <li><a href="parsers.html" class="${activeDoc === 'parsers' ? 'active' : ''}">Zero-Copy Parsers</a></li>
+          <li><a href="net.html" class="${activeDoc === 'net' ? 'active' : ''}">Network Streaming</a></li>
         </ul>
         <h4>Execution Engine</h4>
         <ul class="docs-nav">
@@ -143,6 +144,37 @@ const pages = {
     population_data.genotypes, 
     population_data.frequencies
 );
+      </div>
+    `
+  },
+  'net.html': {
+    title: 'Network Streaming', tab: 'docs', doc: 'net',
+    content: `
+      <div class="nb-head">
+        <span class="nb-title">Network Streaming</span>
+        <span class="op">O(1) MEMORY INGESTION</span>
+      </div>
+      <h2>The BitSieve Engine</h2>
+      <p>BioZig's <code>net/</code> module features a strictly bounded O(1) memory double-buffered ring architecture (BitSieve). It isolates network latency and CPU mathematics into independent threads, guaranteeing zero thread-starvation or out-of-memory errors on massive biological datasets.</p>
+
+      <h3>Supported APIs & Protocol Routing</h3>
+      <p>BioZig seamlessly routes requests via <code>curl</code> (for HTTP REST) and native <code>ftp.zig</code> (for raw TCP FTP modes). Supported APIs include: NCBI Entrez, UniProt, RCSB PDB, ChEMBL, and Ensembl.</p>
+
+      <h3>CLI Usage</h3>
+      <div class="code">
+<span class="cm"># Dynamically compute GC Skew and Markov transitions for SARS-CoV-2</span>
+biozig fetch --db ncbi --query NC_045512.2 --analyze comprehensive
+      </div>
+
+      <h3>Python Interoperability (GIL-Bypass)</h3>
+      <p>Using the C-ABI, high-level languages can trigger the BitSieve state machine. The Zig background thread handles all network I/O, entirely releasing the Python GIL.</p>
+      <div class="code">
+<span class="kw">from</span> biozig <span class="kw">import</span> BioZigContext, stream_genome
+
+<span class="kw">with</span> BioZigContext():
+    <span class="cm"># Native streaming, chunked at 8KB O(1) memory bounds</span>
+    <span class="kw">for</span> chunk <span class="kw">in</span> stream_genome("pdb", "1CRN"):
+        <span class="kw">print</span>(chunk)
       </div>
     `
   },

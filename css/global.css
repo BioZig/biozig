@@ -180,3 +180,17 @@ p.body-text { font-size: 17px; margin-bottom: 24px; }
   .row { grid-template-columns: 1fr; gap: 8px; }
   .num { text-align: left; }
 }
+
+/* DOCS SUB-LAYOUT */
+.docs-layout { display: grid; grid-template-columns: 240px 1fr; gap: 56px; padding: 48px 0; }
+.docs-sidebar { border-right: 1px solid var(--rule); padding-right: 32px; }
+.docs-sidebar h4 { font-family: var(--mono); font-size: 10px; color: var(--dim); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 16px; margin-top: 32px; }
+.docs-sidebar h4:first-child { margin-top: 0; }
+.docs-nav { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+.docs-nav a { font-size: 14px; color: var(--fg); text-decoration: none; font-weight: 500; transition: color 0.15s; }
+.docs-nav a:hover, .docs-nav a.active { color: var(--acc); }
+.docs-content h2 { margin-top: 56px; padding-bottom: 12px; border-bottom: 1px solid var(--rule); }
+.docs-content h2:first-child { margin-top: 0; }
+.docs-content h3 { margin-top: 32px; font-size: 18px; color: var(--fg); }
+.docs-content p { font-size: 15px; line-height: 1.8; color: var(--dim); margin-bottom: 24px; }
+.docs-content ul { padding-left: 24px; margin-bottom: 24px; color: var(--dim); line-height: 1.8; font-size: 15px; }

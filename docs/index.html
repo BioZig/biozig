@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>System Overview — BioZig Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700;900&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/global.css" />
+  <script src="../js/main.js"></script>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <a href="../index.html" class="bz-logo-sm">
+        <div class="bz-chr">
+          <div class="bz-chr-band3">3</div>
+          <div class="bz-chr-band7">7</div>
+        </div>
+        <div class="bz-wordmark"><span class="w-bio">BIO</span><span class="w-zig">ZIG</span></div>
+      </a>
+      <ul class="nav-links">
+        <li><a href="../index.html" class="">Overview</a></li>
+        <li><a href="../philosophy.html" class="">Philosophy</a></li>
+        <li><a href="index.html" class="active">Documentation</a></li>
+        <li><a href="../benchmarks.html" class="">Benchmarks</a></li>
+        <li>
+          <button class="theme-btn" onclick="toggleTheme()" aria-label="Toggle light/dark mode">
+            <span class="icon" id="themeIcon">☀</span>
+            <span id="themeLabel">Light</span>
+          </button>
+        </li>
+      </ul>
+    </header>
+    <div class="docs-layout">
+      <aside class="docs-sidebar">
+        <h4>Core Architecture</h4>
+        <ul class="docs-nav">
+          <li><a href="index.html" class="active">System Overview</a></li>
+          <li><a href="interaction.html" class="">Cross-Domain Interaction</a></li>
+        </ul>
+        <h4>Data Ingestion</h4>
+        <ul class="docs-nav">
+          <li><a href="parsers.html" class="">Zero-Copy Parsers</a></li>
+          <li><a href="net.html" class="">Network Streaming</a></li>
+        </ul>
+        <h4>Execution Engine</h4>
+        <ul class="docs-nav">
+          <li><a href="algorithms.html" class="">Running Algorithms</a></li>
+        </ul>
+        <h4>Domain Libraries</h4>
+        <ul class="docs-nav">
+          <li><a href="domains.html" class="">L1-L6 Domains</a></li>
+        </ul>
+      </aside>
+      <main class="docs-content">
+
+      <div class="nb-head">
+        <span class="nb-title">System Overview</span>
+        <span class="op">ARCHITECTURE · DATA PIPELINE</span>
+      </div>
+      <h2>The BioZig Data Pipeline</h2>
+      <p>BioZig does not act as a monolithic God object. Instead, it enforces strict separation of concerns, broken down into four distinct phases of execution. This prevents cyclic dependencies and ensures hardware-level performance.</p>
+      
+      <div class="arch-grid">
+        <div class="arch-cell"><span class="arch-num">1. CORE</span><div class="arch-title">Memory & Execution</div><div class="arch-desc">Arena Allocators, SIMD, Thread Pools, and I/O handlers.</div></div>
+        <div class="arch-cell"><span class="arch-num">2. PARSER</span><div class="arch-title">Zero-Copy Ingestion</div><div class="arch-desc">64-bit Bit-Sieve MMap parsers transforming raw bytes directly into struct slices.</div></div>
+        <div class="arch-cell"><span class="arch-num">3. DOMAIN</span><div class="arch-title">Data Representation</div><div class="arch-desc">SoA layouts (e.g., DNA2 encoded bits, XYZ coordinate sets). Pure state, no logic.</div></div>
+        <div class="arch-cell"><span class="arch-num">4. ALGORITHM</span><div class="arch-title">Compute Kernels</div><div class="arch-desc">Functions that take Domain structs, process via Core SIMD, and output results.</div></div>
+      </div>
+    
+      </main>
+    </div>
+    <footer class="foot">
+      <span>MD. Arshad · Jamia Millia Islamia · MIT License</span>
+      <span>Open Source · Built in Zig 0.14.0</span>
+    </footer>
+  </div>
+</body>
+</html>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Running Algorithms — BioZig Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700;900&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/global.css" />
+  <script src="../js/main.js"></script>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <a href="../index.html" class="bz-logo-sm">
+        <div class="bz-chr">
+          <div class="bz-chr-band3">3</div>
+          <div class="bz-chr-band7">7</div>
+        </div>
+        <div class="bz-wordmark"><span class="w-bio">BIO</span><span class="w-zig">ZIG</span></div>
+      </a>
+      <ul class="nav-links">
+        <li><a href="../index.html" class="">Overview</a></li>
+        <li><a href="../philosophy.html" class="">Philosophy</a></li>
+        <li><a href="index.html" class="active">Documentation</a></li>
+        <li><a href="../benchmarks.html" class="">Benchmarks</a></li>
+        <li>
+          <button class="theme-btn" onclick="toggleTheme()" aria-label="Toggle light/dark mode">
+            <span class="icon" id="themeIcon">☀</span>
+            <span id="themeLabel">Light</span>
+          </button>
+        </li>
+      </ul>
+    </header>
+    <div class="docs-layout">
+      <aside class="docs-sidebar">
+        <h4>Core Architecture</h4>
+        <ul class="docs-nav">
+          <li><a href="index.html" class="">System Overview</a></li>
+          <li><a href="interaction.html" class="">Cross-Domain Interaction</a></li>
+        </ul>
+        <h4>Data Ingestion</h4>
+        <ul class="docs-nav">
+          <li><a href="parsers.html" class="">Zero-Copy Parsers</a></li>
+          <li><a href="net.html" class="">Network Streaming</a></li>
+        </ul>
+        <h4>Execution Engine</h4>
+        <ul class="docs-nav">
+          <li><a href="algorithms.html" class="active">Running Algorithms</a></li>
+        </ul>
+        <h4>Domain Libraries</h4>
+        <ul class="docs-nav">
+          <li><a href="domains.html" class="">L1-L6 Domains</a></li>
+        </ul>
+      </aside>
+      <main class="docs-content">
+
+      <div class="nb-head">
+        <span class="nb-title">Running Algorithms</span>
+        <span class="op">HARDWARE VECTORIZATION</span>
+      </div>
+      <h2>Compute Kernels</h2>
+      <p>BioZig provides specific kernels in the <code>algorithms/</code> module. These are highly tuned to utilize Zig's <code>@Vector</code> types and <code>std.Thread.Pool</code>.</p>
+
+      <h3>K-mer Counting (Genomics)</h3>
+      <div class="code">
+<span class="kw">const</span> seq = <span class="str">"ATCGATCGATCGATCG"</span>;
+<span class="cm">// Packs sequence into 2-bit representation</span>
+<span class="kw">const</span> packed_seq = <span class="kw">try</span> core.numerics.<span class="fn">pack2Bit</span>(allocator, seq);
+
+<span class="cm">// Runs multi-threaded hash accumulation</span>
+<span class="kw">var</span> kmer_map = <span class="kw">try</span> algorithms.genomics.<span class="fn">countKmers</span>(allocator, packed_seq, 7);
+      </div>
+
+      <h3>RMSD / Kabsch (Structural)</h3>
+      <div class="code">
+<span class="cm">// SoA Coordinate Set</span>
+<span class="kw">const</span> set_a = CoordinateSet{ .x = x_arr_a, .y = y_arr_a, .z = z_arr_a };
+<span class="kw">const</span> set_b = CoordinateSet{ .x = x_arr_b, .y = y_arr_b, .z = z_arr_b };
+
+<span class="cm">// Explicit SIMD Kabsch alignment</span>
+<span class="kw">const</span> transform = <span class="kw">try</span> algorithms.structural.<span class="fn">kabschAlignment</span>(set_a, set_b);
+<span class="kw">const</span> rmsd = <span class="kw">try</span> algorithms.structural.<span class="fn">computeRMSD</span>(set_a, set_b, transform);
+      </div>
+
+      <h3>FM-Index Search</h3>
+      <div class="code">
+<span class="cm">// The index is pre-computed</span>
+<span class="kw">const</span> index = <span class="kw">try</span> algorithms.genomics.<span class="fn">buildFmIndex</span>(allocator, genome_seq);
+
+<span class="cm">// Querying takes O(m) time where m is query length, regardless of genome size</span>
+<span class="kw">const</span> hits = <span class="kw">try</span> algorithms.genomics.<span class="fn">fmSearch</span>(allocator, index, <span class="str">"ATGCCT"</span>);
+      </div>
+    
+      </main>
+    </div>
+    <footer class="foot">
+      <span>MD. Arshad · Jamia Millia Islamia · MIT License</span>
+      <span>Open Source · Built in Zig 0.14.0</span>
+    </footer>
+  </div>
+</body>
+</html>

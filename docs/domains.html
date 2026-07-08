@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Domain Libraries — BioZig Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700;900&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/global.css" />
+  <script src="../js/main.js"></script>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <a href="../index.html" class="bz-logo-sm">
+        <div class="bz-chr">
+          <div class="bz-chr-band3">3</div>
+          <div class="bz-chr-band7">7</div>
+        </div>
+        <div class="bz-wordmark"><span class="w-bio">BIO</span><span class="w-zig">ZIG</span></div>
+      </a>
+      <ul class="nav-links">
+        <li><a href="../index.html" class="">Overview</a></li>
+        <li><a href="../philosophy.html" class="">Philosophy</a></li>
+        <li><a href="index.html" class="active">Documentation</a></li>
+        <li><a href="../benchmarks.html" class="">Benchmarks</a></li>
+        <li>
+          <button class="theme-btn" onclick="toggleTheme()" aria-label="Toggle light/dark mode">
+            <span class="icon" id="themeIcon">☀</span>
+            <span id="themeLabel">Light</span>
+          </button>
+        </li>
+      </ul>
+    </header>
+    <div class="docs-layout">
+      <aside class="docs-sidebar">
+        <h4>Core Architecture</h4>
+        <ul class="docs-nav">
+          <li><a href="index.html" class="">System Overview</a></li>
+          <li><a href="interaction.html" class="">Cross-Domain Interaction</a></li>
+        </ul>
+        <h4>Data Ingestion</h4>
+        <ul class="docs-nav">
+          <li><a href="parsers.html" class="">Zero-Copy Parsers</a></li>
+          <li><a href="net.html" class="">Network Streaming</a></li>
+        </ul>
+        <h4>Execution Engine</h4>
+        <ul class="docs-nav">
+          <li><a href="algorithms.html" class="">Running Algorithms</a></li>
+        </ul>
+        <h4>Domain Libraries</h4>
+        <ul class="docs-nav">
+          <li><a href="domains.html" class="active">L1-L6 Domains</a></li>
+        </ul>
+      </aside>
+      <main class="docs-content">
+
+      <div class="nb-head">
+        <span class="nb-title">Domain Libraries</span>
+        <span class="op">BIOLOGICAL REPRESENTATIONS</span>
+      </div>
+      <h2>L1-L6 Overview</h2>
+      <p>Data structures in BioZig are grouped by biological domain. They dictate <i>how</i> memory is laid out.</p>
+
+      <ul>
+        <li><b>L1 - Molecular:</b> Handles sequence logic. Enums for <code>Base2</code>, <code>Base4</code>, <code>AminoAcid</code>. Slices of bits for DNA.</li>
+        <li><b>L2 - Structural:</b> 3D grids, KD-Trees for fast spatial neighbor queries, SoA coordinates.</li>
+        <li><b>L3 - Cellular:</b> Lineage DAGs (Directed Acyclic Graphs), spatial transcriptomics matrices (Sparse Matrix representations).</li>
+        <li><b>L4 - Systems:</b> Graph adjacency lists for pathways and metabolism flux models.</li>
+        <li><b>L5 - Population:</b> Haplotype arrays (bit matrices), GWAS summary statistics (contiguous memory).</li>
+        <li><b>L6 - Evolutionary:</b> Phylogenetic trees (flattened arrays representing tree nodes) to maintain cache locality, avoiding pointer-chasing linked lists.</li>
+      </ul>
+    
+      </main>
+    </div>
+    <footer class="foot">
+      <span>MD. Arshad · Jamia Millia Islamia · MIT License</span>
+      <span>Open Source · Built in Zig 0.14.0</span>
+    </footer>
+  </div>
+</body>
+</html>

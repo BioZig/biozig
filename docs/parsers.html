@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zero-Copy Parsers — BioZig Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700;900&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/global.css" />
+  <script src="../js/main.js"></script>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <a href="../index.html" class="bz-logo-sm">
+        <div class="bz-chr">
+          <div class="bz-chr-band3">3</div>
+          <div class="bz-chr-band7">7</div>
+        </div>
+        <div class="bz-wordmark"><span class="w-bio">BIO</span><span class="w-zig">ZIG</span></div>
+      </a>
+      <ul class="nav-links">
+        <li><a href="../index.html" class="">Overview</a></li>
+        <li><a href="../philosophy.html" class="">Philosophy</a></li>
+        <li><a href="index.html" class="active">Documentation</a></li>
+        <li><a href="../benchmarks.html" class="">Benchmarks</a></li>
+        <li>
+          <button class="theme-btn" onclick="toggleTheme()" aria-label="Toggle light/dark mode">
+            <span class="icon" id="themeIcon">☀</span>
+            <span id="themeLabel">Light</span>
+          </button>
+        </li>
+      </ul>
+    </header>
+    <div class="docs-layout">
+      <aside class="docs-sidebar">
+        <h4>Core Architecture</h4>
+        <ul class="docs-nav">
+          <li><a href="index.html" class="">System Overview</a></li>
+          <li><a href="interaction.html" class="">Cross-Domain Interaction</a></li>
+        </ul>
+        <h4>Data Ingestion</h4>
+        <ul class="docs-nav">
+          <li><a href="parsers.html" class="active">Zero-Copy Parsers</a></li>
+          <li><a href="net.html" class="">Network Streaming</a></li>
+        </ul>
+        <h4>Execution Engine</h4>
+        <ul class="docs-nav">
+          <li><a href="algorithms.html" class="">Running Algorithms</a></li>
+        </ul>
+        <h4>Domain Libraries</h4>
+        <ul class="docs-nav">
+          <li><a href="domains.html" class="">L1-L6 Domains</a></li>
+        </ul>
+      </aside>
+      <main class="docs-content">
+
+      <div class="nb-head">
+        <span class="nb-title">Zero-Copy Parsers</span>
+        <span class="op">INGESTION MODULES</span>
+      </div>
+      <h2>Parsing at the Speed of NVMe</h2>
+      <p>BioZig parsers are fundamentally different from Python's <code>Bio.SeqIO</code>. We utilize a <b>64-bit Sliding Bit-Sieve</b> via <code>mmap</code>. We read 8 bytes at a time directly from the OS page cache and use bitwise XOR masks and <code>@ctz</code> (count trailing zeros) to find delimiters without branching.</p>
+
+      <h3>FASTA Ingestion</h3>
+      <div class="code">
+<span class="cm">// Initialize memory-mapped file parser</span>
+<span class="kw">var</span> parser = <span class="kw">try</span> FastaIterator.<span class="fn">init</span>(<span class="str">"human_genome.fa"</span>);
+<span class="kw">defer</span> parser.<span class="fn">deinit</span>();
+
+<span class="kw">while</span> (<span class="kw">try</span> parser.<span class="fn">next</span>()) |record| {
+    <span class="cm">// record.id and record.seq are direct []const u8 slices of the mmap buffer</span>
+    <span class="cm">// We do not copy the genome into RAM. We just point to it.</span>
+    std.debug.print(<span class="str">"Found chr: {s}, len: {d}
+"</span>, .{ record.id, record.seq.len });
+}
+      </div>
+
+      <h3>VCF (Variant Call Format)</h3>
+      <div class="code">
+<span class="kw">var</span> vcf = <span class="kw">try</span> VcfIterator.<span class="fn">init</span>(<span class="str">"cohort.vcf"</span>);
+<span class="kw">while</span> (<span class="kw">try</span> vcf.<span class="fn">next</span>()) |variant| {
+    <span class="cm">// variant.pos is parsed via highly optimized SIMD integer parsing</span>
+    <span class="kw">if</span> (variant.pos > 1000000) <span class="kw">break</span>;
+}
+      </div>
+      
+      <h3>PDB / mmCIF (Structural)</h3>
+      <p>Coordinate files are parsed directly into Structure of Arrays (SoA). The X, Y, and Z coordinates are instantly grouped into contiguous memory blocks.</p>
+    
+      </main>
+    </div>
+    <footer class="foot">
+      <span>MD. Arshad · Jamia Millia Islamia · MIT License</span>
+      <span>Open Source · Built in Zig 0.14.0</span>
+    </footer>
+  </div>
+</body>
+</html>
