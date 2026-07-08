@@ -199,7 +199,7 @@ for file in tests/c_abi/*.zig; do
         echo "Running $file"
         zig test \
             "--dep" "core" "--dep" "molecular" "--dep" "algorithms" "--dep" "ingestion" "--dep" "analytics" \
-            "--dep" "structural" "--dep" "cellular" "--dep" "systems" "--dep" "visualization" "--dep" "population" \
+            "--dep" "structural" "--dep" "cellular" "--dep" "systems" "--dep" "visualization" "--dep" "population" "--dep" "net" \
             "--dep" "c_api" \
             "-Mroot=$file" \
             "-Mcore=core/core.zig" \
@@ -212,7 +212,8 @@ for file in tests/c_abi/*.zig; do
             "--dep" "core" "-Mpopulation=population/population.zig" \
             "--dep" "core" "--dep" "molecular" "--dep" "cellular" "--dep" "visualization" "--dep" "analytics" "-Malgorithms=algorithms/algorithms.zig" \
             "--dep" "core" "-Manalytics=analytics/analytics.zig" \
-            "--dep" "core" "--dep" "molecular" "--dep" "algorithms" "--dep" "ingestion" "--dep" "analytics" "--dep" "structural" "--dep" "cellular" "--dep" "systems" "--dep" "visualization" "--dep" "population" "-Mc_api=interoperability/c_api.zig"
+            "--dep" "core" "-Mnet=net/net.zig" \
+            "--dep" "core" "--dep" "molecular" "--dep" "algorithms" "--dep" "ingestion" "--dep" "analytics" "--dep" "structural" "--dep" "cellular" "--dep" "systems" "--dep" "visualization" "--dep" "population" "--dep" "net" "-Mc_api=interoperability/c_api.zig"
     fi
 done
 
