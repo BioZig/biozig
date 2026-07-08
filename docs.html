@@ -59,12 +59,13 @@
     <ul style="list-style:none; padding:0; margin:0;">
       <li><a href="#core-io" style="color:var(--accent); text-decoration:none;">1. Core: Memory & I/O</a></li>
       <li><a href="#ingestion" style="color:var(--accent); text-decoration:none;">2. Ingestion: File Parsers</a></li>
-      <li><a href="#analytics" style="color:var(--accent); text-decoration:none;">3. Analytics: Statistical & Matrix Operations</a></li>
-      <li><a href="#domain-molecular" style="color:var(--accent); text-decoration:none;">4. Domain & Algorithms: Molecular & Genomics</a></li>
-      <li><a href="#domain-structural" style="color:var(--accent); text-decoration:none;">5. Domain & Algorithms: Structural</a></li>
-      <li><a href="#domain-cellular" style="color:var(--accent); text-decoration:none;">6. Domain & Algorithms: Cellular & Transcriptomics</a></li>
-      <li><a href="#domain-systems" style="color:var(--accent); text-decoration:none;">7. Domain & Algorithms: Systems & Pathways</a></li>
-      <li><a href="#domain-population" style="color:var(--accent); text-decoration:none;">8. Domain & Algorithms: Population & Evolutionary</a></li>
+      <li><a href="#net" style="color:var(--accent); text-decoration:none;">3. Net: Network Streaming</a></li>
+      <li><a href="#analytics" style="color:var(--accent); text-decoration:none;">4. Analytics: Statistical & Matrix Operations</a></li>
+      <li><a href="#domain-molecular" style="color:var(--accent); text-decoration:none;">5. Domain & Algorithms: Molecular & Genomics</a></li>
+      <li><a href="#domain-structural" style="color:var(--accent); text-decoration:none;">6. Domain & Algorithms: Structural</a></li>
+      <li><a href="#domain-cellular" style="color:var(--accent); text-decoration:none;">7. Domain & Algorithms: Cellular & Transcriptomics</a></li>
+      <li><a href="#domain-systems" style="color:var(--accent); text-decoration:none;">8. Domain & Algorithms: Systems & Pathways</a></li>
+      <li><a href="#domain-population" style="color:var(--accent); text-decoration:none;">9. Domain & Algorithms: Population & Evolutionary</a></li>
     </ul>
   </div>
 
@@ -99,8 +100,26 @@
     </div>
   </div>
 
+  <!-- NET -->
+  <h2 id="net" style="border-bottom: 2px solid var(--border); padding-bottom: 10px; margin-top: 60px;">3. Net: Network Streaming</h2>
+  <p class="body-text">
+    The <code>net</code> module powers the O(1) memory BitSieve engine. It provides high-performance data pipelining directly from remote endpoints (HTTP, FTP) using double-buffered streams and hardware SIMD validation. <a href="docs/net.html" style="color:var(--accent);">[Read more in Network Streaming]</a>
+  </p>
+  <div class="api-block">
+    <div class="api-name">Network Module Capabilities</div>
+    <div class="api-sig"><span class="kw">pub const</span> net = @import("net/net.zig");</div>
+    <div class="api-desc">
+      <ul style="margin: 0; padding-left: 20px;">
+        <li><strong>Double-Buffered BitSieve:</strong> Asynchronous network-to-CPU data handover.</li>
+        <li><strong>Resilience:</strong> Circuit breakers, exponential backoff, connection throttling.</li>
+        <li><strong>Protocols:</strong> Native HTTP/HTTPS and direct TCP FTP modes.</li>
+        <li><strong>Endpoints:</strong> NCBI Entrez, UniProt, RCSB PDB, ChEMBL, Ensembl.</li>
+      </ul>
+    </div>
+  </div>
+
   <!-- ANALYTICS -->
-  <h2 id="analytics" style="border-bottom: 2px solid var(--border); padding-bottom: 10px; margin-top: 60px;">3. Analytics: Statistical & Matrix Operations</h2>
+  <h2 id="analytics" style="border-bottom: 2px solid var(--border); padding-bottom: 10px; margin-top: 60px;">4. Analytics: Statistical & Matrix Operations</h2>
   <p class="body-text">
     The <code>analytics</code> module sits between domains and algorithms, providing highly-optimized mathematical primitives, factorization, and machine-learning fundamentals.
   </p>
@@ -120,7 +139,7 @@
   </div>
 
   <!-- MOLECULAR / GENOMICS -->
-  <h2 id="domain-molecular" style="border-bottom: 2px solid var(--border); padding-bottom: 10px; margin-top: 60px;">4. Domain & Algorithms: Molecular & Genomics</h2>
+  <h2 id="domain-molecular" style="border-bottom: 2px solid var(--border); padding-bottom: 10px; margin-top: 60px;">5. Domain & Algorithms: Molecular & Genomics</h2>
   <p class="body-text">Strict 2-bit packing for DNA strings, replacing garbage-collected characters with bitwise arithmetic.</p>
   <div class="api-block">
     <div class="api-name">Genomic Algorithms</div>
@@ -132,7 +151,7 @@
   </div>
 
   <!-- STRUCTURAL -->
-  <h2 id="domain-structural" style="border-bottom: 2px solid var(--border); padding-bottom: 10px; margin-top: 60px;">5. Domain & Algorithms: Structural</h2>
+  <h2 id="domain-structural" style="border-bottom: 2px solid var(--border); padding-bottom: 10px; margin-top: 60px;">6. Domain & Algorithms: Structural</h2>
   <p class="body-text">Structure of Arrays (SoA) memory layouts for 3D coordinate geometry to prevent cache misses during heavy floating-point operations.</p>
   <div class="api-block">
     <div class="api-name">Structural Algorithms</div>
@@ -143,7 +162,7 @@
   </div>
 
   <!-- CELLULAR -->
-  <h2 id="domain-cellular" style="border-bottom: 2px solid var(--border); padding-bottom: 10px; margin-top: 60px;">6. Domain & Algorithms: Cellular & Transcriptomics</h2>
+  <h2 id="domain-cellular" style="border-bottom: 2px solid var(--border); padding-bottom: 10px; margin-top: 60px;">7. Domain & Algorithms: Cellular & Transcriptomics</h2>
   <p class="body-text">Pipelines for single-cell transcriptomics matrices.</p>
   <div class="api-block">
     <div class="api-name">Cellular Algorithms</div>
@@ -154,7 +173,7 @@
   </div>
 
   <!-- SYSTEMS -->
-  <h2 id="domain-systems" style="border-bottom: 2px solid var(--border); padding-bottom: 10px; margin-top: 60px;">7. Domain & Algorithms: Systems & Pathways</h2>
+  <h2 id="domain-systems" style="border-bottom: 2px solid var(--border); padding-bottom: 10px; margin-top: 60px;">8. Domain & Algorithms: Systems & Pathways</h2>
   <p class="body-text">Network and graph topologies built using high-performance adjacency lists and sparse matrices.</p>
   <div class="api-block">
     <div class="api-name">Systems Algorithms</div>
@@ -165,7 +184,7 @@
   </div>
 
   <!-- POPULATION & EVOLUTIONARY -->
-  <h2 id="domain-population" style="border-bottom: 2px solid var(--border); padding-bottom: 10px; margin-top: 60px;">8. Domain & Algorithms: Population & Evolutionary</h2>
+  <h2 id="domain-population" style="border-bottom: 2px solid var(--border); padding-bottom: 10px; margin-top: 60px;">9. Domain & Algorithms: Population & Evolutionary</h2>
   <p class="body-text">From allele frequencies to phylogenetic trees, optimizing matrix multiplications and recursive tree structures.</p>
   <div class="api-block">
     <div class="api-name">Population & Evolutionary Algorithms</div>
