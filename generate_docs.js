@@ -84,8 +84,8 @@ const foot = `
       </main>
     </div>
     <footer class="foot">
-      <span>MD. Arshad · Jamia Millia Islamia · MIT License</span>
-      <span>Open Source · Built in Zig 0.14.0</span>
+      <span>MD. Arshad · Jamia Millia Islamia · 3-Clause BSD</span>
+      <span>Open Source · Built in Zig 0.16.0-dev</span>
     </footer>
   </div>
 </body>
