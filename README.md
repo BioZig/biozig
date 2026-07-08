@@ -25,9 +25,9 @@ biozig/
 ├── organismal/       # Phenotypic and developmental mapping
 ├── population/       # Genomic variation and population statistics
 ├── evolutionary/     # Phylogenetics and substitution models
-├── analytics/        # Dimensionality reduction and clustering
+├── analytics/        # Dimensionality reduction, clustering, and cheminformatics
 ├── algorithms/       # Core molecular algorithms (MSA, MCMC, Suffix Trees)
-├── ingestion/        # Zero-copy parsers for FASTA, FASTQ, PDB, SAM, VCF
+├── ingestion/        # Zero-copy parsers (FASTA, FASTQ, PDB, SAM, VCF, SMILES)
 ├── net/              # O(1) Streaming Engine (NCBI, UniProt, PDB, ChEMBL, Ensembl)
 ├── visualization/    # SVG generators for structural and omics data
 ├── reporting/        # Markdown, HTML, and LaTeX export generation
