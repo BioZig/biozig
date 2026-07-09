@@ -62,7 +62,7 @@ pub fn execute(allocator: std.mem.Allocator, args: []const [:0]const u8) !void {
 }
 
 fn streamAndFold(allocator: std.mem.Allocator, db: []const u8, analyze: []const u8, reader: anytype) !void {
-    if (std.mem.eql(u8, db, "ncbi") or std.mem.eql(u8, db, "uniprot") or std.mem.eql(u8, db, "ensembl") or std.mem.eql(u8, db, "ncbi_ftp")) {
+    if (std.mem.eql(u8, db, "ncbi") or std.mem.eql(u8, db, "ucsc") or std.mem.eql(u8, db, "uniprot") or std.mem.eql(u8, db, "ensembl") or std.mem.eql(u8, db, "ncbi_ftp")) {
         var iter_buf: [65536]u8 = undefined;
         var fasta_it = ingestion.genomics.fasta.fastaStreamIterator(reader, &iter_buf);
         try processFastaAnalytics(allocator, analyze, &fasta_it);

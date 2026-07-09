@@ -29,6 +29,8 @@ pub fn createStream(allocator: std.mem.Allocator, io: std.Io, db: []const u8, qu
         url_str = try ensembl.EnsemblClient.buildUrl(allocator, query);
     } else if (std.mem.eql(u8, db, "chembl")) {
         url_str = try chembl.ChemblClient.buildUrl(allocator, query);
+    } else if (std.mem.eql(u8, db, "ucsc")) {
+        url_str = try std.fmt.allocPrint(allocator, "https://hgdownload.cse.ucsc.edu/{s}", .{query});
     } else if (std.mem.eql(u8, db, "ncbi_ftp")) {
         url_str = try std.fmt.allocPrint(allocator, "https://ftp.ncbi.nlm.nih.gov/{s}", .{query});
     } else {
