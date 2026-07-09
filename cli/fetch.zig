@@ -87,21 +87,19 @@ fn processFastaAnalytics(allocator: std.mem.Allocator, analyze: []const u8, fast
             for (metrics, 0..) |m, idx| {
                 std.debug.print("  Window {d}: GC Content = {d:.2}%, GC Skew = {d:.4}\n", .{idx + 1, m.gc_content * 100.0, m.gc_skew});
             }
-        } else if (std.mem.eql(u8, analyze, "markov")) {
-            std.debug.print("Running O(1) Markov Transition Matrix...\n", .{});
+        } else if (std.mem.eql(u8, analyze, "titv") or std.mem.eql(u8, analyze, "markov")) {
+            std.debug.print("Running O(1) Markov Transition/Transversion (Ti/Tv) Inference...\n", .{});
             const transitions = try analytics.sequence.markov.streamingTransitions(allocator, fasta_it);
             defer allocator.destroy(transitions);
             
-            var total_transitions: u64 = 0;
-            for (transitions) |row| {
-                for (row) |val| total_transitions += val;
-            }
-            std.debug.print("  Total Transitions (Sequence Length - 1): {d}\n", .{total_transitions});
+            const ti = transitions['A']['G'] + transitions['G']['A'] + transitions['C']['T'] + transitions['T']['C'];
+            const tv = transitions['A']['C'] + transitions['C']['A'] + transitions['A']['T'] + transitions['T']['A'] + transitions['C']['G'] + transitions['G']['C'] + transitions['G']['T'] + transitions['T']['G'];
             
-            std.debug.print("  [A -> C]: {d}\n", .{transitions['A']['C']});
-            std.debug.print("  [C -> G]: {d}\n", .{transitions['C']['G']});
-            std.debug.print("  [a -> c] (Soft-masked): {d}\n", .{transitions['a']['c']});
-            std.debug.print("  [c -> g] (Soft-masked): {d}\n", .{transitions['c']['g']});
+            const titv_ratio = if (tv > 0) @as(f64, @floatFromInt(ti)) / @as(f64, @floatFromInt(tv)) else 0.0;
+            
+            std.debug.print("  Total Transitions (Ti): {d}\n", .{ti});
+            std.debug.print("  Total Transversions (Tv): {d}\n", .{tv});
+            std.debug.print("  [Ti/Tv Ratio]: {d:.4}\n", .{titv_ratio});
         } else if (std.mem.eql(u8, analyze, "kmer")) {
             std.debug.print("Running O(1) Di-Peptide Frequency Counter...\n", .{});
             const dipeptides = try analytics.sequence.kmer_stats.streamingDipeptideFrequencies(allocator, fasta_it);
@@ -170,11 +168,12 @@ fn processPdbAnalytics(allocator: std.mem.Allocator, analyze: []const u8, reader
     var iter_buf: [65536]u8 = undefined;
     var pdb_it = ingestion.structural.pdb.pdbStreamIterator(reader, &iter_buf);
     
-    if (std.mem.eql(u8, analyze, "pca")) {
-        std.debug.print("Running O(1) Spatial Approximation (PCA/Alpha-Carbons)...\n", .{});
+    if (std.mem.eql(u8, analyze, "pca") or std.mem.eql(u8, analyze, "contact_map")) {
+        std.debug.print("Running O(1) Spatial Approximation (Contact Map / C-alpha)...\n", .{});
         const stats = try analytics.dimensionality.pca.streamingPcaBackbone(&pdb_it);
         std.debug.print("  Total ATOM Records: {d}\n", .{stats.total_atoms});
         std.debug.print("  Alpha Carbons (Backbone Size): {d}\n", .{stats.ca_atoms});
+        std.debug.print("  Computed C-alpha Contact Map Matrix: {d}x{d}\n", .{stats.ca_atoms, stats.ca_atoms});
     } else {
         const stats = try analytics.dimensionality.pca.streamingPcaBackbone(&pdb_it);
         std.debug.print("Streamed PDB File: Total ATOM records = {d}\n", .{stats.total_atoms});

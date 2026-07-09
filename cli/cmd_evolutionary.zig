@@ -81,36 +81,36 @@ pub fn execute(args: args_mod.ParsedArgs) !void {
         const const_matrix = try allocator.alloc([]const f64, parsed.matrix.len);
         for (parsed.matrix, 0..) |row, i| const_matrix[i] = row;
 
-        _ = try evo_alg.neighborJoining(allocator, const_matrix, parsed.labels);
-        try out_writer.writeText("Constructed Neighbor-Joining Tree.\n", .{});
+        const res = try evo_alg.neighborJoining(allocator, const_matrix, parsed.labels);
+        std.debug.print("{any}\n", .{res});
     } else if (std.mem.eql(u8, cmd, "upgma")) {
         const parsed = try parseDistanceMatrix(allocator, reader.data);
         const const_matrix = try allocator.alloc([]const f64, parsed.matrix.len);
         for (parsed.matrix, 0..) |row, i| const_matrix[i] = row;
 
-        _ = try evo_alg.upgma(allocator, const_matrix, parsed.labels);
-        try out_writer.writeText("Constructed UPGMA Tree.\n", .{});
+        const res = try evo_alg.upgma(allocator, const_matrix, parsed.labels);
+        std.debug.print("{any}\n", .{res});
     } else if (std.mem.eql(u8, cmd, "nni")) {
         const tree = try ingestion.evolutionary.newick.parseNewick(allocator, reader.data);
         const trees = try evo_alg.nearestNeighborInterchange(allocator, tree);
-        try out_writer.writeText("Generated {d} NNI trees.\n", .{trees.items.len});
+        std.debug.print("{any}\n", .{trees});
     } else if (std.mem.eql(u8, cmd, "spr")) {
         const tree = try ingestion.evolutionary.newick.parseNewick(allocator, reader.data);
         const trees = try evo_alg.subtreePruningRegrafting(allocator, tree);
-        try out_writer.writeText("Generated {d} SPR trees.\n", .{trees.items.len});
+        std.debug.print("{any}\n", .{trees});
     } else if (std.mem.eql(u8, cmd, "stats")) {
         const tree = try ingestion.evolutionary.newick.parseNewick(allocator, reader.data);
         const stats = evo_alg.computeTreeStatistics(tree);
-        try out_writer.writeText("Tree Stats - Max Depth: {d:.4}, Total Branch Length: {d:.4}\n", .{ stats.max_depth, stats.total_branch_length });
+        std.debug.print("{any}\n", .{stats});
     } else if (std.mem.eql(u8, cmd, "parse-newick")) {
-        _ = try ingestion.evolutionary.newick.parseNewick(allocator, reader.data);
-        try out_writer.writeText("Successfully parsed Newick tree.\n", .{});
+        const tree = try ingestion.evolutionary.newick.parseNewick(allocator, reader.data);
+        std.debug.print("{any}\n", .{tree});
     } else if (std.mem.eql(u8, cmd, "parse-nexus")) {
-        _ = try ingestion.evolutionary.nexus.parseNexus(allocator, reader.data);
-        try out_writer.writeText("Successfully parsed Nexus tree.\n", .{});
+        const tree = try ingestion.evolutionary.nexus.parseNexus(allocator, reader.data);
+        std.debug.print("{any}\n", .{tree});
     } else if (std.mem.eql(u8, cmd, "parse-phyloxml")) {
-        _ = try ingestion.evolutionary.phyloxml.parsePhyloXml(allocator, reader.data);
-        try out_writer.writeText("Successfully parsed PhyloXML tree.\n", .{});
+        const tree = try ingestion.evolutionary.phyloxml.parsePhyloXml(allocator, reader.data);
+        std.debug.print("{any}\n", .{tree});
     } else if (std.mem.eql(u8, cmd, "mle") or std.mem.eql(u8, cmd, "parsimony") or std.mem.eql(u8, cmd, "mcmc") or std.mem.eql(u8, cmd, "bootstrap") or std.mem.eql(u8, cmd, "rf-distance")) {
         try out_writer.writeText("Command '{s}' executed (requires multiple inputs, mocked response for now).\n", .{cmd});
     } else {

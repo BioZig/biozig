@@ -90,47 +90,71 @@ pub fn execute(args: args_mod.ParsedArgs) !void {
     } else if (std.mem.eql(u8, cmd, "bfs")) {
         const order = try systems_alg.bfs(std.heap.page_allocator, g, 0);
         defer std.heap.page_allocator.free(order);
-        try out_writer.writeText("BFS visited {} nodes.\n", .{order.len});
+        std.debug.print("{any}\n", .{order});
     } else if (std.mem.eql(u8, cmd, "dfs")) {
         const order = try systems_alg.dfs(std.heap.page_allocator, g, 0);
         defer std.heap.page_allocator.free(order);
-        try out_writer.writeText("DFS visited {} nodes.\n", .{order.len});
+        std.debug.print("{any}\n", .{order});
     } else if (std.mem.eql(u8, cmd, "shortest_path")) {
         const path = try systems_alg.shortestPath(std.heap.page_allocator, g, 0);
         defer std.heap.page_allocator.free(path);
-        try out_writer.writeText("Computed unweighted shortest paths from node 0.\n", .{});
+        std.debug.print("{any}\n", .{path});
     } else if (std.mem.eql(u8, cmd, "dijkstra")) {
         const dists = try systems_alg.dijkstra(std.heap.page_allocator, g, 0);
         defer std.heap.page_allocator.free(dists);
-        try out_writer.writeText("Computed Dijkstra shortest paths from node 0.\n", .{});
+        std.debug.print("{any}\n", .{dists});
     } else if (std.mem.eql(u8, cmd, "components")) {
         const comps = try systems_alg.connectedComponents(std.heap.page_allocator, g);
         defer std.heap.page_allocator.free(comps);
-        try out_writer.writeText("Computed connected components.\n", .{});
+        
+        var comp_sizes = std.AutoHashMap(usize, usize).init(std.heap.page_allocator);
+        defer comp_sizes.deinit();
+        
+        for (comps) |c| {
+            const entry = try comp_sizes.getOrPut(c);
+            if (!entry.found_existing) {
+                entry.value_ptr.* = 0;
+            }
+            entry.value_ptr.* += 1;
+        }
+        
+        var max_size: usize = 0;
+        var num_comps: usize = 0;
+        var it = comp_sizes.iterator();
+        while (it.next()) |entry| {
+            num_comps += 1;
+            if (entry.value_ptr.* > max_size) {
+                max_size = entry.value_ptr.*;
+            }
+        }
+        
+        std.debug.print("Graph has {} nodes and {} edges.\n", .{g.num_nodes, g.weights.len});
+        std.debug.print("Found {} connected components.\n", .{num_comps});
+        std.debug.print("Largest component size: {} nodes.\n", .{max_size});
     } else if (std.mem.eql(u8, cmd, "toposort")) {
         const order = try systems_alg.topologicalSort(std.heap.page_allocator, g);
         defer std.heap.page_allocator.free(order);
-        try out_writer.writeText("Computed topological sort.\n", .{});
+        std.debug.print("{any}\n", .{order});
     } else if (std.mem.eql(u8, cmd, "closeness")) {
         const centralities = try systems_alg.closenessCentrality(std.heap.page_allocator, g);
         defer std.heap.page_allocator.free(centralities);
-        try out_writer.writeText("Computed closeness centrality.\n", .{});
+        std.debug.print("{any}\n", .{centralities});
     } else if (std.mem.eql(u8, cmd, "approx_close")) {
         const centralities = try systems_alg.approximateClosenessCentrality(std.heap.page_allocator, g, 10);
         defer std.heap.page_allocator.free(centralities);
-        try out_writer.writeText("Computed approximate closeness centrality.\n", .{});
+        std.debug.print("{any}\n", .{centralities});
     } else if (std.mem.eql(u8, cmd, "betweenness")) {
         const cb = try systems_alg.betweennessCentrality(std.heap.page_allocator, g);
         defer std.heap.page_allocator.free(cb);
-        try out_writer.writeText("Computed betweenness centrality.\n", .{});
+        std.debug.print("{any}\n", .{cb});
     } else if (std.mem.eql(u8, cmd, "pagerank")) {
         const pr = try systems_alg.pageRank(std.heap.page_allocator, g, 0.85, 100, 1e-6);
         defer std.heap.page_allocator.free(pr);
-        try out_writer.writeText("Computed PageRank.\n", .{});
+        std.debug.print("{any}\n", .{pr});
     } else if (std.mem.eql(u8, cmd, "community")) {
         const comms = try systems_alg.louvain(std.heap.page_allocator, g);
         defer std.heap.page_allocator.free(comms);
-        try out_writer.writeText("Computed Louvain communities.\n", .{});
+        std.debug.print("{any}\n", .{comms});
     } else if (std.mem.eql(u8, cmd, "maxflow")) {
         const sink = if (g.num_nodes > 0) g.num_nodes - 1 else 0;
         const flow = try systems_alg.edmondsKarp(std.heap.page_allocator, g, 0, sink);
@@ -141,7 +165,7 @@ pub fn execute(args: args_mod.ParsedArgs) !void {
     } else if (std.mem.eql(u8, cmd, "layout")) {
         const pos = try systems_alg.fruchtermanReingold(std.heap.page_allocator, g, 100, 1000.0, 1000.0);
         defer std.heap.page_allocator.free(pos);
-        try out_writer.writeText("Computed Fruchterman-Reingold layout.\n", .{});
+        std.debug.print("{any}\n", .{pos});
     } else {
         std.debug.print("Error: Unknown systems command '{s}'\n", .{cmd});
     }

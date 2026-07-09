@@ -96,6 +96,70 @@ pub fn globalAlignment(allocator: std.mem.Allocator, a: DNA2View, b: DNA2View, o
     };
 }
 
+/// Generic Global Alignment for generic strings (e.g. Protein Amino Acids)
+pub fn globalAlignmentString(allocator: std.mem.Allocator, a: []const u8, b: []const u8, opts: AlignmentOptions) !AlignmentResult {
+    const rows = a.len + 1;
+    const cols = b.len + 1;
+
+    var dp = try allocator.alloc(i32, rows * cols);
+    defer allocator.free(dp);
+
+    for (0..rows) |i| dp[i * cols + 0] = @as(i32, @intCast(i)) * opts.gap_penalty;
+    for (0..cols) |j| dp[0 * cols + j] = @as(i32, @intCast(j)) * opts.gap_penalty;
+
+    for (1..rows) |i| {
+        for (1..cols) |j| {
+            const match = dp[(i - 1) * cols + (j - 1)] + if (a[i - 1] == b[j - 1]) opts.match_score else opts.mismatch_penalty;
+            const delete = dp[(i - 1) * cols + j] + opts.gap_penalty;
+            const insert = dp[i * cols + (j - 1)] + opts.gap_penalty;
+            dp[i * cols + j] = @max(match, @max(delete, insert));
+        }
+    }
+
+    var align_a = std.ArrayList(u8).empty;
+    var align_b = std.ArrayList(u8).empty;
+    defer align_a.deinit(allocator);
+    defer align_b.deinit(allocator);
+
+    var i: usize = a.len;
+    var j: usize = b.len;
+
+    while (i > 0 or j > 0) {
+        if (i > 0 and j > 0) {
+            const score_current = dp[i * cols + j];
+            const score_diag = dp[(i - 1) * cols + (j - 1)];
+            const match_val = if (a[i - 1] == b[j - 1]) opts.match_score else opts.mismatch_penalty;
+
+            if (score_current == score_diag + match_val) {
+                try align_a.append(allocator, a[i - 1]);
+                try align_b.append(allocator, b[j - 1]);
+                i -= 1;
+                j -= 1;
+                continue;
+            }
+        }
+
+        if (i > 0 and dp[i * cols + j] == dp[(i - 1) * cols + j] + opts.gap_penalty) {
+            try align_a.append(allocator, a[i - 1]);
+            try align_b.append(allocator, '-');
+            i -= 1;
+        } else {
+            try align_a.append(allocator, '-');
+            try align_b.append(allocator, b[j - 1]);
+            j -= 1;
+        }
+    }
+
+    std.mem.reverse(u8, align_a.items);
+    std.mem.reverse(u8, align_b.items);
+
+    return AlignmentResult{
+        .score = dp[(rows - 1) * cols + (cols - 1)],
+        .aligned_a = try align_a.toOwnedSlice(allocator),
+        .aligned_b = try align_b.toOwnedSlice(allocator),
+    };
+}
+
 /// Local Alignment using Smith-Waterman algorithm.
 pub fn localAlignment(allocator: std.mem.Allocator, a: DNA2View, b: DNA2View, opts: AlignmentOptions) !AlignmentResult {
     const cols = b.len + 1;

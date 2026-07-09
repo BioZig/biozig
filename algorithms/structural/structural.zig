@@ -353,6 +353,94 @@ pub fn computeOptimalRMSD(allocator: std.mem.Allocator, a: CoordinateSet, b: Coo
     return @sqrt(sum_sq / @as(f64, @floatFromInt(a.x.len)));
 }
 
+pub const IterativeRMSDResult = struct {
+    rmsd: f64,
+    core_atoms: usize,
+};
+
+/// Computes RMSD with iterative outlier rejection (PyMOL align algorithm)
+pub fn computeIterativeRMSD(allocator: std.mem.Allocator, a: CoordinateSet, b: CoordinateSet, cutoff: f64, max_iters: usize) !IterativeRMSDResult {
+    if (a.x.len != b.x.len) return error.LengthMismatch;
+    if (a.x.len == 0) return .{ .rmsd = 0.0, .core_atoms = 0 };
+
+    var valid_mask = try allocator.alloc(bool, a.x.len);
+    defer allocator.free(valid_mask);
+    @memset(valid_mask, true);
+
+    var current_n = a.x.len;
+    var final_rmsd: f64 = 0.0;
+
+    var iter: usize = 0;
+    while (iter < max_iters) : (iter += 1) {
+        var a_core = try CoordinateSetMut.init(allocator, current_n);
+        defer a_core.deinit(allocator);
+        var b_core = try CoordinateSetMut.init(allocator, current_n);
+        defer b_core.deinit(allocator);
+
+        var idx: usize = 0;
+        for (0..a.x.len) |i| {
+            if (valid_mask[i]) {
+                a_core.x[idx] = a.x[i];
+                a_core.y[idx] = a.y[i];
+                a_core.z[idx] = a.z[i];
+                b_core.x[idx] = b.x[i];
+                b_core.y[idx] = b.y[i];
+                b_core.z[idx] = b.z[i];
+                idx += 1;
+            }
+        }
+
+        const ca = computeCentroid(.{ .x = a_core.x, .y = a_core.y, .z = a_core.z });
+        const cb = computeCentroid(.{ .x = b_core.x, .y = b_core.y, .z = b_core.z });
+
+        centerPoints(a_core);
+        centerPoints(b_core);
+
+        const R = try computeKabschRotation(.{ .x = a_core.x, .y = a_core.y, .z = a_core.z }, .{ .x = b_core.x, .y = b_core.y, .z = b_core.z });
+
+        var sum_sq: f64 = 0;
+        var next_n: usize = 0;
+
+        for (0..a.x.len) |i| {
+            if (!valid_mask[i]) continue;
+
+            const p1x = a.x[i] - ca[0];
+            const p1y = a.y[i] - ca[1];
+            const p1z = a.z[i] - ca[2];
+
+            const rx = R[0][0] * p1x + R[0][1] * p1y + R[0][2] * p1z;
+            const ry = R[1][0] * p1x + R[1][1] * p1y + R[1][2] * p1z;
+            const rz = R[2][0] * p1x + R[2][1] * p1y + R[2][2] * p1z;
+
+            const p2x = b.x[i] - cb[0];
+            const p2y = b.y[i] - cb[1];
+            const p2z = b.z[i] - cb[2];
+
+            const dx = rx - p2x;
+            const dy = ry - p2y;
+            const dz = rz - p2z;
+
+            const dist_sq = dx * dx + dy * dy + dz * dz;
+            if (@sqrt(dist_sq) <= cutoff or iter == max_iters - 1) {
+                sum_sq += dist_sq;
+                next_n += 1;
+            } else {
+                valid_mask[i] = false;
+            }
+        }
+
+        final_rmsd = @sqrt(sum_sq / @as(f64, @floatFromInt(next_n)));
+        
+        if (next_n == current_n) {
+            current_n = next_n;
+            break; 
+        }
+        current_n = next_n;
+    }
+
+    return .{ .rmsd = final_rmsd, .core_atoms = current_n };
+}
+
 pub const HydrogenBond = struct {
     donor_idx: usize,
     acceptor_idx: usize,

@@ -137,90 +137,90 @@ pub fn execute(args: args_mod.ParsedArgs) !void {
             if (std.mem.eql(u8, cmd, "umap")) {
                 const res = try algorithms.cellular.UMAP.transform(std.heap.page_allocator, mat, 2);
                 defer std.heap.page_allocator.free(res);
-                try out_writer.writeText("UMAP: {} elements\n", .{res.len});
+                std.debug.print("{any}\n", .{res});
             } else if (std.mem.eql(u8, cmd, "tsne")) {
                 const res = try algorithms.cellular.TSNE.transform(std.heap.page_allocator, mat, 2);
                 defer std.heap.page_allocator.free(res);
-                try out_writer.writeText("TSNE: {} elements\n", .{res.len});
+                std.debug.print("{any}\n", .{res});
             } else if (std.mem.eql(u8, cmd, "kmeans")) {
                 const res = try algorithms.cellular.KMeans.fit(std.heap.page_allocator, mat, 3, 100);
                 defer std.heap.page_allocator.free(res.labels);
                 defer std.heap.page_allocator.free(res.centroids);
-                try out_writer.writeText("KMeans: {} labels\n", .{res.labels.len});
+                std.debug.print("{any}\n", .{res});
             } else if (std.mem.eql(u8, cmd, "zinb")) {
                 const res = try algorithms.cellular.ZINB.fit(std.heap.page_allocator, mat);
                 defer std.heap.page_allocator.free(res.mu);
                 defer std.heap.page_allocator.free(res.theta);
                 defer std.heap.page_allocator.free(res.pi);
-                try out_writer.writeText("ZINB fitted on {} features\n", .{res.mu.len});
+                std.debug.print("{any}\n", .{res});
             } else if (std.mem.eql(u8, cmd, "pseudotime")) {
                 const res = try algorithms.cellular.TrajectoryInference.computePseudotime(std.heap.page_allocator, mat, 0);
                 defer std.heap.page_allocator.free(res);
-                try out_writer.writeText("Pseudotime computed for {} cells\n", .{res.len});
+                std.debug.print("{any}\n", .{res});
             } else if (std.mem.eql(u8, cmd, "pca")) {
                 const res = try algorithms.cellular.PCA.topComponent(std.heap.page_allocator, mat, 10);
                 defer std.heap.page_allocator.free(res);
-                try out_writer.writeText("PCA top component length: {}\n", .{res.len});
+                std.debug.print("{any}\n", .{res});
             } else if (std.mem.eql(u8, cmd, "incremental_pca")) {
                 const res = try algorithms.cellular.IncrementalPCA.onlineTopComponent(std.heap.page_allocator, mat, 0.01);
                 defer std.heap.page_allocator.free(res);
-                try out_writer.writeText("Incremental PCA computed length: {}\n", .{res.len});
+                std.debug.print("{any}\n", .{res});
             } else if (std.mem.eql(u8, cmd, "knn")) {
                 const res = try algorithms.cellular.KNN.buildGraph(std.heap.page_allocator, mat, 5);
                 defer std.heap.page_allocator.free(res.indices);
                 defer std.heap.page_allocator.free(res.distances);
-                try out_writer.writeText("KNN built with {} indices\n", .{res.indices.len});
+                std.debug.print("{any}\n", .{res});
             } else if (std.mem.eql(u8, cmd, "diff_exp")) {
                 const group1 = [_]usize{0};
                 const group2 = [_]usize{1};
                 const res = try algorithms.cellular.DifferentialExpression.simpleDiffExp(std.heap.page_allocator, mat, &group1, &group2);
                 defer std.heap.page_allocator.free(res);
-                try out_writer.writeText("Diff Exp computed for {} genes\n", .{res.len});
+                std.debug.print("{any}\n", .{res});
             } else if (std.mem.eql(u8, cmd, "sparse_col_sums")) {
                 const res = try algorithms.cellular.SparseMatrixOps.colSums(std.heap.page_allocator, mat);
                 defer std.heap.page_allocator.free(res);
-                try out_writer.writeText("Sparse col sums: {} cols\n", .{res.len});
+                std.debug.print("{any}\n", .{res});
             } else if (std.mem.eql(u8, cmd, "sparse_row_sums")) {
                 const res = try algorithms.cellular.SparseMatrixOps.rowSums(std.heap.page_allocator, mat);
                 defer std.heap.page_allocator.free(res);
-                try out_writer.writeText("Sparse row sums: {} rows\n", .{res.len});
+                std.debug.print("{any}\n", .{res});
             } else if (std.mem.eql(u8, cmd, "sparse_multiply")) {
                 const x = try std.heap.page_allocator.alloc(f64, mat.cols);
                 defer std.heap.page_allocator.free(x);
                 @memset(x, 1.0);
                 const res = try algorithms.cellular.SparseMatrixOps.multiplyVector(std.heap.page_allocator, mat, x);
                 defer std.heap.page_allocator.free(res);
-                try out_writer.writeText("Sparse multiply: {} rows\n", .{res.len});
+                std.debug.print("{any}\n", .{res});
             } else if (std.mem.eql(u8, cmd, "mean_expression")) {
                 const res = algorithms.cellular.meanExpression(mat.data);
-                try out_writer.writeText("Mean Expression: {d:.4}\n", .{res});
+                std.debug.print("{any}\n", .{res});
             } else if (std.mem.eql(u8, cmd, "variance_expression")) {
                 const res = algorithms.cellular.varianceExpression(mat.data);
-                try out_writer.writeText("Variance Expression: {d:.4}\n", .{res});
+                std.debug.print("{any}\n", .{res});
             } else if (std.mem.eql(u8, cmd, "spatial_distance")) {
                 const res = algorithms.cellular.spatialDistance(0.0, 0.0, 1.0, 1.0);
-                try out_writer.writeText("Spatial distance: {d:.4}\n", .{res});
+                std.debug.print("{any}\n", .{res});
             } else if (std.mem.eql(u8, cmd, "spatial_neighborhood")) {
                 var px = [_]f64{ 0.0, 1.0 };
                 var py = [_]f64{ 0.0, 1.0 };
                 const points = algorithms.cellular.CoordinateSet2D{ .x = &px, .y = &py };
                 const res = try algorithms.cellular.spatialNeighborhood(std.heap.page_allocator, 0.0, 0.0, points, 2.0);
                 defer std.heap.page_allocator.free(res);
-                try out_writer.writeText("Spatial Neighborhood: {} neighbors\n", .{res.len});
+                std.debug.print("{any}\n", .{res});
             } else if (std.mem.eql(u8, cmd, "neighborhood_expression")) {
                 var n = [_]algorithms.cellular.SpatialNeighbor{.{ .index = 0, .distance = 0.0 }};
                 var expr = [_]f64{1.5};
                 const res = algorithms.cellular.neighborhoodExpressionStats(&n, &expr);
-                try out_writer.writeText("Neighborhood expr: {d:.4}\n", .{res});
+                std.debug.print("{any}\n", .{res});
             } else if (std.mem.eql(u8, cmd, "score_cell_cycle")) {
                 var expr = [_]f64{ 1.0, 2.0 };
                 var m1 = [_]bool{ true, false };
                 var m2 = [_]bool{ false, true };
                 const res = try algorithms.cellular.scoreCellCycle(&expr, &m1, &m2);
-                try out_writer.writeText("G1/S: {d:.4}, G2/M: {d:.4}\n", .{ res.g1_s, res.g2_m });
+                std.debug.print("{any}\n", .{res});
             } else if (std.mem.eql(u8, cmd, "assign_phase")) {
                 const res = cellular.cellcycle.Utils.assignPhase(1.0, 0.5, 0.2);
-                try out_writer.writeText("Phase: {s}\n", .{res.toString()});
+                std.debug.print("{any}\n", .{res});
             } else if (std.mem.eql(u8, cmd, "get_interactions")) {
                 var graph = cellular.communication.InteractionGraph.init(std.heap.page_allocator);
                 defer graph.deinit();
@@ -234,7 +234,7 @@ pub fn execute(args: args_mod.ParsedArgs) !void {
                 var idx = cellular.spatial.SpatialIndex.init(std.heap.page_allocator, &cells, 1.0);
                 const res = try idx.findNeighbors(0, 1.0, std.heap.page_allocator);
                 defer std.heap.page_allocator.free(res);
-                try out_writer.writeText("Found {} neighbors in spatial index\n", .{res.len});
+                std.debug.print("{any}\n", .{res});
             } else {
                 std.debug.print("Routing to {s} (Pending full pipeline integration)...\n", .{cmd});
             }

@@ -42,6 +42,73 @@ pub fn parsePdbCoords(allocator: std.mem.Allocator, buffer: []const u8) ![]Vec3 
     return try coords.toOwnedSlice(allocator);
 }
 
+pub const CaAtom = struct {
+    res_seq: i32,
+    chain_id: u8,
+    aa: u8,
+    coords: Vec3,
+};
+
+pub fn resNameToChar(res: []const u8) u8 {
+    if (std.mem.eql(u8, res, "ALA")) return 'A';
+    if (std.mem.eql(u8, res, "ARG")) return 'R';
+    if (std.mem.eql(u8, res, "ASN")) return 'N';
+    if (std.mem.eql(u8, res, "ASP")) return 'D';
+    if (std.mem.eql(u8, res, "CYS")) return 'C';
+    if (std.mem.eql(u8, res, "GLU")) return 'E';
+    if (std.mem.eql(u8, res, "GLN")) return 'Q';
+    if (std.mem.eql(u8, res, "GLY")) return 'G';
+    if (std.mem.eql(u8, res, "HIS")) return 'H';
+    if (std.mem.eql(u8, res, "ILE")) return 'I';
+    if (std.mem.eql(u8, res, "LEU")) return 'L';
+    if (std.mem.eql(u8, res, "LYS")) return 'K';
+    if (std.mem.eql(u8, res, "MET")) return 'M';
+    if (std.mem.eql(u8, res, "PHE")) return 'F';
+    if (std.mem.eql(u8, res, "PRO")) return 'P';
+    if (std.mem.eql(u8, res, "SER")) return 'S';
+    if (std.mem.eql(u8, res, "THR")) return 'T';
+    if (std.mem.eql(u8, res, "TRP")) return 'W';
+    if (std.mem.eql(u8, res, "TYR")) return 'Y';
+    if (std.mem.eql(u8, res, "VAL")) return 'V';
+    return 'X';
+}
+
+pub fn parsePdbCalphaCoords(allocator: std.mem.Allocator, buffer: []const u8) ![]CaAtom {
+    var coords = std.ArrayList(CaAtom).empty;
+    defer coords.deinit(allocator);
+
+    var pos: usize = 0;
+    while (pos < buffer.len) {
+        const nl = std.mem.indexOfScalarPos(u8, buffer, pos, '\n') orelse buffer.len;
+        const line_raw = buffer[pos..nl];
+        pos = nl + 1;
+
+        const line = std.mem.trimEnd(u8, line_raw, "\r");
+        if (line.len < 54) continue;
+
+        if (std.mem.startsWith(u8, line, "ATOM  ")) {
+            if (line.len > 54 and std.mem.eql(u8, line[13..15], "CA")) {
+                const res_name = std.mem.trim(u8, line[17..20], " ");
+                const chain_id = line[21];
+                const res_seq_str = std.mem.trim(u8, line[22..26], " ");
+                const x_str = std.mem.trim(u8, line[30..38], " ");
+                const y_str = std.mem.trim(u8, line[38..46], " ");
+                const z_str = std.mem.trim(u8, line[46..54], " ");
+
+                const aa = resNameToChar(res_name);
+                const res_seq = std.fmt.parseInt(i32, res_seq_str, 10) catch -1;
+                if (res_seq != -1) {
+                    const x = try std.fmt.parseFloat(f64, x_str);
+                    const y = try std.fmt.parseFloat(f64, y_str);
+                    const z = try std.fmt.parseFloat(f64, z_str);
+                    try coords.append(allocator, CaAtom{ .res_seq = res_seq, .chain_id = chain_id, .aa = aa, .coords = Vec3.init(x, y, z) });
+                }
+            }
+        }
+    }
+    return try coords.toOwnedSlice(allocator);
+}
+
 test "pdb zero-copy memory optimization" {
     const allocator = std.testing.allocator;
     const pdb_data =

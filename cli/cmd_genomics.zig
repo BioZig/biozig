@@ -77,7 +77,7 @@ pub fn execute(args: ParsedArgs) !void {
         return;
     }
     if (args.run) |cmd| {
-        var out_writer = output.OutputWriter.init(.text);
+        _ = output;
 
         const file_path = args.file orelse args.input;
         var reader_opt: ?MMapReader = null;
@@ -98,7 +98,7 @@ pub fn execute(args: ParsedArgs) !void {
                     defer b.?.deinit();
                     const res = try algorithms.molecular.alignment.globalAlignment(std.heap.page_allocator, a.?.view(), b.?.view(), .{});
                     defer res.deinit(std.heap.page_allocator);
-                    try out_writer.writeText("Aligned with score: {}\n", .{res.score});
+                    std.debug.print("{any}\n", .{res});
                 } else {
                     std.debug.print("Error: align requires a FASTA file with at least 2 sequences.\n", .{});
                     std.process.exit(1);
@@ -116,7 +116,7 @@ pub fn execute(args: ParsedArgs) !void {
                     try graph.addSequence(rec.sequence);
                     count += 1;
                 }
-                try out_writer.writeText("Assembled graph from {} sequences\n", .{count});
+                std.debug.print("{any}\n", .{count});
             } else {
                 std.process.exit(1);
             }
@@ -128,7 +128,7 @@ pub fn execute(args: ParsedArgs) !void {
                     defer dna.deinit();
                     const translated = try algorithms.molecular.coding.translateDNA(std.heap.page_allocator, dna.view());
                     defer std.heap.page_allocator.free(translated);
-                    try out_writer.writeText("Translated {} amino acids\n", .{translated.len});
+                    std.debug.print("{any}\n", .{translated});
                 }
             } else {
                 std.process.exit(1);
@@ -144,7 +144,7 @@ pub fn execute(args: ParsedArgs) !void {
                     defer a.?.deinit();
                     defer b.?.deinit();
                     const dist = try algorithms.molecular.distance.levenshteinDistance(std.heap.page_allocator, a.?.view(), b.?.view());
-                    try out_writer.writeText("Distance: {}\n", .{dist});
+                    std.debug.print("{any}\n", .{dist});
                 }
             } else {
                 std.process.exit(1);
@@ -162,7 +162,7 @@ pub fn execute(args: ParsedArgs) !void {
                         for (motifs) |m| std.heap.page_allocator.free(m);
                         std.heap.page_allocator.free(motifs);
                     }
-                    try out_writer.writeText("Gibbs sampled {} motifs\n", .{motifs.len});
+                    std.debug.print("{any}\n", .{motifs});
                 }
             } else {
                 std.process.exit(1);
@@ -170,7 +170,7 @@ pub fn execute(args: ParsedArgs) !void {
         } else if (std.mem.eql(u8, cmd, "hmm")) {
             var hmm = try algorithms.molecular.hmm.HMM.init(std.heap.page_allocator, 2, 4);
             defer hmm.deinit();
-            try out_writer.writeText("Executed genomics.hmm\n", .{});
+            // std.debug.print("hmm\n", .{});
         } else if (std.mem.eql(u8, cmd, "index")) {
             if (reader_opt) |*reader| {
                 var it = ingestion.genomics.fasta.fastaIterator(reader.data);
@@ -179,7 +179,7 @@ pub fn execute(args: ParsedArgs) !void {
                     defer dna.deinit();
                     var fmi = try algorithms.molecular.indexing.FMIndex.init(std.heap.page_allocator, dna.view());
                     defer fmi.deinit();
-                    try out_writer.writeText("Built FM-Index\n", .{});
+                    // std.debug.print("fmindex\n", .{});
                 }
             } else {
                 std.process.exit(1);
@@ -191,7 +191,7 @@ pub fn execute(args: ParsedArgs) !void {
                     var dna = try DNA2.init(rec.sequence, std.heap.page_allocator);
                     defer dna.deinit();
                     const entropy = algorithms.molecular.information.shannonEntropy(dna.view());
-                    try out_writer.writeText("Entropy: {d:.4}\n", .{entropy});
+                    std.debug.print("{any}\n", .{entropy});
                 }
             } else {
                 std.process.exit(1);
@@ -204,7 +204,7 @@ pub fn execute(args: ParsedArgs) !void {
                     defer dna.deinit();
                     var counts = try algorithms.molecular.kmer.countKmers(std.heap.page_allocator, dna.view(), 3);
                     defer counts.deinit();
-                    try out_writer.writeText("Counted {} distinct kmers\n", .{counts.count()});
+                    std.debug.print("{any}\n", .{counts});
                 }
             } else {
                 std.process.exit(1);
@@ -221,7 +221,7 @@ pub fn execute(args: ParsedArgs) !void {
                     defer b.?.deinit();
                     const matches = try algorithms.molecular.motif.searchMotifExact(std.heap.page_allocator, a.?.view(), b.?.view());
                     defer std.heap.page_allocator.free(matches);
-                    try out_writer.writeText("Found {} motif matches\n", .{matches.len});
+                    std.debug.print("{any}\n", .{matches});
                 }
             } else {
                 std.process.exit(1);
@@ -239,7 +239,7 @@ pub fn execute(args: ParsedArgs) !void {
                         for (aligned) |x| std.heap.page_allocator.free(x);
                         std.heap.page_allocator.free(aligned);
                     }
-                    try out_writer.writeText("MSA generated {} aligned sequences\n", .{aligned.len});
+                    std.debug.print("{any}\n", .{aligned});
                 }
             } else {
                 std.process.exit(1);
@@ -256,7 +256,7 @@ pub fn execute(args: ParsedArgs) !void {
                     defer std.heap.page_allocator.free(minimizers);
                     const layer = algorithms.molecular.search.SearchLayer.init(std.heap.page_allocator, &fmi, minimizers, dna.view());
                     _ = layer;
-                    try out_writer.writeText("Search layer initialized\n", .{});
+                    // search
                 }
             } else {
                 std.process.exit(1);
@@ -268,7 +268,7 @@ pub fn execute(args: ParsedArgs) !void {
                     var tree = try algorithms.molecular.suffix_tree.SuffixTree.init(std.heap.page_allocator, rec.sequence);
                     defer tree.deinit();
                     try tree.build();
-                    try out_writer.writeText("Built Suffix Tree\n", .{});
+                    // suffix
                 }
             } else {
                 std.process.exit(1);
@@ -276,7 +276,7 @@ pub fn execute(args: ParsedArgs) !void {
         } else if (std.mem.eql(u8, cmd, "organismal")) {
             const hierarchy = algorithms.organismal.Hierarchy{ .nodes = &[_]algorithms.organismal.HierarchyNode{} };
             _ = hierarchy;
-            try out_writer.writeText("Executed genomics.organismal\n", .{});
+            // organismal
         } else if (std.mem.eql(u8, cmd, "parse-bed")) {
             if (reader_opt) |*reader| {
                 var it = ingestion.genomics.bed.bedIterator(reader.data);
@@ -285,7 +285,7 @@ pub fn execute(args: ParsedArgs) !void {
                     _ = rec;
                     count += 1;
                 }
-                try out_writer.writeText("Parsed {} BED records\n", .{count});
+                std.debug.print("{any}\n", .{count});
             } else {
                 std.process.exit(1);
             }
@@ -295,7 +295,7 @@ pub fn execute(args: ParsedArgs) !void {
                 var parser = ingestion.genomics.cram.CramParser.init(std.heap.page_allocator);
                 var records = try parser.parseStream(&fbs);
                 defer records.deinit(std.heap.page_allocator);
-                try out_writer.writeText("Parsed {} CRAM records\n", .{records.items.len});
+                std.debug.print("{any}\n", .{records.items});
             } else {
                 std.process.exit(1);
             }
@@ -307,7 +307,7 @@ pub fn execute(args: ParsedArgs) !void {
                     _ = rec;
                     count += 1;
                 }
-                try out_writer.writeText("Parsed {} FASTA records\n", .{count});
+                std.debug.print("{any}\n", .{count});
             } else {
                 std.debug.print("Error: No input file provided for parse-fasta.\n", .{});
                 std.process.exit(1);
@@ -320,7 +320,7 @@ pub fn execute(args: ParsedArgs) !void {
                     _ = rec;
                     count += 1;
                 }
-                try out_writer.writeText("Parsed {} FASTQ records\n", .{count});
+                std.debug.print("{any}\n", .{count});
             } else {
                 std.debug.print("Error: No input file provided for parse-fastq.\n", .{});
                 std.process.exit(1);
@@ -335,7 +335,7 @@ pub fn execute(args: ParsedArgs) !void {
                     _ = rec;
                     count += 1;
                 }
-                try out_writer.writeText("Parsed {} GFF3 records\n", .{count});
+                std.debug.print("{any}\n", .{count});
             } else {
                 std.process.exit(1);
             }
@@ -349,7 +349,7 @@ pub fn execute(args: ParsedArgs) !void {
                     _ = rec;
                     count += 1;
                 }
-                try out_writer.writeText("Parsed {} GTF records\n", .{count});
+                std.debug.print("{any}\n", .{count});
             } else {
                 std.process.exit(1);
             }
@@ -363,7 +363,7 @@ pub fn execute(args: ParsedArgs) !void {
                     _ = rec;
                     count += 1;
                 }
-                try out_writer.writeText("Parsed {} SAM records\n", .{count});
+                std.debug.print("{any}\n", .{count});
             } else {
                 std.process.exit(1);
             }
@@ -371,7 +371,7 @@ pub fn execute(args: ParsedArgs) !void {
             if (reader_opt) |*reader| {
                 var parser = try ingestion.genomics.twobit.TwoBitFile.init(std.heap.page_allocator, reader.data);
                 defer parser.deinit();
-                try out_writer.writeText("Parsed TwoBit file with {} sequences\n", .{parser.indices.len});
+                std.debug.print("{any}\n", .{parser});
             } else {
                 std.process.exit(1);
             }
@@ -381,7 +381,7 @@ pub fn execute(args: ParsedArgs) !void {
                 var parser = ingestion.genomics.bcf.BcfParser.init(std.heap.page_allocator);
                 var records = try parser.parseStream(&fbs);
                 defer records.deinit(std.heap.page_allocator);
-                try out_writer.writeText("Parsed {} VCF records\n", .{records.items.len});
+                std.debug.print("{any}\n", .{records.items});
             } else {
                 std.process.exit(1);
             }
@@ -395,7 +395,7 @@ pub fn execute(args: ParsedArgs) !void {
                     _ = rec;
                     count += 1;
                 }
-                try out_writer.writeText("Parsed {} SAM records\n", .{count});
+                std.debug.print("{any}\n", .{count});
             } else {
                 std.process.exit(1);
             }
@@ -407,7 +407,7 @@ pub fn execute(args: ParsedArgs) !void {
                     _ = rec;
                     count += 1;
                 }
-                try out_writer.writeText("Parsed {} VCF records\n", .{count});
+                std.debug.print("{any}\n", .{count});
             } else {
                 std.process.exit(1);
             }
@@ -415,7 +415,7 @@ pub fn execute(args: ParsedArgs) !void {
             if (reader_opt) |*reader| {
                 var idx = try ingestion.indices.genomic_index.parseTbi(std.heap.page_allocator, reader.data);
                 defer idx.deinit();
-                try out_writer.writeText("Parsed Genomic Index\n", .{});
+                // index
             } else {
                 std.process.exit(1);
             }
