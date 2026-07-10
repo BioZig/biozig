@@ -1,12 +1,12 @@
 # BioZig
 
-Native C-ABI computational engine for biological data structures.
+Biology computed exactly.
 
 ![BioZig](docs/biozig_logo.png)
 
 ## Architecture
 
-BioZig implements memory-mapped biological parsers and hardware-aligned algorithms. It operates without a garbage collector, relying exclusively on Arena Allocators and Struct-of-Arrays (SoA) layouts for SIMD vectorization.
+BioZig enforces strict zero-copy data ingestion and static memory boundaries. It operates without a garbage collector, relying exclusively on `O(1)` Arena Allocators and Struct-of-Arrays (SoA) memory layouts to guarantee SIMD vectorization across CPU registers.
 
 ### Core Specifications
 * **Memory Model:** Zero-copy ingestion via memory-mapped files. All allocations are arena-bound.
@@ -59,3 +59,5 @@ For advanced usage, refer to the [Command Line Reference](docs/CLI.md) and [C-AB
 3-Clause BSD License.
 
 **Creator and Curator:** MD. Arshad (BioZig Software Foundation)
+
+**Website:** [https://biozig.github.io/biozig](https://biozig.github.io/biozig)
