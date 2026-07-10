@@ -98,7 +98,7 @@ p.body-text { font-size: 17px; margin-bottom: 24px; }
 .row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 16px; padding: 20px 0; border-bottom: 1px solid var(--rule); }
 .row:first-child { border-top: 1px solid var(--rule); }
 .op { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; color: var(--dim); }
-.op em { display: block; font-style: normal; color: rgba(250,246,238,0.7); font-size: 13px; margin-top: 4px; }
+.op em { display: block; font-style: normal; color: var(--dim); font-size: 13px; margin-top: 4px; }
 .num { text-align: right; }
 .num .v { display: block; font-family: var(--mono); font-size: 38px; font-weight: 700; color: var(--acc); letter-spacing: -0.04em; line-height: 1; }
 .num .u { display: block; font-family: var(--mono); font-size: 11px; color: var(--dim); margin-top: 3px; }
