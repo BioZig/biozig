@@ -40,7 +40,7 @@ Collections like `AssociationCollection` and `SelectionCollection` utilize Unman
 ## Example Usage
 ```zig
 const std = @import("std");
-const gwas = @import("population").gwas;
+const gwas = @import("biozig").population.gwas;
 
 var collection = gwas.AssociationCollection.init(allocator);
 defer collection.deinit();

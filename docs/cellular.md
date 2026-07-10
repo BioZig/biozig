@@ -41,7 +41,7 @@ Highly efficient Unmanaged memory paradigms are strictly enforced. Large collect
 
 ## Example Usage
 ```zig
-const cell_mod = @import("cellular").singlecell;
+const cell_mod = @import("biozig").cellular.singlecell;
 
 var collection = cell_mod.CellCollection.init(allocator);
 defer collection.deinit();

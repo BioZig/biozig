@@ -35,7 +35,7 @@ Relies on highly optimized `StringHashMap` instances to map clinical terms to th
 ## Example Usage
 ```zig
 const std = @import("std");
-const org = @import("organismal");
+const org = @import("biozig").organismal;
 
 const link = org.PhenotypeDiseaseLink{
     .phenotype_id = "HP:0001250", // Seizures

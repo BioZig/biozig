@@ -35,7 +35,7 @@ The `Report` struct is an orchestration container; it borrows slices of figures,
 ## Example Usage
 ```zig
 const std = @import("std");
-const rep = @import("reporting");
+const rep = @import("biozig").reporting;
 
 const sections = [_]rep.Section{
     .{ .title = "Results", .content = "Deterministic biological results." }

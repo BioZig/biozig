@@ -402,6 +402,7 @@ pub fn build(b: *std.Build) void {
     const cli_exe = b.addExecutable(.{
         .name = "biozig",
         .root_module = cli_module,
+        .version = .{ .major = 0, .minor = 1, .patch = 0 },
     });
     b.installArtifact(cli_exe);
 

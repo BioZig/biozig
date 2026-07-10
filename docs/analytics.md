@@ -42,7 +42,7 @@ Routines process `[]const f64` slices. When ranking or sorting is required (e.g.
 ## Example Usage
 ```zig
 const std = @import("std");
-const stats = @import("analytics").statistics;
+const stats = @import("biozig").analytics.statistics;
 
 const x = [_]f64{ 1.0, 2.0, 3.0, 4.0, 5.0 };
 const y = [_]f64{ 2.0, 4.0, 5.0, 4.0, 5.0 };

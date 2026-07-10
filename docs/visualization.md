@@ -37,7 +37,7 @@ Visual elements are primarily string slices (`[]const u8`). The components hold 
 
 ## Example Usage
 ```zig
-const pub_mod = @import("visualization").publication;
+const pub_mod = @import("biozig").visualization.publication;
 
 const p1 = pub_mod.Panel.init("A", "<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"blue\"/>");
 const panels = [_]pub_mod.Panel{ p1 };
