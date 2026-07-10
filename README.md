@@ -60,4 +60,4 @@ For advanced usage, refer to the [Command Line Reference](docs/CLI.md) and [C-AB
 
 **Creator and Curator:** MD. Arshad (BioZig Software Foundation)
 
-**Website:** [https://biozig.github.io/biozig](https://biozig.github.io/biozig)
+**Website:** [https://biozig.org/](https://biozig.org/)
