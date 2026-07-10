@@ -194,3 +194,15 @@ p.body-text { font-size: 17px; margin-bottom: 24px; }
 .docs-content h3 { margin-top: 32px; font-size: 18px; color: var(--fg); }
 .docs-content p { font-size: 15px; line-height: 1.8; color: var(--dim); margin-bottom: 24px; }
 .docs-content ul { padding-left: 24px; margin-bottom: 24px; color: var(--dim); line-height: 1.8; font-size: 15px; }
+
+/* DATA TABLES */
+table.data { width: 100%; border-collapse: collapse; margin-bottom: 48px; border: 1px solid var(--rule); }
+table.data thead { background: rgba(247,164,29,0.05); }
+[data-theme="light"] table.data thead { background: rgba(30,18,4,0.05); }
+table.data td { padding: 16px 24px; border-bottom: 1px solid var(--rule); font-family: var(--sans); font-size: 15px; color: var(--fg); }
+table.data thead td { font-family: var(--mono); font-size: 12px; color: var(--acc); letter-spacing: 0.05em; font-weight: 700; text-transform: uppercase; border-bottom: 2px solid var(--rule); }
+table.data td.desc { color: var(--dim); }
+table.data td.val { font-family: var(--mono); font-weight: 500; text-align: right; }
+table.data tbody tr:last-child td { border-bottom: none; }
+table.data tbody tr:hover { background: rgba(255,255,255,0.02); }
+[data-theme="light"] table.data tbody tr:hover { background: rgba(0,0,0,0.02); }
