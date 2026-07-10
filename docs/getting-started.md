@@ -3,7 +3,7 @@
 BioZig provides a primary interface via a compiled command-line executable.
 
 ## Requirements
-- Zig `0.14.0` or later
+- Zig `0.16.0` or later
 
 ## Installation
 
@@ -30,14 +30,22 @@ The executable is organized into functional domains. To execute a command, provi
 - `-o, --output <path>`: Specifies the output destination (default is `stdout`).
 - `-h, --help`: Displays help for a specific domain or subcommand.
 
-### Example
+### Examples
 
-Generate a biological network SVG visualization:
-
+**Genomic Transition/Transversion Ratio:**
 ```bash
-./zig-out/bin/biozig visualize network -i edges.csv -o output.svg
+./zig-out/bin/biozig fetch --db ncbi --query NC_000001.11 --analyze titv
 ```
 
+**Structural Contact Map Generation:**
+```bash
+./zig-out/bin/biozig fetch --db pdb --query 6vxx --analyze contact_map
+```
+
+**Systems Biology (PPI Network Traversal):**
+```bash
+./zig-out/bin/biozig systems dijkstra -i string_db_9606.txt
+```
 ## Library Integration
 
 BioZig can also be used as a static library in Zig projects by importing it in your `build.zig` and allocating domain objects directly. All modules require an explicit `std.mem.Allocator`.

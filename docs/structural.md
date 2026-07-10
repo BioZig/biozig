@@ -42,7 +42,7 @@ Structures represent data hierarchically. A `StructureModel` owns `Chain` instan
 ## Example Usage
 ```zig
 const std = @import("std");
-const struct_mod = @import("structural");
+const struct_mod = @import("biozig").structural;
 
 const a1 = struct_mod.atom.Atom{ .x = 0.0, .y = 0.0, .z = 0.0, .element = "C" };
 const a2 = struct_mod.atom.Atom{ .x = 1.0, .y = 0.0, .z = 0.0, .element = "O" };

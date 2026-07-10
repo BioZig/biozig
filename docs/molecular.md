@@ -38,7 +38,7 @@ Sequences manage their internal byte arrays using the explicit `Allocator` passe
 ## Example Usage
 ```zig
 const std = @import("std");
-const mol = @import("molecular");
+const mol = @import("biozig").molecular;
 
 var dna_seq = try mol.dna.DnaSequence.init(allocator, "ATCGATCG");
 defer dna_seq.deinit();

@@ -49,13 +49,14 @@ Core promotes the use of unmanaged structures alongside domain-specific arenas. 
 ## Example Usage
 ```zig
 const std = @import("std");
-const core = @import("core").core;
+const core = @import("biozig").core;
 
 var buffer: [1024]u8 = undefined;
-var writer = std.Io.Writer.fixed(&buffer);
+var fbs = std.io.fixedBufferStream(&buffer);
+const writer = fbs.writer();
 
 // Deterministic binary serialization
-try core.serialization.serialize(&writer, @as(u32, 42));
+try core.serialization.serialize(writer, @as(u32, 42));
 ```
 
 ## Limitations

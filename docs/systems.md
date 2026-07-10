@@ -44,7 +44,7 @@ Systems layer graphs heavily utilize integer indices (`usize`) for relationships
 ## Example Usage
 ```zig
 const std = @import("std");
-const sys = @import("systems").regulation;
+const sys = @import("biozig").systems.regulation;
 
 var grn = sys.RegulatoryGraph.init(allocator);
 defer grn.deinit();

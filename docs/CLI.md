@@ -1,9 +1,9 @@
 # BioZig CLI Reference Manual
 
-BioZig is a high-performance, out-of-core, zero-copy bioinformatics engine. The CLI is designed around a strictly domain-driven architecture, enabling massive parallel data analysis right from your terminal without requiring Python or R scripts.
+BioZig is a high-performance, out-of-core, zero-copy bioinformatics engine. The CLI is designed around a strictly domain-driven architecture, enabling parallel data analysis directly from the terminal without requiring interpreted language scripts.
 
 ## Core Architecture
-BioZig runs natively using `mmap` zero-copy memory boundaries. This means whether you pipe data to BioZig using standard Unix tools or pass large files directly, the CLI will map the files without touching the heap, completely eliminating Out-Of-Memory (OOM) crashes.
+BioZig runs natively using `mmap` zero-copy memory boundaries. This means whether you pipe data to BioZig using standard Unix tools or pass large files directly, the CLI will map the files without touching the heap, preventing Out-Of-Memory (OOM) crashes.
 
 ---
 
@@ -106,7 +106,7 @@ Automated reporting and publication exports.
 ---
 
 ## Domain: Visualize
-Render beautiful biological data and plots.
+Render biological data and structural plots.
 
 ### Commands
 *   `dashboards`: Render composite interactive dashboards.
