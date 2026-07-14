@@ -1,0 +1,64 @@
+\documentclass[modern, large]{oup-authoring-template}
+
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{natbib}
+\usepackage{subfloat}
+\usepackage{mathrsfs}
+\usepackage{subfig}
+\usepackage{tikz}
+\usepackage{wrapfig}
+\usepackage{amsthm}
+\usepackage{footnote}
+
+\begin{document}
+
+\journaltitle{Molecular Biology and Evolution}
+\DOI{DOI HERE}
+\copyrightyear{2026}
+\pubyear{2026}
+\access{Advance Access Publication Date: Day Month Year}
+\appnotes{Paper}
+
+\firstpage{1}
+
+\title[Evolution is Not Always Bifurcating]{Evolution is Not Always Bifurcating: ATLAZ and the Geometric Resolution of Reticulate Virology}
+
+\author[1,2,$\ast$]{MD. Arshad}
+\address[1]{\orgdiv{Department of Computer Science}, \orgname{Jamia Millia Islamia}}
+\address[2]{\orgname{BioZig Software Foundation}}
+
+\corres{$\ast$To whom correspondence should be addressed. \href{mailto:arshad10867c@gmail.com}{arshad10867c@gmail.com}}
+
+\abstract{
+The reliance on strictly bifurcating phylogenetic trees fundamentally distorts the evolutionary history of reticulate viral populations. Traditional maximum-likelihood algorithms mandate vertical descent, imposing artificial clades upon recombinant genomes and obscuring the origins of segmented pandemic shifts. Furthermore, linear selection metrics (e.g., dN/dS) fail mathematically when evaluating overlapping open reading frames. Here I present ATLAZ (Alignment, Topology, and Lineage Analysis in Zig), a memory-deterministic geometric engine that explicitly bypasses the phylogenetic tree. By computing Vietoris-Rips simplicial complexes and extracting $H_1$ persistence directly from spatial distance matrices, ATLAZ definitively isolates horizontal recombination in Hepatitis B and Avian Influenza. Conversely, the absence of topological loops strictly proves the clonal descent of Ebola, Zika, and Marburg viruses. Utilizing a native Galois Field reduction across a zero-copy C-ABI boundary, ATLAZ processes massive cohorts (over 6,000 sequences) in $O(1)$ memory relative to sequence length, shattering the catastrophic computational bottlenecks of previous Topological Data Analysis frameworks. Furthermore, sequential column ablation calculates a novel Topological Selection Score (TSS), geometrically mapping absolute structural rigidity and identifying optimal targets for direct-acting antivirals in seconds. ATLAZ establishes a new absolute, math-driven standard for computational virology.
+}
+
+\keywords{Topological Data Analysis, Recombination, Phylogenetics, Zig, Computational Virology}
+
+\maketitle
+
+\input{01_Introduction.tex}
+\input{02_New_Approaches.tex}
+\input{03_Results.tex}
+\input{04_Discussion.tex}
+\input{05_Materials_and_Methods.tex}
+
+\section*{Acknowledgements}
+The author acknowledges the BioZig Software Foundation for providing the high-performance computational infrastructure and testing environments required to execute the massive geometric matrix reductions. Acknowledgment is also given to the Zig Software Foundation for the development of the Zig programming language, and to the curators of the public genomic repositories utilized for empirical validation.
+
+\section*{Funding}
+This research and the development of the ATLAZ engine were internally funded and supported by the BioZig Software Foundation. No external or third-party funding was received for this work.
+
+\section*{Conflict of Interest}
+The author declares no competing financial interests. 
+
+\section*{Data and Code Availability}
+All empirical viral datasets utilized in this study were acquired from publicly available, peer-reviewed genomic repositories and are properly cited within the text. 
+Since ATLAZ is a core component of the broader BioZig computational ecosystem, it is entirely open source and openly available for everyone as part of the BioZig Software Foundation. The complete ATLAZ source code, compiled binaries, and reproducible execution environments can be accessed at the official project repository: \url{https://github.biozig.biozig/atlaz} and via the foundation website: \url{https://biozig.org}.
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\end{document}
