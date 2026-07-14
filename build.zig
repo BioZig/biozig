@@ -486,38 +486,6 @@ pub fn build(b: *std.Build) void {
     lib.root_module.addImport("net", net_module);
     b.installArtifact(lib);
 
-    const validate_module = b.createModule(.{
-        .root_source_file = b.path("validate_wasserstein.zig"),
-        .target = target,
-        .optimize = optimize,
-    });
-    validate_module.addImport("core", core_module);
-    validate_module.addImport("molecular", molecular_module);
-    validate_module.addImport("analytics", analytics_module);
-    validate_module.addImport("ATLAZ", atlaz_module);
-
-    const validate_exe = b.addExecutable(.{
-        .name = "validate_wasserstein",
-        .root_module = validate_module,
-    });
-    b.installArtifact(validate_exe);
-
-    const dist_module = b.createModule(.{
-        .root_source_file = b.path("benchmark_dist.zig"),
-        .target = target,
-        .optimize = optimize,
-    });
-    dist_module.addImport("core", core_module);
-    dist_module.addImport("molecular", molecular_module);
-    dist_module.addImport("analytics", analytics_module);
-    dist_module.addImport("ATLAZ", atlaz_module);
-    dist_module.addImport("ingestion", ingestion_module);
-
-    const dist_exe = b.addExecutable(.{
-        .name = "benchmark_dist",
-        .root_module = dist_module,
-    });
-    b.installArtifact(dist_exe);
 
     test_step.dependOn(&run_cli_main_tests.step);
 }
