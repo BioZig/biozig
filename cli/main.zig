@@ -11,6 +11,8 @@ const cmd_reporting = @import("cmd_reporting.zig");
 const cmd_visualize = @import("cmd_visualize.zig");
 const cmd_fetch = @import("fetch.zig");
 
+const cmd_atlaz = @import("cmd_atlaz.zig");
+
 pub fn main(init: std.process.Init) !void {
     const allocator = init.arena.allocator();
     const process_args = try init.minimal.args.toSlice(allocator);
@@ -47,6 +49,8 @@ pub fn main(init: std.process.Init) !void {
         try cmd_reporting.execute(parsed);
     } else if (std.mem.eql(u8, domain, "visualize")) {
         try cmd_visualize.execute(parsed);
+    } else if (std.mem.eql(u8, domain, "atlaz")) {
+        try cmd_atlaz.execute(allocator, process_args);
     } else if (std.mem.eql(u8, domain, "fetch") or std.mem.eql(u8, domain, "stream")) {
         try cmd_fetch.execute(allocator, process_args);
     } else {
