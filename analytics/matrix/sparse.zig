@@ -97,3 +97,106 @@ test "csr vector multiplication" {
     try std.testing.expect(result[1] == 9.0); // 3.0*3.0
     try std.testing.expect(result[2] == 8.0); // 4.0*2.0
 }
+
+pub const PersistencePair = struct {
+    birth: usize,
+    death: usize,
+    dimension: usize,
+    birth_val: f64 = 0.0,
+    death_val: f64 = std.math.inf(f64),
+};
+
+/// Gets the pivot (largest row index) for a given column in a CSC matrix.
+/// Returns null if the column is empty.
+fn getPivot(matrix: CscMatrix, col: usize) ?usize {
+    const start_idx = matrix.col_ptr[col];
+    const end_idx = matrix.col_ptr[col + 1];
+    if (start_idx == end_idx) return null;
+    
+    // CSC row indices are typically sorted. The largest is the last one.
+    var max_val: usize = 0;
+    var found = false;
+    for (start_idx..end_idx) |i| {
+        if (!found or matrix.row_indices[i] > max_val) {
+            max_val = matrix.row_indices[i];
+            found = true;
+        }
+    }
+    return if (found) max_val else null;
+}
+
+/// XORs two columns together (col1 = col1 XOR col2) over GF(2) and returns a new list of row indices.
+/// Assumes values are implicit 1s.
+fn xorColumns(allocator: std.mem.Allocator, matrix: CscMatrix, col1_indices: []const usize, col2: usize) ![]usize {
+    const start2 = matrix.col_ptr[col2];
+    const end2 = matrix.col_ptr[col2 + 1];
+    const col2_indices = matrix.row_indices[start2..end2];
+    
+    var set = std.AutoHashMap(usize, void).init(allocator);
+    defer set.deinit();
+    
+    for (col1_indices) |idx| {
+        try set.put(idx, {});
+    }
+    
+    for (col2_indices) |idx| {
+        if (set.contains(idx)) {
+            _ = set.remove(idx); // GF(2) 1 + 1 = 0
+        } else {
+            try set.put(idx, {});
+        }
+    }
+    
+    var result = try allocator.alloc(usize, set.count());
+    var it = set.keyIterator();
+    var i: usize = 0;
+    while (it.next()) |key| {
+        result[i] = key.*;
+        i += 1;
+    }
+    // Sort to maintain pivot at the end
+    std.mem.sort(usize, result, {}, std.sort.asc(usize));
+    return result;
+}
+
+/// Reduces a boundary matrix over GF(2) using the standard left-to-right column addition algorithm.
+/// Emits persistence pairs (birth, death, dimension).
+pub fn reduceBoundaryMatrix(allocator: std.mem.Allocator, boundary_matrix: CscMatrix) ![]PersistencePair {
+    var pairs = std.ArrayList(PersistencePair).init(allocator);
+    defer pairs.deinit();
+    
+    // Map of pivot row index -> column index that currently has this pivot
+    var pivot_map = std.AutoHashMap(usize, usize).init(allocator);
+    defer pivot_map.deinit();
+    
+    for (0..boundary_matrix.cols) |j| {
+        const start_idx = boundary_matrix.col_ptr[j];
+        const end_idx = boundary_matrix.col_ptr[j + 1];
+        
+        var current_col = try allocator.alloc(usize, end_idx - start_idx);
+        @memcpy(current_col, boundary_matrix.row_indices[start_idx..end_idx]);
+        
+        while (current_col.len > 0) {
+            const pivot = current_col[current_col.len - 1]; // Sorted, so last is largest
+            
+            if (pivot_map.get(pivot)) |existing_col| {
+                const new_col = try xorColumns(allocator, boundary_matrix, current_col, existing_col);
+                allocator.free(current_col);
+                current_col = new_col;
+            } else {
+                try pivot_map.put(pivot, j);
+                // In a VR complex, a column j adding a face creates a cycle (or kills one). 
+                // We'll leave dimension inference to the caller mapping or assume dim=1 for testing.
+                try pairs.append(.{
+                    .birth = pivot,
+                    .death = j,
+                    .dimension = 1, // Simplified, caller must map this correctly in ATLAZ wrapper
+                });
+                break;
+            }
+        }
+        allocator.free(current_col);
+    }
+    
+    return pairs.toOwnedSlice();
+}
