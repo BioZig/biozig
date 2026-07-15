@@ -175,6 +175,22 @@ pub fn build(b: *std.Build) void {
     analytics_module.addImport("core", core_module);
     b.modules.put(b.graph.arena, "analytics", analytics_module) catch @panic("OOM");
 
+    const atlaz_module = b.createModule(.{
+        .root_source_file = b.path("ATLAZ/atlaz.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    atlaz_module.addImport("core", core_module);
+    atlaz_module.addImport("molecular", molecular_module);
+    atlaz_module.addImport("analytics", analytics_module);
+    b.modules.put(b.graph.arena, "ATLAZ", atlaz_module) catch @panic("OOM");
+
+    const atlaz_lib = b.addLibrary(.{
+        .name = "biozig-atlaz",
+        .root_module = atlaz_module,
+    });
+    b.installArtifact(atlaz_lib);
+
     const analytics_lib = b.addLibrary(.{
         .name = "biozig-analytics",
         .root_module = analytics_module,
@@ -363,6 +379,7 @@ pub fn build(b: *std.Build) void {
     cli_module.addImport("structural", structural_module);
     cli_module.addImport("visualization", visualization_module);
     cli_module.addImport("cellular", cellular_module);
+    cli_module.addImport("ATLAZ", atlaz_module);
 
     const population_module = b.createModule(.{
         .root_source_file = b.path("population/population.zig"),
@@ -406,6 +423,31 @@ pub fn build(b: *std.Build) void {
     });
     b.installArtifact(cli_exe);
 
+    // Standalone ATLAZ binary
+    const cmd_atlaz_module = b.createModule(.{
+        .root_source_file = b.path("cli/cmd_atlaz.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    cmd_atlaz_module.addImport("core", core_module);
+    cmd_atlaz_module.addImport("ATLAZ", atlaz_module);
+    cmd_atlaz_module.addImport("molecular", molecular_module);
+    cmd_atlaz_module.addImport("ingestion", ingestion_module);
+
+    const atlaz_standalone_module = b.createModule(.{
+        .root_source_file = b.path("ATLAZ/cli_standalone.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    atlaz_standalone_module.addImport("cmd_atlaz", cmd_atlaz_module);
+
+    const atlaz_exe = b.addExecutable(.{
+        .name = "atlaz",
+        .root_module = atlaz_standalone_module,
+        .version = .{ .major = 0, .minor = 1, .patch = 0 },
+    });
+    b.installArtifact(atlaz_exe);
+
     const cli_args_module = b.createModule(.{
         .root_source_file = b.path("cli/args.zig"),
         .target = target,
@@ -443,6 +485,7 @@ pub fn build(b: *std.Build) void {
     lib.root_module.addImport("population", population_module);
     lib.root_module.addImport("net", net_module);
     b.installArtifact(lib);
+
 
     test_step.dependOn(&run_cli_main_tests.step);
 }
