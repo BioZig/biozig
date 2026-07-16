@@ -26,19 +26,15 @@
       </a>
       <ul class="nav-links">
         <li><a href="index.html" class="active">Overview</a></li>
-        <li><a href="philosophy.html" class="">Philosophy</a></li>
-        <li><a href="architecture.html" class="">Architecture</a></li>
-        <li><a href="docs.html" class="">Docs</a></li>
-        <li><a href="tutorials.html" class="">Tutorials</a></li>
-        <li><a href="libbiozig.html" class="">libbiozig</a></li>
-        <li><a href="cli.html" class="">CLI</a></li>
-        <li><a href="foundation.html" class="">BZSF</a></li>
+        <li><a href="philosophy.html">Philosophy</a></li>
+        <li><a href="docs.html">Docs</a></li>
+        <li><a href="benchmarks.html">Benchmarks</a></li>
+        <li><a href="foundation.html">BZSF</a></li>
+        <li><a href="atlaz.html">ATLAZ</a></li>
         <li>
-          <button class="theme-toggle" onclick="openSearch()" aria-label="Search">[ / ] SEARCH</button>
-        </li>
-        <li>
-          <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light/dark mode">
-            <span id="themeIcon">☀</span> <span id="themeLabel">Light</span>
+          <button class="theme-btn" onclick="toggleTheme()" aria-label="Toggle light/dark mode">
+            <span class="icon" id="themeIcon">☀</span>
+            <span id="themeLabel">Light</span>
           </button>
         </li>
       </ul>
@@ -52,12 +48,17 @@
           <b>BioZig (BZ): Biology first principles programming.</b><br><br>
           <b>DNA is not a string.</b><br>
           Protein is not a string.<br>
-          BZ encodes biological reality<br>
-          at the bit level — where it belongs.<br><br>
+          They are discrete, deterministic mathematical structures.<br>
+          BZ discards legacy abstractions and encodes biological reality<br>
+          directly at the bit level — where it belongs.<br><br>
+          Zero-fragmentation graph traversal.<br>
+          Provable rigid-body transformations.<br>
           Deterministic. Reproducible.<br>
           On every machine. Every time.
         </p>
         <a href="docs.html" class="cta">Read Documentation</a>
+        <br><br>
+        <a href="https://github.com/BioZig/biozig/releases/tag/v0.1.0" class="cta" style="background: var(--dim); color: var(--fg); border-color: var(--dim);">Download v0.1.0 Binaries</a>
       </div>
       <div class="right-col">
         <div class="readout">
@@ -121,6 +122,7 @@
         case '6': case 'l': window.location.href = 'libbiozig.html'; break;
         case '7': case 'c': window.location.href = 'cli.html'; break;
         case '8': case 'f': window.location.href = 'foundation.html'; break;
+        case '9': case 'z': window.location.href = 'atlaz.html'; break;
         case 's': case '/': 
           e.preventDefault();
           openSearch(); 

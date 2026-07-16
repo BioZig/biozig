@@ -25,20 +25,16 @@
         <div class="bz-wordmark"><span class="w-bio">BIO</span><span class="w-zig">ZIG</span></div>
       </a>
       <ul class="nav-links">
-        <li><a href="index.html" class="">Overview</a></li>
+        <li><a href="index.html">Overview</a></li>
         <li><a href="philosophy.html" class="active">Philosophy</a></li>
-        <li><a href="architecture.html" class="">Architecture</a></li>
-        <li><a href="docs.html" class="">Docs</a></li>
-        <li><a href="tutorials.html" class="">Tutorials</a></li>
-        <li><a href="libbiozig.html" class="">libbiozig</a></li>
-        <li><a href="cli.html" class="">CLI</a></li>
-        <li><a href="foundation.html" class="">BZSF</a></li>
+        <li><a href="docs.html">Docs</a></li>
+        <li><a href="benchmarks.html">Benchmarks</a></li>
+        <li><a href="foundation.html">BZSF</a></li>
+        <li><a href="atlaz.html">ATLAZ</a></li>
         <li>
-          <button class="theme-toggle" onclick="openSearch()" aria-label="Search">[ / ] SEARCH</button>
-        </li>
-        <li>
-          <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light/dark mode">
-            <span id="themeIcon">☀</span> <span id="themeLabel">Light</span>
+          <button class="theme-btn" onclick="toggleTheme()" aria-label="Toggle light/dark mode">
+            <span class="icon" id="themeIcon">☀</span>
+            <span id="themeLabel">Light</span>
           </button>
         </li>
       </ul>
@@ -137,6 +133,7 @@
         case '6': case 'l': window.location.href = 'libbiozig.html'; break;
         case '7': case 'c': window.location.href = 'cli.html'; break;
         case '8': case 'f': window.location.href = 'foundation.html'; break;
+        case '9': case 'z': window.location.href = 'atlaz.html'; break;
         case 's': case '/': 
           e.preventDefault();
           openSearch(); 
