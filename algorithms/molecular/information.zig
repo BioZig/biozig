@@ -2,18 +2,16 @@ const std = @import("std");
 const dna_module = @import("molecular").dna;
 const DNA2View = dna_module.DNA2View;
 
-/// Calculates Shannon Entropy of a sequence.
 pub fn shannonEntropy(sequence: DNA2View) f64 {
     if (sequence.len == 0) return 0.0;
 
-    var counts = [_]usize{0} ** 4; // A, C, G, T
+    var counts = [_]usize{0} ** 4;
 
     if (sequence.start % 4 == 0) {
         const bytes_len = sequence.len / 4;
         const seq_bytes = sequence.bytes[sequence.start / 4 .. (sequence.start / 4) + bytes_len];
 
         var i: usize = 0;
-        // Process in 64-bit (8-byte) chunks
         while (i + 8 <= seq_bytes.len) : (i += 8) {
             const word = std.mem.readInt(u64, seq_bytes[i .. i + 8][0..8], .little);
             const not_word = ~word;
@@ -24,7 +22,6 @@ pub fn shannonEntropy(sequence: DNA2View) f64 {
             counts[3] += @popCount(word & (word >> 1) & 0x5555555555555555);
         }
 
-        // Process remaining bytes
         for (seq_bytes[i..]) |byte_val| {
             const not_byte = ~byte_val;
             counts[0] += @popCount(@as(u8, @truncate(not_byte & (not_byte >> 1) & 0x55)));
@@ -33,12 +30,10 @@ pub fn shannonEntropy(sequence: DNA2View) f64 {
             counts[3] += @popCount(@as(u8, @truncate(byte_val & (byte_val >> 1) & 0x55)));
         }
 
-        // Remainder
         for (bytes_len * 4..sequence.len) |idx| {
             counts[@intFromEnum(sequence.get(idx))] += 1;
         }
     } else {
-        // Scalar fallback
         for (0..sequence.len) |idx| {
             counts[@intFromEnum(sequence.get(idx))] += 1;
         }
@@ -68,7 +63,6 @@ const DNA2ViewContext = struct {
     }
 };
 
-/// Calculates linguistic sequence complexity.
 pub fn linguisticComplexity(allocator: std.mem.Allocator, sequence: DNA2View) !f64 {
     if (sequence.len == 0) return 0.0;
 

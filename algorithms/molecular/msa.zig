@@ -12,7 +12,7 @@ pub const MSA = struct {
         };
     }
 
-    pub fn alignProgressive(self: *MSA, opts: alignment.AlignmentOptions) ![][]const u8 {
+    pub fn alignProgressive(self: *MSA, opts: anytype) ![][]const u8 {
         _ = opts;
         if (self.sequences.len == 0) return &[_][]const u8{};
         if (self.sequences.len == 1) {
@@ -25,7 +25,6 @@ pub const MSA = struct {
         try aligned.append(self.allocator, try self.allocator.dupe(u8, self.sequences[0]));
 
         for (self.sequences[1..]) |seq| {
-            // Find consensus of currently aligned sequences
             const len = aligned.items[0].len;
             var consensus = try self.allocator.alloc(u8, len);
             defer self.allocator.free(consensus);
@@ -46,7 +45,6 @@ pub const MSA = struct {
                 consensus[i] = max_char;
             }
 
-            // Align `seq` to `consensus` using standard DP
             const rows = consensus.len + 1;
             const cols = seq.len + 1;
             var dp = try self.allocator.alloc(i32, rows * cols);
@@ -100,7 +98,6 @@ pub const MSA = struct {
             std.mem.reverse(u8, align_a.items);
             std.mem.reverse(u8, align_b.items);
 
-            // Now expand the original alignment and the new sequence
             var new_aligned = std.ArrayList([]const u8).empty;
             for (aligned.items) |old_seq| {
                 var expanded = std.ArrayListUnmanaged(u8).empty;

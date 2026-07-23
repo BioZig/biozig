@@ -2,7 +2,6 @@ const std = @import("std");
 const dna_module = @import("molecular").dna;
 const DNA2View = dna_module.DNA2View;
 
-/// A simple directed graph representing a De Bruijn graph.
 pub const DeBruijnGraph = struct {
     allocator: std.mem.Allocator,
     k: usize,
@@ -19,7 +18,6 @@ pub const DeBruijnGraph = struct {
     pub fn deinit(self: *DeBruijnGraph) void {
         var it = self.edges.iterator();
         while (it.next()) |entry| {
-            // values were allocated, need to free them
             for (entry.value_ptr.*.items) |v| {
                 self.allocator.free(v);
             }
@@ -44,7 +42,7 @@ pub const DeBruijnGraph = struct {
             if (!res.found_existing) {
                 res.value_ptr.* = std.ArrayList([]const u8).empty;
             } else {
-                self.allocator.free(u_dup); // already had the key
+                self.allocator.free(u_dup);
             }
             try res.value_ptr.append(self.allocator, v_dup);
         }
@@ -57,8 +55,6 @@ test "De Bruijn Graph basic" {
     defer graph.deinit();
 
     try graph.addSequence("AATATG");
-    // kmers: AAT, ATA, TAT, ATG
-    // edges: AA -> AT, AT -> TA, TA -> AT, AT -> TG
 
     const at_edges = graph.edges.get("AT").?;
     try std.testing.expectEqual(@as(usize, 2), at_edges.items.len);

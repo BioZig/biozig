@@ -20,28 +20,25 @@ pub const GibbsSampler = struct {
 
         var motifs = try self.allocator.alloc([]const u8, self.sequences.len);
 
-        // Randomly select initial motifs
         for (self.sequences, 0..) |seq, i| {
             if (seq.len >= self.motif_len) {
                 const start = random.uintLessThan(usize, seq.len - self.motif_len + 1);
                 motifs[i] = seq[start .. start + self.motif_len];
             } else {
-                motifs[i] = seq; // Should assert seq.len >= motif_len really
+                motifs[i] = seq;
             }
         }
 
         var profile = try self.allocator.alloc([256]f64, self.motif_len);
         defer self.allocator.free(profile);
 
-        // Run iterations
         for (0..iterations) |_| {
             const seq_idx = random.uintLessThan(usize, self.sequences.len);
             const seq = self.sequences[seq_idx];
             if (seq.len < self.motif_len) continue;
 
-            // 1. Build profile from all other sequences (with pseudocounts)
             for (0..self.motif_len) |pos| {
-                @memset(&profile[pos], 1.0); // Pseudocount of 1
+                @memset(&profile[pos], 1.0);
             }
 
             for (motifs, 0..) |m, i| {
@@ -51,7 +48,6 @@ pub const GibbsSampler = struct {
                 }
             }
 
-            // Normalize profile
             const total_other = @as(f64, @floatFromInt(self.sequences.len - 1)) + 256.0;
             for (0..self.motif_len) |pos| {
                 for (0..256) |char| {
@@ -59,7 +55,6 @@ pub const GibbsSampler = struct {
                 }
             }
 
-            // 2. Score all k-mers in sequences[seq_idx]
             const num_kmers = seq.len - self.motif_len + 1;
             var weights = try self.allocator.alloc(f64, num_kmers);
             defer self.allocator.free(weights);
@@ -74,7 +69,6 @@ pub const GibbsSampler = struct {
                 total_weight += prob;
             }
 
-            // 3. Sample a new motif based on weights
             var new_start: usize = 0;
             if (total_weight > 0.0) {
                 const r = random.float(f64) * total_weight;

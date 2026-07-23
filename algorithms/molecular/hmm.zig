@@ -5,10 +5,9 @@ pub const HMM = struct {
     num_states: usize,
     num_emissions: usize,
 
-    // Probabilities are typically stored as logs, but here we use simple f64 for brevity.
     initial_probs: []f64,
-    transition_probs: [][]f64, // transition_probs[i][j] = P(j | i)
-    emission_probs: [][]f64, // emission_probs[i][k] = P(k | i)
+    transition_probs: [][]f64,
+    emission_probs: [][]f64,
 
     pub fn init(allocator: std.mem.Allocator, num_states: usize, num_emissions: usize) !HMM {
         const initial_probs = try allocator.alloc(f64, num_states);
@@ -64,13 +63,11 @@ pub const HMM = struct {
             ptr[t] = try allocator.alloc(usize, self.num_states);
         }
 
-        // Initialize t=0
         for (0..self.num_states) |s| {
             v_path[0][s] = self.initial_probs[s] * self.emission_probs[s][emissions[0]];
             ptr[0][s] = 0;
         }
 
-        // Run Viterbi
         for (1..t_len) |t| {
             for (0..self.num_states) |s| {
                 var max_p: f64 = -1.0;

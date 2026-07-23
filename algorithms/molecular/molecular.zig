@@ -13,6 +13,7 @@ pub const hmm = @import("hmm.zig");
 pub const msa = @import("msa.zig");
 pub const gibbs = @import("gibbs.zig");
 pub const suffix_tree = @import("suffix_tree.zig");
+pub const timsa = @import("timsa.zig");
 
 test "Sequence Algorithm Tests" {
     std.testing.refAllDecls(@This());
@@ -30,3 +31,4 @@ test "Sequence Algorithm Tests" {
     std.testing.refAllDecls(gibbs);
     std.testing.refAllDecls(suffix_tree);
 }
+pub const matrices = @import("matrices.zig");

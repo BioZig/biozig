@@ -2,21 +2,17 @@ const std = @import("std");
 const dna_module = @import("molecular").dna;
 const DNA2View = dna_module.DNA2View;
 
-/// Computes the Hamming distance between two sequences of equal length.
-/// Returns error.LengthMismatch if lengths differ.
 pub fn hammingDistance(a: DNA2View, b: DNA2View) !usize {
     if (a.len != b.len) return error.LengthMismatch;
 
     var dist: usize = 0;
 
-    // Check if we can do byte-aligned fast comparison
     if (a.start % 4 == 0 and b.start % 4 == 0) {
         const bytes_len = a.len / 4;
         const a_bytes = a.bytes[a.start / 4 .. (a.start / 4) + bytes_len];
         const b_bytes = b.bytes[b.start / 4 .. (b.start / 4) + bytes_len];
 
         var i: usize = 0;
-        // Process in 64-bit (8-byte) chunks
         while (i + 8 <= a_bytes.len) : (i += 8) {
             const a_word = std.mem.readInt(u64, a_bytes[i .. i + 8][0..8], .little);
             const b_word = std.mem.readInt(u64, b_bytes[i .. i + 8][0..8], .little);
@@ -25,19 +21,16 @@ pub fn hammingDistance(a: DNA2View, b: DNA2View) !usize {
             dist += @popCount(mismatch_bits);
         }
 
-        // Process remaining bytes
         for (a_bytes[i..], b_bytes[i..]) |byte_a, byte_b| {
             const xor_byte = byte_a ^ byte_b;
             const mismatch_bits = (xor_byte | (xor_byte >> 1)) & 0x55;
             dist += @popCount(@as(u8, @truncate(mismatch_bits)));
         }
 
-        // Remainder
         for (bytes_len * 4..a.len) |idx| {
             if (a.get(idx) != b.get(idx)) dist += 1;
         }
     } else {
-        // Scalar fallback
         for (0..a.len) |idx| {
             if (a.get(idx) != b.get(idx)) dist += 1;
         }
@@ -46,8 +39,6 @@ pub fn hammingDistance(a: DNA2View, b: DNA2View) !usize {
     return dist;
 }
 
-/// Computes the Levenshtein (edit) distance between two sequences.
-/// Uses O(min(|a|, |b|)) memory and O(|a| * |b|) time.
 pub fn levenshteinDistance(allocator: std.mem.Allocator, a: DNA2View, b: DNA2View) !usize {
     const s1 = if (a.len <= b.len) a else b;
     const s2 = if (a.len <= b.len) b else a;

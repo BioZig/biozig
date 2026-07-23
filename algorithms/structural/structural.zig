@@ -1,6 +1,5 @@
 const std = @import("std");
 
-/// 3D Coordinate
 pub const Vec3 = [3]f64;
 
 pub const CoordinateSet = struct {
@@ -30,7 +29,6 @@ pub const CoordinateSetMut = struct {
     }
 };
 
-/// Computes the Euclidean distance between two 3D coordinates.
 pub fn distance(a: Vec3, b: Vec3) f64 {
     const dx = a[0] - b[0];
     const dy = a[1] - b[1];
@@ -38,7 +36,6 @@ pub fn distance(a: Vec3, b: Vec3) f64 {
     return @sqrt(dx * dx + dy * dy + dz * dz);
 }
 
-/// Generates a pairwise distance matrix between all points.
 pub fn computeDistanceMatrix(allocator: std.mem.Allocator, points: CoordinateSet) ![]f64 {
     const n = points.x.len;
     var matrix = try allocator.alloc(f64, n * n);
@@ -96,7 +93,6 @@ pub fn computeDistanceMatrixBlock(allocator: std.mem.Allocator, points_i: []cons
     return matrix;
 }
 
-/// A boolean contact map using a Uniform Spatial Grid (Cell Grid) to avoid O(N^2) distance checks.
 pub fn computeContactMap(allocator: std.mem.Allocator, points: []const Vec3, threshold: f64) ![]bool {
     const n = points.len;
     var matrix = try allocator.alloc(bool, n * n);
@@ -234,7 +230,6 @@ pub fn centerPoints(points: CoordinateSetMut) void {
 
 pub const RotationMatrix = [3][3]f64;
 
-/// Quaternion Kabsch algorithm for exact rigid alignment.
 pub fn computeKabschRotation(a: CoordinateSet, b: CoordinateSet) !RotationMatrix {
     if (a.x.len != b.x.len) return error.LengthMismatch;
 
@@ -312,7 +307,6 @@ pub fn computeKabschRotation(a: CoordinateSet, b: CoordinateSet) !RotationMatrix
     };
 }
 
-/// Computes the optimal RMSD after superposition using Kabsch
 pub fn computeOptimalRMSD(allocator: std.mem.Allocator, a: CoordinateSet, b: CoordinateSet) !f64 {
     if (a.x.len != b.x.len) return error.LengthMismatch;
     if (a.x.len == 0) return 0.0;
@@ -358,7 +352,6 @@ pub const IterativeRMSDResult = struct {
     core_atoms: usize,
 };
 
-/// Computes RMSD with iterative outlier rejection (PyMOL align algorithm)
 pub fn computeIterativeRMSD(allocator: std.mem.Allocator, a: CoordinateSet, b: CoordinateSet, cutoff: f64, max_iters: usize) !IterativeRMSDResult {
     if (a.x.len != b.x.len) return error.LengthMismatch;
     if (a.x.len == 0) return .{ .rmsd = 0.0, .core_atoms = 0 };
@@ -469,7 +462,6 @@ pub const PocketStatistics = struct {
     hydrophobicity: f64,
 };
 
-/// Voronoi-based (Grid approximation) pocket volume and residue-derived hydrophobicity.
 pub fn computePocketStatistics(allocator: std.mem.Allocator, points: []const Vec3, atom_hydrophobicities: []const f64) !PocketStatistics {
     if (points.len == 0) return .{ .volume = 0, .surface_area = 0, .hydrophobicity = 0 };
     if (points.len != atom_hydrophobicities.len) return error.LengthMismatch;
@@ -597,10 +589,6 @@ pub fn computeRadiusOfGyration(points: CoordinateSet) f64 {
     return @sqrt(sum_sq / @as(f64, @floatFromInt(points.x.len)));
 }
 
-// ============================================================================
-// Molecular Dynamics (Verlet integration)
-// ============================================================================
-
 pub fn simulateVerletMD(
     positions: []Vec3,
     velocities: []Vec3,
@@ -635,10 +623,6 @@ pub fn simulateVerletMD(
         }
     }
 }
-
-// ============================================================================
-// Monte Carlo / Simulated Annealing
-// ============================================================================
 
 pub fn simulatedAnnealing(
     allocator: std.mem.Allocator,
@@ -682,10 +666,6 @@ pub fn simulatedAnnealing(
     }
 }
 
-// ============================================================================
-// Elastic Network Models (Normal Mode Analysis)
-// ============================================================================
-
 pub fn computeANMHessian(allocator: std.mem.Allocator, coords: []const Vec3, cutoff: f64, gamma: f64) ![]f64 {
     const n = coords.len;
     var hessian = try allocator.alloc(f64, 3 * n * 3 * n);
@@ -719,10 +699,6 @@ pub fn computeANMHessian(allocator: std.mem.Allocator, coords: []const Vec3, cut
     }
     return hessian;
 }
-
-// ============================================================================
-// Threading / Fold Recognition (Dynamic Programming on structures)
-// ============================================================================
 
 pub fn threadingDynamicProgramming(allocator: std.mem.Allocator, seq_len: usize, template_len: usize, structural_scores: []const f64, gap_open: f64, gap_extend: f64) !f64 {
     var dp_M = try allocator.alloc(f64, (seq_len + 1) * (template_len + 1));
@@ -767,10 +743,6 @@ pub fn threadingDynamicProgramming(allocator: std.mem.Allocator, seq_len: usize,
     const final_idx = seq_len * (template_len + 1) + template_len;
     return @max(dp_M[final_idx], @max(dp_X[final_idx], dp_Y[final_idx]));
 }
-
-// ============================================================================
-// Rotamer Library Search (Sidechain packing)
-// ============================================================================
 
 pub const Rotamer = struct {
     chi_angles: []const f64,
@@ -827,7 +799,6 @@ test "Structural Algorithms - Molecular Dynamics" {
 
     const S = struct {
         fn f(p: []const Vec3, fr: []Vec3) void {
-            // Harmonic spring
             const dx = p[1][0] - p[0][0];
             fr[0][0] = dx;
             fr[1][0] = -dx;
@@ -871,7 +842,7 @@ test "Structural Algorithms - ANM Hessian" {
 
 test "Structural Algorithms - Threading DP" {
     const alloc = std.testing.allocator;
-    const scores = [_]f64{ 1.0, -1.0, -1.0, 1.0 }; // 2x2 identity-like
+    const scores = [_]f64{ 1.0, -1.0, -1.0, 1.0 };
     const score = try threadingDynamicProgramming(alloc, 2, 2, &scores, -2.0, -0.5);
     try std.testing.expectEqual(@as(f64, 2.0), score);
 }
@@ -937,8 +908,8 @@ test "Structural Algorithms - RMSD and Distance" {
     const dist_mat = try computeDistanceMatrix(alloc, a);
     defer alloc.free(dist_mat);
 
-    try std.testing.expectEqual(@as(f64, 0.0), dist_mat[0]); // 0,0
-    try std.testing.expectEqual(@as(f64, 1.0), dist_mat[1]); // 0,1
+    try std.testing.expectEqual(@as(f64, 0.0), dist_mat[0]);
+    try std.testing.expectEqual(@as(f64, 1.0), dist_mat[1]);
 }
 
 test "Structural Algorithms - Centroid" {
@@ -948,7 +919,7 @@ test "Structural Algorithms - Centroid" {
     const points = CoordinateSet{ .x = &x, .y = &y, .z = &z };
     const c = computeCentroid(points);
     try std.testing.expectEqual(@as(f64, 0.0), c[0]);
-    try std.testing.expect(c[1] > 0.6 and c[1] < 0.7); // 2/3
+    try std.testing.expect(c[1] > 0.6 and c[1] < 0.7);
 }
 
 test "Structural Algorithms - Kabsch Optimal RMSD" {
@@ -962,11 +933,9 @@ test "Structural Algorithms - Kabsch Optimal RMSD" {
     var bz align(32) = [_]f64{ 0.0, 0.0, 0.0 };
     const b = CoordinateSet{ .x = &bx, .y = &by, .z = &bz };
 
-    // Raw RMSD will be non-zero
     const raw_rmsd = try computeRMSD(a, b);
     try std.testing.expect(raw_rmsd > 0.5);
 
-    // Optimal RMSD should be essentially 0
     const alloc = std.testing.allocator;
     const opt_rmsd = try computeOptimalRMSD(alloc, a, b);
     try std.testing.expect(opt_rmsd < 1e-5);
@@ -979,6 +948,7 @@ test "Structural Algorithms - Contact Map" {
     const cmap = try computeContactMap(alloc, &points, 2.0);
     defer alloc.free(cmap);
 
-    try std.testing.expect(cmap[0 * 3 + 1] == true); // dist 1 <= 2.0
-    try std.testing.expect(cmap[0 * 3 + 2] == false); // dist 5 > 2.0
+    try std.testing.expect(cmap[0 * 3 + 1] == true);
+    try std.testing.expect(cmap[0 * 3 + 2] == false);
 }
+pub const topology = @import("topology.zig");

@@ -63,10 +63,10 @@ export fn biozig_align_global(seq_a_c: [*c]const u8, seq_b_c: [*c]const u8, matc
     const dna2_b = dna.DNA2.init(seq_b, alloc) catch return error_res;
     const view_b = dna2_b.view();
 
-    const opts = alignment.AlignmentOptions{
-        .match_score = @intCast(match_score),
-        .mismatch_penalty = @intCast(mismatch_penalty),
-        .gap_penalty = @intCast(gap_penalty),
+    const opts = .{
+        .match_score = @as(i16, @intCast(match_score)),
+        .mismatch_penalty = @as(i16, @intCast(mismatch_penalty)),
+        .gap_penalty = @as(i16, @intCast(gap_penalty)),
     };
 
     const result = alignment.globalAlignment(alloc, view_a, view_b, opts) catch return error_res;
@@ -80,6 +80,7 @@ export fn biozig_align_global(seq_a_c: [*c]const u8, seq_b_c: [*c]const u8, matc
         .aligned_a = c_align_a.ptr,
         .aligned_b = c_align_b.ptr,
     };
+
 }
 
 /// Computes the Shannon Entropy of a nucleotide sequence.

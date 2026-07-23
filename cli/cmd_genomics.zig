@@ -244,6 +244,25 @@ pub fn execute(args: ParsedArgs) !void {
             } else {
                 std.process.exit(1);
             }
+        } else if (std.mem.eql(u8, cmd, "timsa")) {
+            if (reader_opt) |*reader| {
+                var list = std.ArrayList([]const u8).empty;
+                defer list.deinit(std.heap.page_allocator);
+                var it = ingestion.genomics.fasta.fastaIterator(reader.data);
+                while (try it.next()) |rec| try list.append(std.heap.page_allocator, rec.sequence);
+                if (list.items.len > 0) {
+                    var ms = algorithms.molecular.timsa.TiMSA.init(std.heap.page_allocator, .{ .memory_budget_bytes = 100 * 1024 * 1024 }); // 100MB budget
+                    const res = try ms.executeAlignment(list.items);
+                    defer {
+                        for (res.aligned_sequences) |x| std.heap.page_allocator.free(x);
+                        std.heap.page_allocator.free(res.aligned_sequences);
+                        std.heap.page_allocator.free(res.consensus);
+                    }
+                    std.debug.print("TiMSA Output:\n{any}\n", .{res.aligned_sequences});
+                }
+            } else {
+                std.process.exit(1);
+            }
         } else if (std.mem.eql(u8, cmd, "search")) {
             if (reader_opt) |*reader| {
                 var it = ingestion.genomics.fasta.fastaIterator(reader.data);

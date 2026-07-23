@@ -54,7 +54,7 @@ pub fn charToNucleotide(c: u8) !Nucleotide {
     return @as(Nucleotide, @enumFromInt(val));
 }
 
-const nuc_char_map = [_]u8{ '?', 'A', 'C', '?', 'G', '?', '?', '?', 'T' };
+const nuc_char_map = [_]u8{ 'A', 'C', 'G', 'T' };
 
 pub fn nucleotideToChar(n: Nucleotide) u8 {
     return nuc_char_map[@intFromEnum(n)];
