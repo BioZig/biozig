@@ -53,7 +53,7 @@ pub fn main(init: std.process.Init) !void {
         try cmd_atlaz.execute(allocator, process_args);
     } else if (std.mem.eql(u8, domain, "timsa")) {
         try cmd_timsa.execute(allocator, parsed);
-    } else if (std.mem.eql(u8, domain, "fetch") or std.mem.eql(u8, domain, "stream")) {
+    } else if (std.mem.eql(u8, domain, "fetch") or std.mem.eql(u8, domain, "stream") or std.mem.eql(u8, domain, "net")) {
         try cmd_fetch.execute(allocator, process_args);
     } else {
         std.debug.print("Error: Unknown domain '{s}'.\n\n", .{domain});
@@ -79,6 +79,7 @@ fn printHelp() void {
         \\  reporting      Automated reporting and publication exports
         \\  visualize      Render biological data and plots
         \\  timsa          Topology-inspired Multiple Sequence Alignment engine
+        \\  net            Network protocols, fetching, and streaming algorithms
         \\
         \\Global Options:
         \\  -i, --input <path>     Input file path

@@ -316,6 +316,12 @@ pub const SWRecurrence = struct {
             }
         }
     }
+    
+    pub fn resetGlobalMax(self: Self) void {
+        self.max_score_ptr.* = 0;
+        self.max_row_ptr.* = 0;
+        self.max_col_ptr.* = 0;
+    }
 
     pub fn getTracebackStart(self: Self) ?struct { row: usize, col: usize } {
         return .{ .row = self.max_row_ptr.*, .col = self.max_col_ptr.* };

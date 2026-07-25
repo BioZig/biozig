@@ -12,7 +12,10 @@ pub fn execute(allocator: std.mem.Allocator, args: []const [:0]const u8) !void {
 
     var i: usize = 2;
     while (i < args.len) : (i += 1) {
-        if (std.mem.eql(u8, args[i], "--db") and i + 1 < args.len) {
+        if (std.mem.eql(u8, args[i], "--help") or std.mem.eql(u8, args[i], "-h")) {
+            printHelp();
+            return;
+        } else if (std.mem.eql(u8, args[i], "--db") and i + 1 < args.len) {
             db = args[i + 1];
             i += 1;
         } else if (std.mem.eql(u8, args[i], "--query") and i + 1 < args.len) {
@@ -198,4 +201,26 @@ fn processChemblAnalytics(allocator: std.mem.Allocator, analyze: []const u8, rea
         std.debug.print("Streamed ChEMBL JSON: Processed {d} bytes directly from API.\n", .{features.bytes_streamed});
     }
     std.debug.print("===================================\n", .{});
+}
+
+fn printHelp() void {
+    const help_text =
+        \\biozig net (fetch/stream) - Network protocols and data streaming
+        \\
+        \\Usage:
+        \\  biozig net [options]
+        \\
+        \\Options:
+        \\  --db <name>       Target database (ncbi, uniprot, pdb, ensembl, chembl, ucsc, ncbi_ftp)
+        \\  --query <str>     Accession ID or query string
+        \\  --analyze <type>  Streaming analytics to run (gc_content, titv, markov, kmer, comprehensive, pca, contact_map, features)
+        \\  -h, --help        Show this help menu
+        \\
+        \\Examples:
+        \\  biozig net --db ncbi --query NC_045512.2 --analyze comprehensive
+        \\  biozig net --db pdb --query 1CRN --analyze pca
+        \\  biozig net --db chembl --query CHEMBL25 --analyze features
+        \\
+    ;
+    std.debug.print("{s}\n", .{help_text});
 }
