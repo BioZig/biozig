@@ -332,7 +332,7 @@ pub const TiMSA = struct {
                     entropy = std.math.inf(f64);
                 }
                 
-                conserved_cols[col] = (entropy < 1.0); // Strict structural conservation
+                conserved_cols[col] = (entropy < 1.0) and (total >= (reordered_aligned.len / 2)); // Strict structural conservation + gap threshold
             }
 
             rigidity_scores = try ref_engine.computeAblationGradient(reordered_aligned, topo_clusters.raw_pd, conserved_cols, topo_clusters.landmarks);

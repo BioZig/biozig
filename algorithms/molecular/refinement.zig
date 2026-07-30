@@ -190,13 +190,14 @@ pub const RefinementEngine = struct {
     }
 
     fn evaluateTopologyWithout(self: *Self, msa: [][]const u8, skip_idx: usize, raw_pd: []const sparse.PersistencePair) !f64 {
-        const max_seqs = @min(msa.len, @as(usize, 200));
-        var n_sub = max_seqs;
+        const max_seqs: usize = @min(msa.len, @as(usize, 200));
+        var n_sub: usize = max_seqs;
         if (skip_idx < max_seqs) n_sub -= 1;
         
         if (n_sub < 2) return 0.0;
         
-        var msa_dists = try self.allocator.alloc(f64, (n_sub * (n_sub - 1)) / 2);
+        const n_pairs: usize = (n_sub * (n_sub - 1)) / 2;
+        var msa_dists = try self.allocator.alloc(f64, n_pairs);
         defer self.allocator.free(msa_dists);
 
         var idx: usize = 0;
@@ -219,10 +220,7 @@ pub const RefinementEngine = struct {
             }
         }
 
-        var max_dim: usize = 1;
-        for (raw_pd) |p| {
-            if (p.dimension == 1) max_dim = 2;
-        }
+        const max_dim: usize = 1; // Force H0 Union-Find for extreme performance
         const knn_k = @min(n_sub, @as(usize, 15));
         const msa_pd = try topology.buildAndReduceRips(self.allocator, msa_dists, n_sub, 1.0, knn_k, max_dim);
         defer self.allocator.free(msa_pd);
@@ -231,10 +229,11 @@ pub const RefinementEngine = struct {
     }
 
     fn evaluateTopology(self: *Self, msa: [][]const u8, raw_pd: []const sparse.PersistencePair) !f64 {
-        const n = @min(msa.len, @as(usize, 200));
+        const n: usize = @min(msa.len, @as(usize, 200));
         if (n < 2) return 0.0;
         
-        var msa_dists = try self.allocator.alloc(f64, (n * (n - 1)) / 2);
+        const n_pairs: usize = (n * (n - 1)) / 2;
+        var msa_dists = try self.allocator.alloc(f64, n_pairs);
         defer self.allocator.free(msa_dists);
 
         for (0..n) |i| {
@@ -257,10 +256,7 @@ pub const RefinementEngine = struct {
             }
         }
 
-        var max_dim: usize = 1;
-        for (raw_pd) |p| {
-            if (p.dimension == 1) max_dim = 2;
-        }
+        const max_dim: usize = 1; // Force H0 Union-Find for extreme performance
         const knn_k = @min(n, @as(usize, 15));
         const msa_pd = try topology.buildAndReduceRips(self.allocator, msa_dists, n, 1.0, knn_k, max_dim);
         defer self.allocator.free(msa_pd);
@@ -280,7 +276,7 @@ pub const RefinementEngine = struct {
         var scores = try self.allocator.alloc(f64, L);
         for (0..L) |c| scores[c] = 0.0;
         
-        const num_pairs = (effective_n * (effective_n - 1)) / 2;
+        const num_pairs: usize = (effective_n * (effective_n - 1)) / 2;
         var base_diffs = try self.allocator.alloc(usize, num_pairs);
         defer self.allocator.free(base_diffs);
         var base_valid = try self.allocator.alloc(usize, num_pairs);
@@ -313,10 +309,7 @@ pub const RefinementEngine = struct {
             msa_dists[idx] = if (base_valid[idx] > 0) @as(f64, @floatFromInt(base_diffs[idx])) / @as(f64, @floatFromInt(base_valid[idx])) else 1.0;
         }
         
-        var max_dim: usize = 1;
-        for (raw_pd) |p| {
-            if (p.dimension == 1) max_dim = 2;
-        }
+        const max_dim: usize = 1; // Force H0 Union-Find for extreme performance
         const knn_k = @min(effective_n, @as(usize, 15));
         const base_pd = try topology.buildAndReduceRips(self.allocator, msa_dists, effective_n, 1.0, knn_k, max_dim);
         defer self.allocator.free(base_pd);
@@ -338,7 +331,7 @@ pub const RefinementEngine = struct {
             landmarks: ?[]const usize,
             
             fn worker(task: *@This()) void {
-                const local_num_pairs = (task.n * (task.n - 1)) / 2;
+                const local_num_pairs: usize = (task.n * (task.n - 1)) / 2;
                 var local_dists = task.allocator.alloc(f64, local_num_pairs) catch unreachable;
                 defer task.allocator.free(local_dists);
                 

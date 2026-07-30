@@ -3,8 +3,8 @@ const sparse = @import("analytics").matrix.sparse;
 const hungarian = @import("hungarian.zig");
 
 
-fn getBirth(p: sparse.PersistencePair) f64 { return @floatFromInt(p.birth); }
-fn getDeath(p: sparse.PersistencePair) f64 { return @floatFromInt(p.death); }
+fn getBirth(p: sparse.PersistencePair) f64 { return p.birth_val; }
+fn getDeath(p: sparse.PersistencePair) f64 { return p.death_val; }
 
 pub fn buildCostMatrix(
     allocator: std.mem.Allocator,

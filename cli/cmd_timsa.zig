@@ -117,8 +117,8 @@ pub fn execute(allocator: std.mem.Allocator, parsed: ParsedArgs) !void {
     
     if (result.rigidity_scores) |scores| {
         std.debug.print("\n=== TiMSA Rigidity Scores (Ablation Gradient) ===\n", .{});
-        for (scores, 0..) |score, col| {
-            if (score > 0.0) std.debug.print("Col {d}: +{d:.4}\n", .{col, score});
+        for (scores, 0..) |score, idx| {
+            std.debug.print("Col {d}:\t{d:.6}\n", .{ idx, score });
         }
     }
     

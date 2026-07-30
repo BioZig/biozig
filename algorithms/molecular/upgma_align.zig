@@ -58,7 +58,19 @@ pub fn alignProfilesUPGMA(
             if (i == j) {
                 D[i * n + j] = 0.0;
             } else {
-                D[i * n + j] = 1.0;
+                const s1 = cluster_profiles.items[i].aligned_sequences[0];
+                const s2 = cluster_profiles.items[j].aligned_sequences[0];
+                var diffs: usize = 0;
+                var valid: usize = 0;
+                const min_len = @min(s1.len, s2.len);
+                for (0..min_len) |col| {
+                    if (s1[col] != '-' and s2[col] != '-') {
+                        valid += 1;
+                        if (s1[col] != s2[col]) diffs += 1;
+                    }
+                }
+                D[i * n + j] = if (valid > 0) @as(f32, @floatFromInt(diffs)) / @as(f32, @floatFromInt(valid)) else 1.0;
+                D[j * n + i] = D[i * n + j];
             }
         }
     }

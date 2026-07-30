@@ -261,10 +261,10 @@ pub fn buildAndReduceRips(
             if (simplex.dim == 0) {
                 try pairs.append(allocator, .{
                     .birth = i,
-                    .death = std.math.maxInt(usize),
+                    .death = simplices.len,
                     .dimension = 0,
                     .birth_val = simplex.filtration_value,
-                    .death_val = std.math.inf(f64),
+                    .death_val = max_distance,
                 });
             } else if (simplex.dim == 1) {
                 const u = simplex.vertices[0];
@@ -278,7 +278,7 @@ pub fn buildAndReduceRips(
                     parent[killed] = survivor;
                     
                     for (pairs.items) |*pair| {
-                        if (pair.birth == killed and pair.death == std.math.maxInt(usize)) {
+                        if (pair.birth == killed and pair.death == simplices.len) {
                             pair.death = i;
                             pair.death_val = simplex.filtration_value;
                             break;
@@ -372,7 +372,7 @@ pub fn buildAndReduceRips(
                 .death = std.math.maxInt(usize),
                 .dimension = simplex.dim,
                 .birth_val = simplex.filtration_value,
-                .death_val = std.math.inf(f64),
+                .death_val = max_distance,
             });
         }
     }
