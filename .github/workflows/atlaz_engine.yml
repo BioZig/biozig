@@ -1,0 +1,48 @@
+name: ATLAZ Topological Engine CI
+
+on:
+  push:
+    branches: [ "73" ]
+  pull_request:
+    branches: [ "73" ]
+
+jobs:
+  build_and_test:
+    name: Build & Test (${{ matrix.os }}, ${{ matrix.arch }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: linux
+            arch: x86_64
+            runner: ubuntu-latest
+          - os: linux
+            arch: aarch64
+            runner: ubuntu-24.04-arm
+          - os: macos
+            arch: aarch64
+            runner: macos-latest
+
+          - os: windows
+            arch: x86_64
+            runner: windows-latest
+
+    steps:
+      - name: Checkout Codebase
+        uses: actions/checkout@v4
+
+      - name: Setup Zig
+        uses: goto-bus-stop/setup-zig@v2
+        with:
+          version: 0.16.0
+
+      - name: Compile Unified and Standalone Binaries
+        run: zig build -Doptimize=ReleaseFast
+
+      - name: Execute Core Mathematical Primitives (Tests)
+        run: zig build test
+
+      - name: Transparent ATLAZ CI/CD Execution
+        shell: bash
+        run: bash scripts/ci_test_atlaz.sh

@@ -10,6 +10,8 @@ const cmd_population = @import("cmd_population.zig");
 const cmd_reporting = @import("cmd_reporting.zig");
 const cmd_visualize = @import("cmd_visualize.zig");
 const cmd_fetch = @import("fetch.zig");
+const cmd_atlaz = @import("cmd_atlaz.zig");
+const cmd_timsa = @import("cmd_timsa.zig");
 
 const cmd_atlaz = @import("cmd_atlaz.zig");
 
@@ -51,7 +53,9 @@ pub fn main(init: std.process.Init) !void {
         try cmd_visualize.execute(parsed);
     } else if (std.mem.eql(u8, domain, "atlaz")) {
         try cmd_atlaz.execute(allocator, process_args);
-    } else if (std.mem.eql(u8, domain, "fetch") or std.mem.eql(u8, domain, "stream")) {
+    } else if (std.mem.eql(u8, domain, "timsa")) {
+        try cmd_timsa.execute(allocator, parsed);
+    } else if (std.mem.eql(u8, domain, "fetch") or std.mem.eql(u8, domain, "stream") or std.mem.eql(u8, domain, "net")) {
         try cmd_fetch.execute(allocator, process_args);
     } else {
         std.debug.print("Error: Unknown domain '{s}'.\n\n", .{domain});
@@ -76,6 +80,8 @@ fn printHelp() void {
         \\  analytics      Statistical models, matrix decompositions, clustering
         \\  reporting      Automated reporting and publication exports
         \\  visualize      Render biological data and plots
+        \\  timsa          Topology-inspired Multiple Sequence Alignment engine
+        \\  net            Network protocols, fetching, and streaming algorithms
         \\
         \\Global Options:
         \\  -i, --input <path>     Input file path
@@ -88,6 +94,7 @@ fn printHelp() void {
         \\  biozig genomics align -i reads.fastq --ref genome.fa
         \\  biozig analytics pca -i cells.mtx -f json
         \\  biozig structural contacts -i envelope.mmcif -p
+        \\  biozig timsa rigidity -i unaligned.fa -o refined.fa
         \\
     ;
     std.debug.print("{s}\n", .{help_text});

@@ -5,7 +5,6 @@ const Nucleotide = dna_module.Nucleotide;
 
 const STOP_CODON = '*';
 
-// A codon is 3 nucleotides. We can pack it into 6 bits.
 pub fn encodeCodon(c1: Nucleotide, c2: Nucleotide, c3: Nucleotide) u6 {
     return (@as(u6, @intFromEnum(c1)) << 4) | (@as(u6, @intFromEnum(c2)) << 2) | @as(u6, @intFromEnum(c3));
 }

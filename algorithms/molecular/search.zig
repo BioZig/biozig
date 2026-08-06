@@ -24,13 +24,11 @@ pub const SearchLayer = struct {
         };
     }
 
-    /// Exact match using FM-Index / BWT
     pub fn exactMatch(self: *const SearchLayer, query: DNA2View) struct { start: usize, end: usize } {
         const res = self.fm_index.count(query);
         return .{ .start = res.start, .end = res.end };
     }
 
-    /// Exact matching using Seed-and-Extend
     pub fn seedAndExtend(self: *const SearchLayer, query: DNA2View, max_errors: usize) []SearchResult {
         var results = std.ArrayList(SearchResult).empty;
         errdefer results.deinit(self.allocator);
@@ -73,7 +71,6 @@ pub const SearchLayer = struct {
         return results.toOwnedSlice(self.allocator) catch unreachable;
     }
 
-    /// Banding (Banded alignment heuristic)
     pub fn banding(self: *const SearchLayer, query: DNA2View, band_width: usize) []SearchResult {
         var results = std.ArrayList(SearchResult).empty;
         errdefer results.deinit(self.allocator);
@@ -135,7 +132,6 @@ pub const SearchLayer = struct {
         return results.toOwnedSlice(self.allocator) catch unreachable;
     }
 
-    /// Chaining (Chaining of minimizers/seeds)
     pub fn chaining(self: *const SearchLayer, query_minimizers: []const indexing.Minimizer) []SearchResult {
         var results = std.ArrayList(SearchResult).empty;
         errdefer results.deinit(self.allocator);

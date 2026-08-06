@@ -1,4 +1,5 @@
 const std = @import("std");
+pub const srf = @import("srf.zig");
 
 /// A task within the dependency-aware scheduler.
 pub const SchedTask = struct {

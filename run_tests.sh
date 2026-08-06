@@ -145,11 +145,12 @@ for file in tests/algorithms/molecular/*.zig; do
     if [ -f "$file" ]; then
         echo "Running $file"
         zig test \
-            "--dep" "core" "--dep" "molecular" "--dep" "algorithms" \
+            "--dep" "core" "--dep" "molecular" "--dep" "analytics" "--dep" "algorithms" \
             "-Mroot=$file" \
             "-Mcore=core/core.zig" \
             "--dep" "core" "-Mmolecular=molecular/molecular.zig" \
-            "--dep" "core" "--dep" "molecular" "-Malgorithms=algorithms/algorithms.zig"
+            "--dep" "core" "-Manalytics=analytics/analytics.zig" \
+            "--dep" "core" "--dep" "molecular" "--dep" "analytics" "-Malgorithms=algorithms/algorithms.zig"
     fi
 done
 

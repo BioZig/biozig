@@ -200,11 +200,11 @@ pub const SuffixArray = struct {
         defer allocator.free(S);
 
         for (0..seq.len) |i| {
-            S[i] = @as(usize, @intFromEnum(seq.get(i))) + 1; // 1-based to leave 0 for $
+            S[i] = @as(usize, @intFromEnum(seq.get(i))) + 1;
         }
-        S[seq.len] = 0; // $ is smallest
+        S[seq.len] = 0;
 
-        try SAIS.sais(allocator, S, sa, 6); // Alphabet size 6 ($ + 4 nucs)
+        try SAIS.sais(allocator, S, sa, 6);
 
         return SuffixArray{
             .sa = sa,
@@ -218,7 +218,7 @@ pub const SuffixArray = struct {
 };
 
 pub const BWT = struct {
-    bwt: []u8, // Storing as u8 for A, C, G, T and $ (using 4 for $)
+    bwt: []u8,
     primary_index: usize,
     allocator: std.mem.Allocator,
 
@@ -229,7 +229,7 @@ pub const BWT = struct {
         var primary_index: usize = 0;
         for (sa.sa, 0..) |suffix_pos, i| {
             if (suffix_pos == 0) {
-                bwt[i] = 0; // $
+                bwt[i] = 0;
                 primary_index = i;
             } else {
                 bwt[i] = @as(u8, @intFromEnum(seq.get(suffix_pos - 1))) + 1;
@@ -252,7 +252,7 @@ pub const FMIndex = struct {
     bwt: BWT,
     sa: SuffixArray,
     counts: [5]usize,
-    occurrences: [][]usize, // For each char 0..4, prefix sum of occurrences
+    occurrences: [][]usize,
     allocator: std.mem.Allocator,
 
     pub fn init(allocator: std.mem.Allocator, seq: DNA2View) !FMIndex {
@@ -263,12 +263,10 @@ pub const FMIndex = struct {
         errdefer bwt.deinit();
 
         var counts = [_]usize{0} ** 5;
-        // Count frequencies in BWT
         for (bwt.bwt) |c| {
             counts[c] += 1;
         }
 
-        // Cumulative counts (C array)
         var c_array = [_]usize{0} ** 5;
         var sum: usize = 0;
         for (0..5) |i| {
@@ -311,7 +309,6 @@ pub const FMIndex = struct {
         self.sa.deinit();
     }
 
-    // Returns the range [start, end) in the suffix array
     pub fn count(self: *const FMIndex, query: DNA2View) struct { start: usize, end: usize } {
         if (query.len == 0) return .{ .start = 0, .end = self.bwt.bwt.len };
 

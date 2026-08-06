@@ -2,7 +2,6 @@ const std = @import("std");
 const dna_module = @import("molecular").dna;
 const DNA2View = dna_module.DNA2View;
 
-/// Context for hashing DNA2View
 const DNA2ViewContext = struct {
     pub fn hash(ctx: @This(), view: DNA2View) u64 {
         _ = ctx;
@@ -14,7 +13,6 @@ const DNA2ViewContext = struct {
     }
 };
 
-/// Counts exact k-mer occurrences in a sequence.
 pub fn countKmers(allocator: std.mem.Allocator, sequence: DNA2View, k: usize) !std.HashMap(DNA2View, usize, DNA2ViewContext, std.hash_map.default_max_load_percentage) {
     var counts = std.HashMap(DNA2View, usize, DNA2ViewContext, std.hash_map.default_max_load_percentage).init(allocator);
     errdefer counts.deinit();

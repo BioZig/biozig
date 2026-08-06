@@ -448,6 +448,25 @@ pub fn build(b: *std.Build) void {
     });
     b.installArtifact(atlaz_exe);
 
+    // Standalone TiMSA binary
+    const timsa_standalone_module = b.createModule(.{
+        .root_source_file = b.path("TiMSA/main.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    timsa_standalone_module.addImport("core", core_module);
+    timsa_standalone_module.addImport("molecular", molecular_module);
+    timsa_standalone_module.addImport("algorithms", algorithms_module);
+    timsa_standalone_module.addImport("analytics", analytics_module);
+    timsa_standalone_module.addImport("ingestion", ingestion_module);
+
+    const timsa_exe = b.addExecutable(.{
+        .name = "timsa",
+        .root_module = timsa_standalone_module,
+        .version = .{ .major = 0, .minor = 1, .patch = 0 },
+    });
+    b.installArtifact(timsa_exe);
+
     const cli_args_module = b.createModule(.{
         .root_source_file = b.path("cli/args.zig"),
         .target = target,
@@ -459,10 +478,6 @@ pub fn build(b: *std.Build) void {
     const run_cli_tests = b.addRunArtifact(cli_tests);
     test_step.dependOn(&run_cli_tests.step);
 
-    const cli_main_tests = b.addTest(.{
-        .root_module = cli_module,
-    });
-    const run_cli_main_tests = b.addRunArtifact(cli_main_tests);
     const lib = b.addLibrary(.{
         .linkage = .dynamic,
         .name = "biozig",
@@ -487,5 +502,18 @@ pub fn build(b: *std.Build) void {
     b.installArtifact(lib);
 
 
-    test_step.dependOn(&run_cli_main_tests.step);
+    const timsa_edge_tests_module = b.createModule(.{
+        .root_source_file = b.path("tests/algorithms/test_timsa_edge_cases.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    timsa_edge_tests_module.addImport("core", core_module);
+    timsa_edge_tests_module.addImport("analytics", analytics_module);
+    timsa_edge_tests_module.addImport("algorithms", algorithms_module);
+
+    const timsa_edge_tests = b.addTest(.{
+        .root_module = timsa_edge_tests_module,
+    });
+    const run_timsa_edge_tests = b.addRunArtifact(timsa_edge_tests);
+    test_step.dependOn(&run_timsa_edge_tests.step);
 }

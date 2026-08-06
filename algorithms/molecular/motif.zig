@@ -2,8 +2,6 @@ const std = @import("std");
 const dna_module = @import("molecular").dna;
 const DNA2View = dna_module.DNA2View;
 
-/// Search for exact matches of a motif string in a sequence.
-/// Returns a list of zero-indexed starting positions.
 pub fn searchMotifExact(allocator: std.mem.Allocator, sequence: DNA2View, motif: DNA2View) ![]usize {
     if (motif.len == 0 or motif.len > sequence.len) {
         return &[_]usize{};
@@ -22,11 +20,9 @@ pub fn searchMotifExact(allocator: std.mem.Allocator, sequence: DNA2View, motif:
     return positions.toOwnedSlice(allocator);
 }
 
-/// A Position Weight Matrix (PWM) for DNA (A, C, G, T).
 pub const PWM = struct {
     matrix: []const [4]f64,
 
-    /// Scores a sequence window of the same length as the PWM against the PWM.
     pub fn scoreWindow(self: PWM, sequence: DNA2View) f64 {
         std.debug.assert(sequence.len == self.matrix.len);
 
@@ -38,8 +34,6 @@ pub const PWM = struct {
         return score;
     }
 
-    /// Scans the entire sequence, returning the starting positions and scores of windows
-    /// that score equal to or greater than the given threshold.
     pub fn scanThreshold(self: PWM, allocator: std.mem.Allocator, sequence: DNA2View, threshold: f64) ![]const Hit {
         if (sequence.len < self.matrix.len) return &[_]Hit{};
 
@@ -82,13 +76,11 @@ test "Sequence Motif - Exact Search" {
 
 test "Sequence Motif - PWM Scoring" {
     const alloc = std.testing.allocator;
-    // Simple PWM for "TATA"
-    //      A    C    G    T
     const pwm_data = [_][4]f64{
-        .{ 0.1, 0.1, 0.1, 0.9 }, // T
-        .{ 0.9, 0.1, 0.1, 0.1 }, // A
-        .{ 0.1, 0.1, 0.1, 0.9 }, // T
-        .{ 0.9, 0.1, 0.1, 0.1 }, // A
+        .{ 0.1, 0.1, 0.1, 0.9 },
+        .{ 0.9, 0.1, 0.1, 0.1 },
+        .{ 0.1, 0.1, 0.1, 0.9 },
+        .{ 0.9, 0.1, 0.1, 0.1 },
     };
     const pwm = PWM{ .matrix = &pwm_data };
 
