@@ -2,9 +2,7 @@ name: TiMSA Topological Epistasis Engine CI
 
 on:
   push:
-    branches: [ "37", "73"]
   pull_request:
-    branches: [ "37", "73"]
 
 jobs:
   build_and_test_timsa:
