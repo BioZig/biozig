@@ -52,11 +52,11 @@ jobs:
           fi
 
       - name: Execute TiMSA Core Mathematical Primitives (Tests)
-        if: ${{ matrix.arch != 'riscv64' }}
+        if: matrix.arch != 'riscv64'
         run: zig build test
 
       - name: Verify C++ Network Fusion Kernel Compilation
-        if: ${{ matrix.arch != 'riscv64' }}
+        if: matrix.arch != 'riscv64'
         shell: bash
         run: |
           if [ "${{ matrix.os }}" = "windows" ]; then
@@ -68,7 +68,7 @@ jobs:
           fi
 
       - name: End-to-End TiMSA Pipeline Execution (Minimal Dataset)
-        if: ${{ matrix.arch != 'riscv64' }}
+        if: matrix.arch != 'riscv64'
         shell: bash
         run: |
           # 1. Generate a minimal 5-sequence MSA for the CI test
