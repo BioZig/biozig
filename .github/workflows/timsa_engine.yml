@@ -63,7 +63,7 @@ jobs:
             echo "Skipping direct g++ on windows-latest step, assuming MSYS2 or Zig CC handling."
           else
             # Ensure the C++ kernel can compile cleanly on the target OS
-            g++ -O3 -std=c++17 epistasis_disc/fuse_network.cpp -o fuse_network_test
+            g++ -O3 -std=c++17 fuse_network.cpp -o fuse_network_test
             ./fuse_network_test || echo "Requires arguments, expected."
           fi
 
