@@ -12,7 +12,14 @@ fn runEdgeCase(alloc: std.mem.Allocator, sequences: [][]const u8) !void {
     }
     // Minimal verification: we just want to ensure it doesn't crash, panic, leak, or OOM incorrectly.
     try std.testing.expect(res.aligned_sequences.len == sequences.len);
-    try std.testing.expect(res.consensus.len >= sequences[0].len);
+    
+    // The fundamental invariant of an MSA: the consensus and all aligned sequences MUST have the exact same length (column count).
+    if (res.aligned_sequences.len > 0) {
+        const expected_len = res.consensus.len;
+        for (res.aligned_sequences) |aligned_seq| {
+            try std.testing.expect(aligned_seq.len == expected_len);
+        }
+    }
 }
 
 test "Tier 1.6: TiMSA 50+ Exhaustive Edge Cases Stress Test" {
