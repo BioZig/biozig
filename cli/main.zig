@@ -13,8 +13,6 @@ const cmd_fetch = @import("fetch.zig");
 const cmd_atlaz = @import("cmd_atlaz.zig");
 const cmd_timsa = @import("cmd_timsa.zig");
 
-const cmd_atlaz = @import("cmd_atlaz.zig");
-
 pub fn main(init: std.process.Init) !void {
     const allocator = init.arena.allocator();
     const process_args = try init.minimal.args.toSlice(allocator);
