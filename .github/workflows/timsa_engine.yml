@@ -79,8 +79,8 @@ jobs:
           MAGATCV
           EOF
           
-          # 2. Execute the Zig TiMSA rigidity engine
-          ./zig-out/bin/biozig timsa rigidity -i test_msa.fasta -o rigidity_out.txt
+          # 2. Execute the Zig TiMSA rigidity engine and capture stdout
+          ./zig-out/bin/biozig timsa rigidity -i test_msa.fasta > rigidity_out.txt
           
           # 3. Execute the C++ Fusion Kernel to fuse topological rigidity with statistical covariance
           ./fuse_network_test rigidity_out.txt final_epistasis.csv
