@@ -29,3 +29,5 @@ BioZig is a deterministic, memory-efficient computational biology framework writ
 - [Population](population.md) - GWAS, haplotypes, and LD matrices.
 - [Visualization](visualization.md) - Publication-ready asset generation.
 - [Reporting](reporting.md) - Reproducible manuscript compilation.
+- [ATLAZ](../ATLAZ/ATLAZ_ARCHITECTURE.md) - Topological lineage and recombination.
+- [TiMSA](../TiMSA/timsa.md) - Topological alignment and epistasis.

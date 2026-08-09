@@ -13,7 +13,7 @@ The Core layer provides the foundational system interactions for BioZig. It isol
 - `memory/`: Memory alignment and explicit endianness views (`MemoryView`).
 - `numerics/`: Low-level float stabilization (`kahanSum`, `variance`, `quantile`).
 - `reproducibility/`: Provenance tracking (`ReproducibilityRecord`).
-- `scheduling/`: Deterministic DAG task execution (`Scheduler`).
+- `scheduling/`: Deterministic DAG task execution and Structural Recomputation Framework (`Scheduler`, `SRFScheduler`).
 - `serialization/`: Recursive binary deterministic serialization (`serialize`, `deserialize`).
 - `simd/`: Vectorized counting and summation (`sumFloat`, `countChar`, `countMismatches`).
 - `threading/`: Concurrency primitives (`SpinMutex`, `ThreadPool`).
@@ -24,6 +24,7 @@ The Core layer provides the foundational system interactions for BioZig. It isol
 - `PackedIntArray(bits)`
 - `ReproducibilityRecord`
 - `Scheduler`
+- `SRFScheduler`
 - `ThreadPool`
 - `MemoryView`
 
@@ -43,6 +44,7 @@ Core promotes the use of unmanaged structures alongside domain-specific arenas. 
 
 ## Determinism Guarantees
 - Thread pools execute tasks in non-deterministic completion order unless governed by the `Scheduler`, which enforces a strict topological DAG execution order.
+- **Memory Boundaries:** The `SRFScheduler` enforces strict $O(L)$ limits via `budget.zig`. Rather than permitting OS-level Out-of-Memory (OOM) crashes, it triggers a deterministic panic (`SRF Memory Budget Exceeded`) when operations breach the defined arena budget.
 - Floating-point sums use Kahan summation to prevent associative precision loss.
 - Serialization is 100% deterministic (no padding bytes or memory pointers are serialized).
 

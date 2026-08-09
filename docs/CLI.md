@@ -192,6 +192,24 @@ Phylogenetics and evolutionary models.
 
 ---
 
+## Domain: ATLAZ
+Topological lineage and recombination analysis.
+
+### Commands
+*   `recombine`: Extract persistent homology (H1 loops) to detect recombination events.
+*   `select`: Mask components to determine selection pressure bounds.
+
+---
+
+## Domain: TiMSA
+Topology-inspired Multiple Sequence Alignment.
+
+### Commands
+*   `rigidity`: Extract topological rigidity limits across an MSA.
+*   `fuse`: Merge Mutual Information matrices with geometric spatial contact maps.
+
+---
+
 ## Unix Pipeline Integration Examples
 
 Because BioZig outputs clean standard text by default (and can ingest from `-`), you can chain it natively into advanced pipelines:

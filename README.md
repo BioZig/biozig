@@ -9,7 +9,7 @@ Biology computed exactly.
 BioZig enforces strict zero-copy data ingestion and static memory boundaries. It operates without a garbage collector, relying exclusively on `O(1)` Arena Allocators and Struct-of-Arrays (SoA) memory layouts to guarantee SIMD vectorization across CPU registers.
 
 ### Core Specifications
-* **Memory Model:** Zero-copy ingestion via memory-mapped files. All allocations are arena-bound.
+* **Memory Model:** Zero-copy ingestion via memory-mapped files. All allocations are arena-bound. Memory limits are deterministically enforced via the Structural Recomputation Framework (SRFScheduler).
 * **Execution:** Unrestricted multi-threading (`std.Thread.Pool`). Bypasses interpreted environment limitations (e.g., Python GIL).
 * **Dependency Chain:** Zero external dependencies. Pure Zig compilation.
 
@@ -39,6 +39,8 @@ Comprehensive technical specifications and implementation details are maintained
 * [`visualization`](docs/visualization.md) — Data export routines
 * [`reporting`](docs/reporting.md) — Markdown/LaTeX serializers
 * [`cli`](docs/CLI.md) — Command-line interface
+* [`atlaz`](ATLAZ/ATLAZ_ARCHITECTURE.md) — Topological lineage and recombination analysis
+* [`timsa`](TiMSA/timsa.md) — Topology-inspired multiple sequence alignment and epistasis
 
 ## Quickstart
 
