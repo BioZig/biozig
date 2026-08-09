@@ -55,7 +55,7 @@ jobs:
         shell: bash
         run: |
           # Ensure the C++ kernel can compile cleanly on the target OS using Zig's embedded Clang compiler
-          zig c++ -O3 -std=c++17 fuse_network.cpp -o fuse_network_test
+          zig c++ -O3 -std=c++17 -Wno-nullability-completeness TiMSA/fuse_network.cpp -o fuse_network_test
           ./fuse_network_test || echo "Requires arguments, expected."
 
       - name: End-to-End TiMSA Pipeline Execution (Minimal Dataset)
