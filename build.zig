@@ -419,7 +419,7 @@ pub fn build(b: *std.Build) void {
     const cli_exe = b.addExecutable(.{
         .name = "biozig",
         .root_module = cli_module,
-        .version = .{ .major = 0, .minor = 1, .patch = 0 },
+        .version = .{ .major = 0, .minor = 2, .patch = 0 },
     });
     b.installArtifact(cli_exe);
 
@@ -444,7 +444,7 @@ pub fn build(b: *std.Build) void {
     const atlaz_exe = b.addExecutable(.{
         .name = "atlaz",
         .root_module = atlaz_standalone_module,
-        .version = .{ .major = 0, .minor = 1, .patch = 0 },
+        .version = .{ .major = 0, .minor = 2, .patch = 0 },
     });
     b.installArtifact(atlaz_exe);
 
@@ -463,7 +463,7 @@ pub fn build(b: *std.Build) void {
     const timsa_exe = b.addExecutable(.{
         .name = "timsa",
         .root_module = timsa_standalone_module,
-        .version = .{ .major = 0, .minor = 1, .patch = 0 },
+        .version = .{ .major = 0, .minor = 2, .patch = 0 },
     });
     b.installArtifact(timsa_exe);
 
