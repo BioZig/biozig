@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BZSF - BioZig</title>
+  <title>ATLAZ Engine - BioZig</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700;900&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet" />
@@ -29,8 +29,8 @@
         <li><a href="philosophy.html">Philosophy</a></li>
         <li><a href="docs.html">Docs</a></li>
         <li><a href="benchmarks.html">Benchmarks</a></li>
-        <li><a href="foundation.html" class="active">BZSF</a></li>
-        <li><a href="atlaz.html">ATLAZ</a></li>
+        <li><a href="foundation.html">BZSF</a></li>
+        <li><a href="atlaz.html" class="active">ATLAZ</a></li>
         <li><a href="timsa.html">TiMSA</a></li>
         <li>
           <button class="theme-btn" onclick="toggleTheme()" aria-label="Toggle light/dark mode">
@@ -43,30 +43,36 @@
 
     <div style="padding: 80px 0;">
       <div class="nb-head">
-        <span class="nb-title">BZ Software Foundation</span>
-        <span class="op">BZSF</span>
+        <span class="nb-title">ATLAZ Geometric Engine</span>
+        <span class="op">TOPOLOGICAL DATA ANALYSIS</span>
       </div>
+      <p class="body-text">
+        <strong>ATLAZ (Alignment, Topology, and Lineage Analysis in Zig)</strong> is a production-grade, memory-deterministic geometric engine acting as a topological subcomponent of the broader BioZig ecosystem.
+      </p>
       
-      <p class="body-text">The BZ Software Foundation (BZSF) exists to safeguard the integrity, performance, and philosophical rigor of the BZ ecosystem. We are committed to maintaining a zero-copy, mathematically provable, and brutalist standard for bioinformatics infrastructure.</p>
+      <p class="body-text">
+        Traditional phylogenetic algorithms force evolutionary history into strictly bifurcating trees. While this works for vertical descent, it fundamentally misrepresents reticulate evolution (e.g., recombination, reassortment, and horizontal gene transfer). ATLAZ resolves this by abandoning predefined graph structures entirely and instead utilizing Topological Data Analysis (TDA) and Persistent Homology.
+      </p>
 
       <div class="nb-head" style="margin-top: 60px;">
-        <span class="nb-title">Leadership</span>
-        <span class="op">STEERING</span>
+        <span class="nb-title">Resolving the Bifurcation Constraint</span>
+        <span class="op">EXACT HOMOLOGY LOOPS</span>
       </div>
       
       <div class="api-block">
-        <div class="api-name">MD. Arshad</div>
-        <div class="api-sig">Creator and Curator</div>
-        <div class="api-desc">Principal architect of the BZ framework and guardian of the core philosophy.</div>
+        <div class="api-name">Memory-Deterministic Vietoris-Rips</div>
+        <div class="api-desc">
+          ATLAZ overcomes the catastrophic memory scaling (O(2^N)) of traditional TDA tools by leveraging BioZig's zero-copy C-ABI boundary and native Galois Field (GF(2)) matrix reductions. This enables the evaluation of topological features across multiple distance scales without triggering garbage collection overheads typical of Python or R implementations.
+        </div>
       </div>
 
-      <div class="nb-head" style="margin-top: 60px;">
-        <span class="nb-title">The Future</span>
-        <span class="op">EXPANSION</span>
+      <div class="api-block">
+        <div class="api-name">Identifying Reticulation</div>
+        <div class="api-desc">
+          Within the ATLAZ engine, vertical clonal evolution is geometrically classified as zero-dimensional homology (H0). Conversely, reticulate evolutionary events—such as viral recombination—manifest mathematically as one-dimensional topological holes or loops (H1). ATLAZ precisely tracks the birth and death of these H1 features to map exact biological truth.
+        </div>
       </div>
-      
-      <p class="body-text">The codebase is currently undergoing rigorous validation of its core axioms. In the forthcoming future, the BZSF will actively accept contributors, researchers, and systems engineers who align with our uncompromising standards. A formal governance model and contributor guidelines will be established as the foundation matures.</p>
-    
+    </div>
     
   <div id="searchModal" class="search-modal" onclick="closeSearch(event)">
     <div class="search-box">
@@ -109,6 +115,7 @@
         case '7': case 'c': window.location.href = 'cli.html'; break;
         case '8': case 'f': window.location.href = 'foundation.html'; break;
         case '9': case 'z': window.location.href = 'atlaz.html'; break;
+        case '0': case 'x': window.location.href = 'timsa.html'; break;
         case 's': case '/': 
           e.preventDefault();
           openSearch(); 
