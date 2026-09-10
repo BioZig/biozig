@@ -12,6 +12,7 @@ const cmd_visualize = @import("cmd_visualize.zig");
 const cmd_fetch = @import("fetch.zig");
 const cmd_atlaz = @import("cmd_atlaz.zig");
 const cmd_timsa = @import("cmd_timsa.zig");
+const cmd_eon = @import("cmd_eon.zig");
 
 pub fn main(init: std.process.Init) !void {
     const allocator = init.arena.allocator();
@@ -53,6 +54,8 @@ pub fn main(init: std.process.Init) !void {
         try cmd_atlaz.execute(allocator, process_args);
     } else if (std.mem.eql(u8, domain, "timsa")) {
         try cmd_timsa.execute(allocator, parsed);
+    } else if (std.mem.eql(u8, domain, "eon")) {
+        try cmd_eon.execute(allocator, process_args);
     } else if (std.mem.eql(u8, domain, "fetch") or std.mem.eql(u8, domain, "stream") or std.mem.eql(u8, domain, "net")) {
         try cmd_fetch.execute(allocator, process_args);
     } else {
@@ -79,6 +82,7 @@ fn printHelp() void {
         \\  reporting      Automated reporting and publication exports
         \\  visualize      Render biological data and plots
         \\  timsa          Topology-inspired Multiple Sequence Alignment engine
+        \\  eon            Epistatic Overwatch Network (AMR / viral risk prediction)
         \\  net            Network protocols, fetching, and streaming algorithms
         \\
         \\Global Options:
