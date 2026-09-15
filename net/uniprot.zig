@@ -7,4 +7,8 @@ pub const UniprotClient = struct {
     pub fn buildUrl(allocator: std.mem.Allocator, query: []const u8) ![]u8 {
         return std.fmt.allocPrint(allocator, "https://rest.uniprot.org/uniprotkb/{s}.fasta", .{query});
     }
+
+    pub fn buildUrlJson(allocator: std.mem.Allocator, query: []const u8) ![]u8 {
+        return std.fmt.allocPrint(allocator, "https://rest.uniprot.org/uniprotkb/{s}.json", .{query});
+    }
 };

@@ -175,4 +175,81 @@ pub const BitSieve = struct {
     pub fn reader(self: *Self) Reader {
         return .{ .sieve = self };
     }
+
+    pub const Writer = struct {
+        sieve: *BitSieve,
+
+        pub fn write(self: Writer, bytes: []const u8) !usize {
+            var written: usize = 0;
+            while (written < bytes.len) {
+                self.sieve.mutex.lockUncancelable(self.sieve.io);
+                
+                while ((self.sieve.write_index == 0 and self.sieve.a_ready) or 
+                       (self.sieve.write_index == 1 and self.sieve.b_ready)) {
+                    self.sieve.cond.waitUncancelable(self.sieve.io, &self.sieve.mutex);
+                }
+
+                var chunk: usize = 0;
+                if (self.sieve.write_index == 0) {
+                    const remain = 65536 - 4096 - self.sieve.a_len;
+                    chunk = @min(bytes.len - written, remain);
+                    std.mem.copyForwards(u8, self.sieve.buffer_a[4096 + self.sieve.a_len ..], bytes[written .. written + chunk]);
+                    self.sieve.a_len += chunk;
+                    if (self.sieve.a_len == 65536 - 4096) {
+                        self.sieve.a_ready = true;
+                        self.sieve.write_index = 1 - self.sieve.write_index;
+                        self.sieve.cond.signal(self.sieve.io);
+                    }
+                } else {
+                    const remain = 65536 - 4096 - self.sieve.b_len;
+                    chunk = @min(bytes.len - written, remain);
+                    std.mem.copyForwards(u8, self.sieve.buffer_b[4096 + self.sieve.b_len ..], bytes[written .. written + chunk]);
+                    self.sieve.b_len += chunk;
+                    if (self.sieve.b_len == 65536 - 4096) {
+                        self.sieve.b_ready = true;
+                        self.sieve.write_index = 1 - self.sieve.write_index;
+                        self.sieve.cond.signal(self.sieve.io);
+                    }
+                }
+                self.sieve.mutex.unlock(self.sieve.io);
+                written += chunk;
+            }
+            return written;
+        }
+
+        pub fn writeAll(self: Writer, bytes: []const u8) !void {
+            _ = try self.write(bytes);
+        }
+        
+        pub fn writeByte(self: Writer, b: u8) !void {
+            const arr = [_]u8{b};
+            _ = try self.write(&arr);
+        }
+        
+        pub fn any(self: Writer) std.io.AnyWriter {
+            _ = self;
+            return .{ .context = undefined, .writeFn = undefined }; // We'll just pass Writer directly
+        }
+    };
+
+    pub fn writer(self: *Self) Writer {
+        return .{ .sieve = self };
+    }
+    
+    pub fn close(self: *Self) void {
+        self.mutex.lockUncancelable(self.io);
+        defer self.mutex.unlock(self.io);
+        
+        // If there's pending data not marked ready, mark it ready
+        if (self.write_index == 0 and self.a_len > 0 and !self.a_ready) {
+            self.a_ready = true;
+            self.write_index = 1;
+        } else if (self.write_index == 1 and self.b_len > 0 and !self.b_ready) {
+            self.b_ready = true;
+            self.write_index = 0;
+        }
+        
+        self.eof = true;
+        self.cond.signal(self.io);
+    }
 };

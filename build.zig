@@ -366,6 +366,13 @@ pub fn build(b: *std.Build) void {
     });
     docs_step.dependOn(&install_algorithms_docs.step);
 
+    const eon_module = b.createModule(.{
+        .root_source_file = b.path("eon/src/lib.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    b.modules.put(b.graph.arena, "eon", eon_module) catch @panic("OOM");
+
     const cli_module = b.createModule(.{
         .root_source_file = b.path("cli/main.zig"),
         .target = target,
@@ -380,6 +387,7 @@ pub fn build(b: *std.Build) void {
     cli_module.addImport("visualization", visualization_module);
     cli_module.addImport("cellular", cellular_module);
     cli_module.addImport("ATLAZ", atlaz_module);
+    cli_module.addImport("eon", eon_module);
 
     const population_module = b.createModule(.{
         .root_source_file = b.path("population/population.zig"),
@@ -466,6 +474,29 @@ pub fn build(b: *std.Build) void {
         .version = .{ .major = 0, .minor = 2, .patch = 0 },
     });
     b.installArtifact(timsa_exe);
+
+    // Standalone EON binary
+    const cmd_eon_module = b.createModule(.{
+        .root_source_file = b.path("cli/cmd_eon.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    cmd_eon_module.addImport("core", core_module);
+    cmd_eon_module.addImport("eon", eon_module);
+
+    const eon_standalone_module = b.createModule(.{
+        .root_source_file = b.path("eon/cli_standalone.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    eon_standalone_module.addImport("cmd_eon", cmd_eon_module);
+
+    const eon_exe = b.addExecutable(.{
+        .name = "eon",
+        .root_module = eon_standalone_module,
+        .version = .{ .major = 0, .minor = 2, .patch = 0 },
+    });
+    b.installArtifact(eon_exe);
 
     const cli_args_module = b.createModule(.{
         .root_source_file = b.path("cli/args.zig"),

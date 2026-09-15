@@ -44,3 +44,44 @@ manuscript/
 ATLAZ/manuscript_mbe/
 epistasis_disc/
 data/
+
+# Output and Binaries
+*.o
+*.out
+*.exe
+*-aarch64*
+*-x86_64*
+*-riscv64*
+*.zip
+TiMSA/timsa
+fuse_network_cpp
+v0.2.0_binaries/
+benchmarks/benchmark_timsa_16s
+benchmarks/benchmark_timsa_16s_full
+
+# Data files
+*.fasta
+*.csv
+*.db
+*.json
+*.txt
+
+# TeX and Manuscript Files
+*.tex
+*.pdf
+*.aux
+*.bbl
+*.blg
+*.out
+*.toc
+*.bst
+*.cls
+*.bib
+PLOS_latex_template/
+eon/wp_manuscript/
+
+# Internal roadmap
+things to-add-in-v3.md
+
+# Benchmarks (keep untracked ones ignored)
+benchmarks/

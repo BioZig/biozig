@@ -12,6 +12,7 @@ pub const containers = @import("containers/containers.zig");
 pub const compression = @import("compression/compression.zig");
 pub const scheduling = @import("scheduling/scheduling.zig");
 pub const math = @import("math.zig");
+pub const bzip2 = @import("bzip2.zig");
 
 test {
     _ = allocators;
