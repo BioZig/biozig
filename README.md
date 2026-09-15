@@ -41,6 +41,7 @@ Comprehensive technical specifications and implementation details are maintained
 * [`cli`](docs/CLI.md) — Command-line interface
 * [`atlaz`](ATLAZ/ATLAZ_ARCHITECTURE.md) — Topological lineage and recombination analysis
 * [`timsa`](TiMSA/timsa.md) — Topology-inspired multiple sequence alignment and epistasis
+* [`eon`](eon/eon.md) — Epistatic Output Network (EON) and structural rigidity modeling
 
 ## Quickstart
 
